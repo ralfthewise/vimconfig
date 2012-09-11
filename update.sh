@@ -34,3 +34,8 @@ cd submodules/syntastic
 git checkout master
 git pull
 cd ../..
+
+cd submodules/vim-coffee-script
+git checkout master
+git pull
+cd ../..

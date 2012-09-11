@@ -19,3 +19,6 @@
 [submodule "submodules/syntastic"]
 	path = submodules/syntastic
 	url = git://github.com/scrooloose/syntastic.git
+[submodule "submodules/vim-coffee-script"]
+	path = submodules/vim-coffee-script
+	url = git://github.com/kchmck/vim-coffee-script.git
