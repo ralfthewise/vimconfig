@@ -4,3 +4,6 @@
 [submodule "submodules/AutoComplPop"]
 	path = submodules/AutoComplPop
 	url = git://github.com/vim-scripts/AutoComplPop.git
+[submodule "submodules/vim-bufexplorer"]
+	path = submodules/vim-bufexplorer
+	url = git://github.com/thisivan/vim-bufexplorer.git

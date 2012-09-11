@@ -9,3 +9,8 @@ cd submodules/AutoComplPop
 git checkout master
 git pull
 cd ../..
+
+cd submodules/vim-bufexplorer
+git checkout master
+git pull
+cd ../..
