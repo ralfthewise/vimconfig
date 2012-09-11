@@ -16,3 +16,6 @@
 [submodule "submodules/vim-rails"]
 	path = submodules/vim-rails
 	url = git://github.com/tpope/vim-rails.git
+[submodule "submodules/syntastic"]
+	path = submodules/syntastic
+	url = git://github.com/scrooloose/syntastic.git

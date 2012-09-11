@@ -29,3 +29,8 @@ cd submodules/vim-rails
 git checkout master
 git pull
 cd ../..
+
+cd submodules/syntastic
+git checkout master
+git pull
+cd ../..
