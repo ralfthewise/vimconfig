@@ -10,3 +10,6 @@
 [submodule "submodules/nerdtree"]
 	path = submodules/nerdtree
 	url = git://github.com/scrooloose/nerdtree.git
+[submodule "submodules/genutils"]
+	path = submodules/genutils
+	url = git://github.com/vim-scripts/genutils.git

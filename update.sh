@@ -19,3 +19,8 @@ cd submodules/nerdtree
 git checkout master
 git pull
 cd ../..
+
+cd submodules/genutils
+git checkout master
+git pull
+cd ../..
