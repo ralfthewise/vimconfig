@@ -13,3 +13,6 @@
 [submodule "submodules/genutils"]
 	path = submodules/genutils
 	url = git://github.com/vim-scripts/genutils.git
+[submodule "submodules/vim-rails"]
+	path = submodules/vim-rails
+	url = git://github.com/tpope/vim-rails.git
