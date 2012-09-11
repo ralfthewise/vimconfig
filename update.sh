@@ -44,3 +44,9 @@ cd submodules/command-t
 git checkout master
 git pull
 cd ../..
+
+#build command-t
+cd submodules/command-t/ruby/command-t
+ruby extconf.rb
+make
+cd ../../../..
