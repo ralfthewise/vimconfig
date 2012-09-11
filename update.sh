@@ -39,3 +39,8 @@ cd submodules/vim-coffee-script
 git checkout master
 git pull
 cd ../..
+
+cd submodules/command-t
+git checkout master
+git pull
+cd ../..
