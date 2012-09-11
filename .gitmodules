@@ -7,3 +7,6 @@
 [submodule "submodules/vim-bufexplorer"]
 	path = submodules/vim-bufexplorer
 	url = git://github.com/thisivan/vim-bufexplorer.git
+[submodule "submodules/nerdtree"]
+	path = submodules/nerdtree
+	url = git://github.com/scrooloose/nerdtree.git

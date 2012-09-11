@@ -14,3 +14,8 @@ cd submodules/vim-bufexplorer
 git checkout master
 git pull
 cd ../..
+
+cd submodules/nerdtree
+git checkout master
+git pull
+cd ../..
