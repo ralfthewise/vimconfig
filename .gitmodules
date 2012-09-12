@@ -25,3 +25,6 @@
 [submodule "submodules/command-t"]
 	path = submodules/command-t
 	url = git://git.wincent.com/command-t.git
+[submodule "submodules/taglist"]
+	path = submodules/taglist
+	url = git://github.com/vim-scripts/taglist.vim.git
