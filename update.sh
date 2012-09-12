@@ -47,6 +47,8 @@ cd ../..
 
 #build command-t
 cd submodules/command-t/ruby/command-t
+make clean
+rm -f Makefile
 ruby extconf.rb
 make
 cd ../../../..
