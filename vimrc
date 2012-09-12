@@ -103,7 +103,8 @@ nmap <C-b> :cstag <C-R>=expand("<cword>")<CR><CR>
 let g:acp_completeoptPreview = 1
 
 "command-t
-nnoremap <silent> <C-n> :CommandT<CR>
+nnoremap <silent> <C-n> :CommandTTag<CR>
+nnoremap <silent> <C-S-n> :CommandT<CR>
 
 "taglist
 let g:Tlist_Show_One_File = 1
