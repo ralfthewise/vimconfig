@@ -105,6 +105,7 @@ let g:acp_completeoptPreview = 1
 "command-t
 nnoremap <silent> <C-n> :CommandTTag<CR>
 nnoremap <silent> <C-S-n> :CommandT<CR>
+let g:tlist_coffee_settings = 'coffee;c:class;f:function;v:variable'
 
 "taglist
 let g:Tlist_Show_One_File = 1
