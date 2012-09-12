@@ -36,7 +36,7 @@ set wrapmargin=0 "don't wrap when we reach the right margin
 set incsearch "incremental search
 set completeopt=longest,menuone,preview "in insert mode when doing completions, only insert longest common text, use popup menu even if only one match, show extra info about selected
 set nohlsearch "don't highlight additional matches
-set ignorecase "ignore case when using ctags
+"set ignorecase "ignore case when using ctags
 set hidden "hide buffers rather than closing them when switching away from them
 set history=1000 "remember more commands and search history
 set undolevels=1000 "use many muchos levels of undo
@@ -104,8 +104,8 @@ let g:acp_completeoptPreview = 1
 
 "command-t
 nnoremap <silent> <C-n> :CommandTTag<CR>
-nnoremap <silent> <C-S-n> :CommandT<CR>
-let g:tlist_coffee_settings = 'coffee;c:class;f:function;v:variable'
+nnoremap <silent> <C-m> :CommandT<CR>
+let g:CommandTMatchWindowAtTop = 1
 
 "taglist
 let g:Tlist_Show_One_File = 1
@@ -114,6 +114,7 @@ let g:Tlist_Exit_OnlyWindow = 1
 let g:Tlist_Process_File_Always = 1
 let g:Tlist_Sort_Type = "name"
 let g:Tlist_WinWidth = 60
+let g:tlist_coffee_settings = 'coffee;c:class;f:function;v:variable'
 nnoremap <silent> <F5> :TlistOpen<CR>
 
 "showmarks
