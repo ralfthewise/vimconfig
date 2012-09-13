@@ -103,9 +103,15 @@ nmap <C-b> :cstag <C-R>=expand("<cword>")<CR><CR>
 let g:acp_completeoptPreview = 1
 
 "command-t
-nnoremap <silent> <C-n> :CommandTTag<CR>
-nnoremap <silent> <C-m> :CommandT<CR>
-let g:CommandTMatchWindowAtTop = 1
+"nnoremap <silent> <C-n> :CommandTTag<CR>
+"nnoremap <silent> <C-m> :CommandT<CR>
+"let g:CommandTMatchWindowAtTop = 1
+
+"ctrlp
+let g:ctrlp_extensions = ['tag']
+let g:ctrlp_custom_ignore = 'vendor\/bundle'
+nnoremap <silent> <C-n> :CtrlPTag<CR>
+nnoremap <silent> <C-m> :CtrlP<CR>
 
 "taglist
 let g:Tlist_Show_One_File = 1

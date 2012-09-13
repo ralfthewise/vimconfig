@@ -50,6 +50,11 @@ git checkout master
 git pull
 cd ../..
 
+cd submodules/ctrlp
+git checkout master
+git pull
+cd ../..
+
 #build command-t
 cd submodules/command-t/ruby/command-t
 make clean

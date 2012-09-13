@@ -28,3 +28,6 @@
 [submodule "submodules/taglist"]
 	path = submodules/taglist
 	url = git://github.com/vim-scripts/taglist.vim.git
+[submodule "submodules/ctrlp"]
+	path = submodules/ctrlp
+	url = git://github.com/kien/ctrlp.vim.git
