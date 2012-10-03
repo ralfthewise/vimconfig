@@ -138,7 +138,7 @@ nnoremap <silent> <C-h> :BufExplorer<CR>
 let g:NERDTreeQuitOnOpen = 1
 let g:NERDChristmasTree = 1
 let g:NERDTreeWinSize = 48
-nnoremap <silent> <F4> :NERDTreeToggle<CR>
+nnoremap <silent> <F4> :NERDTreeFind<CR>
 
 "cscope
 "blow away all previous quickfix entries for all types of cscope searches
@@ -160,14 +160,12 @@ function s:add_global_ruby_cscope()
 endfunction
 "autocmd FileType ruby,eruby call s:add_global_ruby_cscope()
 "autocmd FileType ruby,eruby set omnifunc=rubycomplete#Complete
-autocmd FileType ruby,eruby set tags=tags,~/.ruby.ctags
+autocmd FileType ruby,eruby set tags=ruby.tags
 autocmd FileType ruby,eruby let g:rubycomplete_buffer_loading = 1
 autocmd FileType ruby,eruby let g:rubycomplete_rails = 1
 autocmd FileType ruby,eruby let g:rubycomplete_classes_in_global = 1
 autocmd FileType ruby set iskeyword=@,48-57,_,?,!,192-255
-"autocmd FileType ruby,eruby nnoremap <silent> <C-F12> :!find /usr/lib/ruby -type d -name `ruby -e 'require "rubygems"; puts Config::CONFIG["ruby_version"]'` -exec find '{}' -type f -name '*.rb' -perm -444 ';'\| cscope -f ~/.ruby.cscope -q -i - -b<CR>:cs reset<CR><CR>
-autocmd FileType ruby,eruby nnoremap <silent> <C-F12> :!find /usr/lib/ruby -type d -name `ruby -e 'require "rubygems"; puts Config::CONFIG["ruby_version"]'` -exec find '{}' -type f -name '*.rb' -perm -444 ';'\| ctags --sort=foldcase -f ~/.ruby.ctags -L-<CR>
-autocmd FileType ruby,eruby nnoremap <silent> <F12> :!find . -not -path '*vendor/bundle*' -a \( -iname '*.rb' -o -iname '*.erb' -o -iname '*.rhtml' \) \| ctags --fields=afmikKlnsStz --sort=foldcase -L-<CR>:!find . -not -path '*vendor/bundle*' -a \( -iname '*.rb' -o -iname '*.erb' -o -iname '*.rhtml' \) \| cscope -q -i - -b<CR>:cs reset<CR><CR>
+autocmd FileType ruby,eruby nnoremap <silent> <F12> :!find . -not -path '*vendor/bundle*' -a \( -iname '*.rb' -o -iname '*.erb' -o -iname '*.rhtml' \) \| ctags --fields=afmikKlnsStz --sort=foldcase -L- -f ruby.tags<CR>:!find . -not -path '*vendor/bundle*' -a \( -iname '*.rb' -o -iname '*.erb' -o -iname '*.rhtml' \) \| cscope -q -i - -b<CR>:cs reset<CR><CR>
 
 "vim
 autocmd FileType vim call Collapse_SetRegexs('^\s*function!\?', '^\s*endfunction\s*$', '^\s*"')
@@ -181,13 +179,18 @@ function s:add_global_python_cscope()
   endif
 endfunction
 "autocmd FileType python call s:add_global_python_cscope()
-autocmd FileType python set tags=tags,~/.python.ctags
+autocmd FileType python set tags=python.tags,~/.python.ctags
 autocmd FileType python set omnifunc=pythoncomplete#Complete
 "autocmd FileType python nnoremap <silent> <C-F12> :!find /usr/lib/python`python -c 'import sys; print sys.version[:3]'` -name '*.py' -perm -444\| cscope -f ~/.python.cscope -q -i - -b<CR>:cs reset<CR><CR>
 autocmd FileType python nnoremap <silent> <C-F12> :!find /usr/lib/python`python -c 'import sys; print sys.version[:3]'` -name '*.py' -perm -444\| ctags --sort=foldcase -f ~/.python.ctags -L-<CR>
-autocmd FileType python nnoremap <silent> <F12> :!find . -iname '*.py' \| ctags --sort=foldcase -L-<CR>:!find . -iname '*.py' \| cscope -q -i - -b<CR>:cs reset<CR><CR>
+autocmd FileType python nnoremap <silent> <F12> :!find . -iname '*.py' \| ctags --sort=foldcase -L- -f python.tags<CR>:!find . -iname '*.py' \| cscope -q -i - -b<CR>:cs reset<CR><CR>
+
+"coffeescript
+autocmd FileType coffee set tags=coffee.tags
+autocmd FileType coffee nnoremap <silent> <F12> :!find . -not -path '*vendor/bundle*' -a -iname '*\.coffee*' \| ctags -L- -f coffee.tags<CR><CR>
 
 "c/c++
 autocmd FileType c setl ts=2 sts=2 sw=2 et
+autocmd FileType c set tags=c.tags
 autocmd FileType c set omnifunc=ccomplete#Complete
-autocmd FileType c nnoremap <silent> <F12> :!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| ctags --sort=foldcase -L-<CR>:!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| cscope -q -i - -b<CR>:cs reset<CR><CR>
+autocmd FileType c nnoremap <silent> <F12> :!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| ctags --sort=foldcase -L- -f c.tags<CR>:!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| cscope -q -i - -b<CR>:cs reset<CR><CR>
