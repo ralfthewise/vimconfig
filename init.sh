@@ -16,8 +16,24 @@ git submodule update
 #cd ../../../..
 
 #check for needed commands
-command -v coffee >/dev/null 2>&1 || echo >&2 'coffee is not installed'
-command -v coffeelint >/dev/null 2>&1 || echo >&2 'coffeelint is not installed'
+command -v coffee >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo >&2 ''
+  echo >&2 ''
+  echo >&2 'coffee is not installed'
+  echo >&2 'You can probably install it with "sudo apt-get install coffeescript"'
+  echo >&2 ''
+  echo >&2 ''
+fi
+command -v coffeelint >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo >&2 ''
+  echo >&2 ''
+  echo >&2 'coffeelint is not installed'
+  echo >&2 'To install it you need to install node and npm, and then do "sudo npm install -g coffeelint"'
+  echo >&2 ''
+  echo >&2 ''
+fi
 
 echo ""
 echo ""
