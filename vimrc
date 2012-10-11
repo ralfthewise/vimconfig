@@ -132,7 +132,7 @@ nnoremap <silent> <F5> :TlistOpen<CR>
 "hi default ShowMarksHLm ctermfg=white ctermbg=blue cterm=bold guifg=white guibg=blue gui=bold
 
 "BufferExplorer
-nnoremap <silent> <C-h> :BufExplorer<CR>
+nnoremap <silent> <C-h> :BufExplorer<CR>j
 
 "NERDTree
 let g:NERDTreeQuitOnOpen = 1
