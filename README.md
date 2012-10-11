@@ -3,6 +3,8 @@ vimconfig
 
 Vim plugins and .vimrc
 
+After cloning the repository, run the "init.sh" script to install.
+
 Keyboard Shortcuts
 ------------------
 
