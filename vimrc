@@ -109,7 +109,7 @@ let g:acp_completeoptPreview = 1
 
 "ctrlp
 let g:ctrlp_extensions = ['tag']
-let g:ctrlp_custom_ignore = 'vendor\/bundle'
+let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|vendor\/bundle)'
 let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
 let g:ctrlpmatcher_debug = 0
 nnoremap <silent> <C-n> :CtrlPTag<CR>
@@ -152,6 +152,7 @@ nnoremap <C-k> :cp<CR>:cl!<CR>
 
 "filetypes
 au BufRead,BufNewFile *.jst.ejs set filetype=html
+au BufRead,BufNewFile *.hbs set filetype=html
 
 "language specific stuff
 "ruby
