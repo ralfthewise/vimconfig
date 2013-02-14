@@ -21,6 +21,7 @@ autocmd BufWinEnter * match ExtraWhitespace /\s\+$\|\t/ "opening a new buffer ma
 syntax enable "enable syntax highlighting
 set t_Co=256 "force vim to assume our terminal can display 256 colors
 set background=dark "use colors that look good on a dark background
+set mouse=a
 "colorscheme mine256 "use mine256 colorscheme
 colorscheme xoria256 "use xoria256 colorscheme
 "colorscheme mustang "use mustang colorscheme
