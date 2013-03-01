@@ -41,11 +41,12 @@ set nohlsearch "don't highlight additional matches
 set hidden "hide buffers rather than closing them when switching away from them
 set history=1000 "remember more commands and search history
 set undolevels=1000 "use many muchos levels of undo
-set wildignore=vendor/bundle/**,*.gif,*.png,*.jpg,*.swp,*.bak,*.pyc,*.class,*.o,*.obj "when displaying/completing files/directories, ignore these patterns
+set wildignore=vendor/bundle/**,tmp/**,*.gif,*.png,*.jpg,*.swp,*.bak,*.pyc,*.class,*.o,*.obj "when displaying/completing files/directories, ignore these patterns
 set title "change the terminal's title
 "set visualbell "flash screen instead of beeping
 set noerrorbells "don't beep for error MESSAGES (errors still always beep)
 set verbosefile=/dev/null "discard all messages
+set clipboard=unnamedplus "use X11 clipboard as default
 redir >>/dev/null "redirect messages to null (sort of the same as above line)
 let mapleader = "," "you can enter special commands with combinations that start with mapleader
 
@@ -110,7 +111,7 @@ let g:acp_completeoptPreview = 1
 
 "ctrlp
 let g:ctrlp_extensions = ['tag']
-let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|vendor\/bundle)'
+let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle)'
 let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
 let g:ctrlpmatcher_debug = 0
 nnoremap <silent> <C-n> :CtrlPTag<CR>
