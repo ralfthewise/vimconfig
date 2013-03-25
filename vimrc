@@ -71,7 +71,9 @@ imap <D-CR> <Esc>o
 imap kj <Esc>
 
 "jump to the last position
-autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+"autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+autocmd BufWinLeave * mkview
+autocmd BufWinEnter * silent loadview
 
 "folding
 set foldcolumn=4 "width of left column displaying info about folds
