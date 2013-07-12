@@ -28,3 +28,17 @@ Keyboard Shortcuts
     <td>F12</td><td>Re-index project files</td>
   </tr>
 </table>
+
+Notes
+-----
+
+To add a new plugin, do:
+
+git submodule add https://github.com/scrooloose/nerdcommenter.git submodules/nerdcommenter
+cd bundle
+ln -s ../submodules/nerdcommenter
+cd ..
+./init.sh
+git add bundle/nerdcommenter
+git commit -m 'add nerdcommenter submodule'
+git push
