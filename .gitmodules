@@ -28,3 +28,6 @@
 [submodule "submodules/ctrlp"]
 	path = submodules/ctrlp
 	url = git://github.com/kien/ctrlp.vim.git
+[submodule "submodules/nerdcommenter"]
+	path = submodules/nerdcommenter
+	url = https://github.com/scrooloose/nerdcommenter.git
