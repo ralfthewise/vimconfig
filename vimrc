@@ -21,7 +21,7 @@ autocmd BufWinEnter * match ExtraWhitespace /\s\+$\|\t/ "opening a new buffer ma
 syntax enable "enable syntax highlighting
 set t_Co=256 "force vim to assume our terminal can display 256 colors
 set background=dark "use colors that look good on a dark background
-set mouse=a
+"set mouse=a
 "colorscheme mine256 "use mine256 colorscheme
 colorscheme xoria256 "use xoria256 colorscheme
 "colorscheme mustang "use mustang colorscheme
@@ -71,9 +71,12 @@ imap <D-CR> <Esc>o
 imap kj <Esc>
 
 "jump to the last position
-""autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 "autocmd BufWinLeave * mkview
 "autocmd BufWinEnter * silent loadview
+"autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+"autocmd BufWritePost,BufLeave,WinLeave ?* if expand('%') != '' && &buftype !~ 'nofile' | mkview | endif
+"autocmd BufWinEnter * if expand('%') != '[BufExplorer]' | silent loadview | endif
+"autocmd BufWinEnter * if confirm(expand('%'), "&Yes\n&No", 2, "Question") == 1 | silent loadview | endif
 
 "force unix line endings
 autocmd BufWinEnter * set fileformat=unix
