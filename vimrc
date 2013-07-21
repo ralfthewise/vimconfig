@@ -21,7 +21,7 @@ autocmd BufWinEnter * match ExtraWhitespace /\s\+$\|\t/ "opening a new buffer ma
 syntax enable "enable syntax highlighting
 set t_Co=256 "force vim to assume our terminal can display 256 colors
 set background=dark "use colors that look good on a dark background
-set mouse=a
+"set mouse=a
 "colorscheme mine256 "use mine256 colorscheme
 colorscheme xoria256 "use xoria256 colorscheme
 "colorscheme mustang "use mustang colorscheme
@@ -76,7 +76,7 @@ imap kj <Esc>
 "autocmd BufWinEnter * silent loadview
 
 "force unix line endings
-autocmd BufWinEnter * set fileformat=unix
+"autocmd BufWinEnter * set fileformat=unix
 
 "folding
 set foldcolumn=4 "width of left column displaying info about folds
@@ -117,7 +117,7 @@ let g:acp_completeoptPreview = 1
 "ctrlp
 let g:ctrlp_extensions = ['tag']
 let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle)'
-let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
+"let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
 let g:ctrlpmatcher_debug = 0
 nnoremap <silent> <C-n> :CtrlPTag<CR>
 nnoremap <silent> <C-m> :CtrlP<CR>
@@ -148,6 +148,17 @@ let g:NERDTreeQuitOnOpen = 1
 let g:NERDChristmasTree = 1
 let g:NERDTreeWinSize = 48
 nnoremap <silent> <F4> :NERDTreeFind<CR>
+
+"NERDCommenter
+"have to do these two to prevent the plugin from overriding our '<leader>cc'
+"mappings below
+nmap <leader>c6 <plug>NERDCommenterComment
+xmap <leader>c6 <plug>NERDCommenterComment
+
+",cc to comment a line or selected block
+nmap <leader>cc <plug>NERDCommenterAlignLeft
+xmap <leader>cc <plug>NERDCommenterAlignLeft
+",cu to uncomment a line or selected block
 
 "cscope
 "blow away all previous quickfix entries for all types of cscope searches
