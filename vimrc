@@ -79,7 +79,7 @@ imap kj <Esc>
 "autocmd BufWinEnter * if confirm(expand('%'), "&Yes\n&No", 2, "Question") == 1 | silent loadview | endif
 
 "force unix line endings
-autocmd BufWinEnter * set fileformat=unix
+"autocmd BufWinEnter * set fileformat=unix
 
 "folding
 set foldcolumn=4 "width of left column displaying info about folds
@@ -120,7 +120,7 @@ let g:acp_completeoptPreview = 1
 "ctrlp
 let g:ctrlp_extensions = ['tag']
 let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle)'
-let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
+"let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
 let g:ctrlpmatcher_debug = 0
 nnoremap <silent> <C-n> :CtrlPTag<CR>
 nnoremap <silent> <C-m> :CtrlP<CR>
@@ -151,6 +151,17 @@ let g:NERDTreeQuitOnOpen = 1
 let g:NERDChristmasTree = 1
 let g:NERDTreeWinSize = 48
 nnoremap <silent> <F4> :NERDTreeFind<CR>
+
+"NERDCommenter
+"have to do these two to prevent the plugin from overriding our '<leader>cc'
+"mappings below
+nmap <leader>c6 <plug>NERDCommenterComment
+xmap <leader>c6 <plug>NERDCommenterComment
+
+",cc to comment a line or selected block
+nmap <leader>cc <plug>NERDCommenterAlignLeft
+xmap <leader>cc <plug>NERDCommenterAlignLeft
+",cu to uncomment a line or selected block
 
 "cscope
 "blow away all previous quickfix entries for all types of cscope searches
