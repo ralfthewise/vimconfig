@@ -46,7 +46,7 @@ set title "change the terminal's title
 "set visualbell "flash screen instead of beeping
 set noerrorbells "don't beep for error MESSAGES (errors still always beep)
 set verbosefile=/dev/null "discard all messages
-set clipboard=unnamedplus "use X11 clipboard as default
+"set clipboard=unnamedplus "use X11 clipboard as default
 redir >>/dev/null "redirect messages to null (sort of the same as above line)
 let mapleader = "," "you can enter special commands with combinations that start with mapleader
 
