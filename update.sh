@@ -55,6 +55,11 @@ git checkout master
 git pull
 cd ../..
 
+cd submodules/vim-easymotion
+git checkout master
+git pull
+cd ../..
+
 #cd submodules/command-t
 #git checkout master
 #git pull
