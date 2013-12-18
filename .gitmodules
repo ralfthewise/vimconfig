@@ -31,3 +31,6 @@
 [submodule "submodules/nerdcommenter"]
 	path = submodules/nerdcommenter
 	url = https://github.com/scrooloose/nerdcommenter.git
+[submodule "submodules/vim-easymotion"]
+	path = submodules/vim-easymotion
+	url = https://github.com/Lokaltog/vim-easymotion.git

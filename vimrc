@@ -166,7 +166,7 @@ xmap <leader>c6 <plug>NERDCommenterComment
 ",cc to comment a line or selected block
 nmap <leader>cc <plug>NERDCommenterAlignLeft
 xmap <leader>cc <plug>NERDCommenterAlignLeft
-",cu to uncomment a line or selected block
+",cu to uncomment a line or selected block - already done natively by NERDCommenter
 
 "cscope
 "blow away all previous quickfix entries for all types of cscope searches
@@ -175,6 +175,24 @@ set cscopequickfix=s-,c-,d-,i-,t-,e-
 nnoremap <C-j> :cn<CR>:cl!<CR>
 "jump to previous quickfix entry and redisplay the quickfix list
 nnoremap <C-k> :cp<CR>:cl!<CR>
+
+"EasyMotion
+"move down by lines
+vmap <leader>j :<C-U>call EasyMotion#JK(1, 0)<CR>
+omap <leader>j :call EasyMotion#JK(0, 0)<CR>
+nmap <leader>j :call EasyMotion#JK(0, 0)<CR>
+"move up by lines
+vmap <leader>k :<C-U>call EasyMotion#JK(1, 1)<CR>
+omap <leader>k :call EasyMotion#JK(0, 1)<CR>
+nmap <leader>k :call EasyMotion#JK(0, 1)<CR>
+"move forward by words
+vmap <leader>w :<C-U>call EasyMotion#WB(1, 0)<CR>
+omap <leader>w :call EasyMotion#WB(0, 0)<CR>
+nmap <leader>w :call EasyMotion#WB(0, 0)<CR>
+"move backward by words
+vmap <leader>b :<C-U>call EasyMotion#WB(1, 1)<CR>
+omap <leader>b :call EasyMotion#WB(0, 1)<CR>
+nmap <leader>b :call EasyMotion#WB(0, 1)<CR>
 
 "filetypes
 au BufRead,BufNewFile *.jst.ejs set filetype=html
