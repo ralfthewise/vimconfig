@@ -38,8 +38,16 @@ fi
 echo ""
 echo ""
 echo ""
+echo "Updating your vim environment to use this configuration..."
+
+echo "  mkdir -p ~/.vimbackup ~/.vimswp ~/.vimundo"
+mkdir -p ~/.vimbackup ~/.vimswp ~/.vimundo
+echo "  rm -f ~/.vimrc.bak; mv ~/.vimrc ~/.vimrc.bak; ln -s \"${DIR}/vimrc\" ~/.vimrc"
+rm -f ~/.vimrc.bak; mv ~/.vimrc ~/.vimrc.bak; ln -s "${DIR}/vimrc" ~/.vimrc
+echo "  rm -f ~/.vim.bak; mv ~/.vim ~/.vim.bak; ln -s \"${DIR}\" ~/.vim"
+rm -f ~/.vim.bak; mv ~/.vim ~/.vim.bak; ln -s "${DIR}" ~/.vim
+echo "  rm -f ~/.ctags.bak; mv ~/.ctags ~/.ctags.bak; ln -s \"${DIR}/ctags\" ~/.ctags"
+rm -f ~/.ctags.bak; mv ~/.ctags ~/.ctags.bak; ln -s "${DIR}/ctags" ~/.ctags
+
+echo ""
 echo "Installation complete."
-echo "  You should now do:"
-echo "    \"mv ~/.vimrc ~/.vimrc.bak; ln -s '${DIR}/vimrc' ~/.vimrc\""
-echo "    \"mv ~/.vim ~/.vim.bak; ln -s '${DIR}' ~/.vim\""
-echo "    \"mv ~/.ctags ~/.ctags.bak; ln -s '${DIR}/ctags' ~/.ctags\""

@@ -25,6 +25,7 @@ set background=dark "use colors that look good on a dark background
 "colorscheme mine256 "use mine256 colorscheme
 colorscheme xoria256 "use xoria256 colorscheme
 "colorscheme mustang "use mustang colorscheme
+set backspace=indent,eol,start "make backspace work better
 set cursorline "highlight line cursor is on
 set ai "autoindent - copy indent from current line when starting new line
 set si "smartindent - add additional indent after {, if, def, etc.
@@ -49,6 +50,10 @@ set verbosefile=/dev/null "discard all messages
 "set clipboard=unnamedplus "use X11 clipboard as default
 redir >>/dev/null "redirect messages to null (sort of the same as above line)
 let mapleader = "," "you can enter special commands with combinations that start with mapleader
+set backupdir=~/.vimbackup,/tmp "where to store backup (~) files
+set directory=~/.vimswp,/tmp "where to store swap (.swp) files
+set undofile "allow undo across vim restarts
+set undodir=~/.vimundo,/tmp "where to store undo (.udf) files
 
 "mappings
 "inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
@@ -119,7 +124,7 @@ let g:acp_completeoptPreview = 1
 
 "ctrlp
 let g:ctrlp_extensions = ['tag']
-let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle)'
+let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|app\/components\/)'
 "let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
 let g:ctrlpmatcher_debug = 0
 nnoremap <silent> <C-n> :CtrlPTag<CR>
