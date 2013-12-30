@@ -27,6 +27,7 @@ colorscheme xoria256 "use xoria256 colorscheme
 "colorscheme mustang "use mustang colorscheme
 set backspace=indent,eol,start "make backspace work better
 set cursorline "highlight line cursor is on
+set scrolloff=999 "keep current line centered vertically
 set ai "autoindent - copy indent from current line when starting new line
 set si "smartindent - add additional indent after {, if, def, etc.
 set ts=2 sts=2 sw=2 et "tab/softtab = 2 spaces, shiftwidth (autoindent) = 2 spaces, insert spaces instead of tab.  these may be overridden by filetype plugins
