@@ -21,7 +21,7 @@ if [ $? -ne 0 ]; then
   echo >&2 ''
   echo >&2 ''
   echo >&2 'coffee is not installed'
-  echo >&2 'You can probably install it with "sudo apt-get install coffeescript"'
+  echo >&2 'You can probably install it with "sudo npm install -g coffee-script"'
   echo >&2 ''
   echo >&2 ''
 fi
