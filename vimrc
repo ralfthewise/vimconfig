@@ -242,3 +242,14 @@ autocmd FileType c setl ts=2 sts=2 sw=2 et
 autocmd FileType c set tags=c.tags
 autocmd FileType c set omnifunc=ccomplete#Complete
 autocmd FileType c nnoremap <silent> <F12> :!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| ctags --sort=foldcase -L- -f c.tags<CR>:!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| cscope -q -i - -b<CR>:cs reset<CR><CR>
+
+"go
+if exists("g:did_load_filetypes")
+  filetype off
+  filetype plugin indent off
+endif
+set runtimepath+=$GOROOT/misc/vim " replace $GOROOT with the output of: go env GOROOT
+filetype plugin indent on
+syntax on
+autocmd FileType go highlight clear ExtraWhitespace
+autocmd FileType go setl ts=2 sts=2 sw=2 noexpandtab
