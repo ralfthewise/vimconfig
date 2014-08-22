@@ -48,3 +48,8 @@ To update plugins do:
 ./update.sh
 git add -A submodules
 git commit -m 'update plugins'
+git push
+
+Updating plugin documentation:
+
+open vim and do :Helptags
