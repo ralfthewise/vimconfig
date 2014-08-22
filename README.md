@@ -42,3 +42,9 @@ cd ..
 git add bundle/nerdcommenter
 git commit -m 'add nerdcommenter submodule'
 git push
+
+To update plugins do:
+
+./update.sh
+git add -A submodules
+git commit -m 'update plugins'

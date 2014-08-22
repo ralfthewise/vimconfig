@@ -1,69 +1,14 @@
 #!/bin/bash
 
-cd submodules/AutoComplPop
-git checkout master
-git pull
-cd ../..
+ROOT="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "${ROOT}"
 
-cd submodules/ctrlp
-git checkout master
-git pull
-cd ../..
-
-cd submodules/genutils
-git checkout master
-git pull
-cd ../..
-
-cd submodules/nerdcommenter
-git checkout master
-git pull
-cd ../..
-
-cd submodules/nerdtree
-git checkout master
-git pull
-cd ../..
-
-cd submodules/syntastic
-git checkout master
-git pull
-cd ../..
-
-cd submodules/taglist
-git checkout master
-git pull
-cd ../..
-
-cd submodules/vim-bufexplorer
-git checkout master
-git pull
-cd ../..
-
-cd submodules/vim-coffee-script
-git checkout master
-git pull
-cd ../..
-
-cd submodules/vim-pathogen
-git checkout master
-git pull
-cd ../..
-
-cd submodules/vim-rails
-git checkout master
-git pull
-cd ../..
-
-cd submodules/vim-easymotion
-git checkout master
-git pull
-cd ../..
-
-#cd submodules/command-t
-#git checkout master
-#git pull
-#cd ../..
+for m in $( ls submodules ); do
+  cd "submodules/$m"
+  git checkout master
+  git pull
+  cd "${ROOT}"
+done
 
 #build command-t
 #cd submodules/command-t/ruby/command-t
