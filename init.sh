@@ -34,6 +34,15 @@ if [ $? -ne 0 ]; then
   echo >&2 ''
   echo >&2 ''
 fi
+command -v gotags >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo >&2 ''
+  echo >&2 ''
+  echo >&2 'gotags is not installed'
+  echo >&2 'To install it you need to install go, setup your GOPATH, and then do "go get -u github.com/jstemmer/gotags"'
+  echo >&2 ''
+  echo >&2 ''
+fi
 
 echo ""
 echo ""
