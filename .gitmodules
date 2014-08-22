@@ -34,3 +34,6 @@
 [submodule "submodules/vim-easymotion"]
 	path = submodules/vim-easymotion
 	url = https://github.com/Lokaltog/vim-easymotion.git
+[submodule "submodules/tagbar"]
+	path = submodules/tagbar
+	url = https://github.com/majutsushi/tagbar
