@@ -132,14 +132,33 @@ nnoremap <silent> <C-n> :CtrlPTag<CR>
 nnoremap <silent> <C-m> :CtrlP<CR>
 
 "taglist
-let g:Tlist_Show_One_File = 1
-let g:Tlist_Close_On_Select = 1
-let g:Tlist_Exit_OnlyWindow = 1
-let g:Tlist_Process_File_Always = 1
-let g:Tlist_Sort_Type = "name"
-let g:Tlist_WinWidth = 60
-let g:tlist_coffee_settings = 'coffee;c:class;f:function;v:variable'
-nnoremap <silent> <F5> :TlistOpen<CR>
+"let g:Tlist_Show_One_File = 1
+"let g:Tlist_Close_On_Select = 1
+"let g:Tlist_Exit_OnlyWindow = 1
+"let g:Tlist_Process_File_Always = 1
+"let g:Tlist_Sort_Type = "name"
+"let g:Tlist_WinWidth = 60
+"let g:tlist_coffee_settings = 'coffee;c:class;f:function;v:variable'
+"nnoremap <silent> <F5> :TlistOpen<CR>
+
+"tagbar
+let g:tagbar_left = 1
+let g:tagbar_autoclose = 1
+let g:tagbar_autofocus = 1
+let g:tagbar_width = 60
+let g:tagbar_sort = 1
+let g:tagbar_compact = 1
+nnoremap <silent> <F5> :TagbarToggle<CR>
+let g:tagbar_type_coffee = {
+    \ 'ctagstype' : 'coffee',
+    \ 'kinds'     : [
+        \ 'c:classes',
+        \ 'm:methods',
+        \ 'f:functions',
+        \ 'v:variables',
+        \ 'f:fields',
+    \ ]
+\ }
 
 "showmarks
 "let g:showmarks_textupper=">"
