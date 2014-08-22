@@ -34,22 +34,22 @@ Notes
 
 To add a new plugin, do:
 
-   git submodule add https://github.com/scrooloose/nerdcommenter.git submodules/nerdcommenter
-   cd bundle
-   ln -s ../submodules/nerdcommenter
-   cd ..
-   ./init.sh
-   git add bundle/nerdcommenter
-   git commit -m 'add nerdcommenter submodule'
-   git push
+    git submodule add https://github.com/scrooloose/nerdcommenter.git submodules/nerdcommenter
+    cd bundle
+    ln -s ../submodules/nerdcommenter
+    cd ..
+    ./init.sh
+    git add bundle/nerdcommenter
+    git commit -m 'add nerdcommenter submodule'
+    git push
 
 To update plugins do:
 
-   ./update.sh
-   git add -A submodules
-   git commit -m 'update plugins'
-   git push
+    ./update.sh
+    git add -A submodules
+    git commit -m 'update plugins'
+    git push
 
 Updating plugin documentation:
 
-   open vim and do :Helptags
+    open vim and do :Helptags
