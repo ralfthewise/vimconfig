@@ -76,6 +76,9 @@ nmap <leader>= gg=G``
 imap <D-CR> <Esc>o
 "esc is too far away!
 imap kj <Esc>
+"copy/cut to OS clipboard in visual/select mode
+vmap Y "+y
+vmap X "+x
 
 "jump to the last position
 "autocmd BufWinLeave * mkview
