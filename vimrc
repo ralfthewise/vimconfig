@@ -129,7 +129,7 @@ let g:acp_completeoptPreview = 1
 
 "ctrlp
 let g:ctrlp_extensions = ['tag']
-let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|app\/components\/)'
+let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|app\/components\/|log\/)'
 "let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
 let g:ctrlpmatcher_debug = 0
 nnoremap <silent> <C-n> :CtrlPTag<CR>
@@ -162,6 +162,33 @@ let g:tagbar_type_coffee = {
         \ 'v:variables',
         \ 'f:fields',
     \ ]
+\ }
+let g:tagbar_type_go = {
+    \ 'ctagstype' : 'go',
+    \ 'kinds'     : [
+        \ 'p:package',
+        \ 'i:imports:1',
+        \ 'c:constants',
+        \ 'v:variables',
+        \ 't:types',
+        \ 'n:interfaces',
+        \ 'w:fields',
+        \ 'e:embedded',
+        \ 'm:methods',
+        \ 'r:constructor',
+        \ 'f:functions'
+    \ ],
+    \ 'sro' : '.',
+    \ 'kind2scope' : {
+        \ 't' : 'ctype',
+        \ 'n' : 'ntype'
+    \ },
+    \ 'scope2kind' : {
+        \ 'ctype' : 't',
+        \ 'ntype' : 'n'
+    \ },
+    \ 'ctagsbin'  : 'gotags',
+    \ 'ctagsargs' : '-sort -silent'
 \ }
 
 "showmarks
@@ -220,6 +247,7 @@ nmap <leader>b :call EasyMotion#WB(0, 1)<CR>
 
 "filetypes
 au BufRead,BufNewFile *.jst.ejs set filetype=html
+au BufRead,BufNewFile *.jst.str set filetype=html
 au BufRead,BufNewFile *.hbs set filetype=html
 
 "language specific stuff
@@ -236,7 +264,7 @@ autocmd FileType ruby,eruby let g:rubycomplete_buffer_loading = 1
 autocmd FileType ruby,eruby let g:rubycomplete_rails = 1
 autocmd FileType ruby,eruby let g:rubycomplete_classes_in_global = 1
 autocmd FileType ruby set iskeyword=@,48-57,_,?,!,192-255
-autocmd FileType ruby,eruby nnoremap <silent> <F12> :!find . -not -path '*vendor/bundle*' -a \( -iname '*.rb' -o -iname '*.erb' -o -iname '*.rhtml' \) \| ctags --fields=afmikKlnsStz --sort=foldcase -L- -f ruby.tags<CR>:!find . -not -path '*vendor/bundle*' -a \( -iname '*.rb' -o -iname '*.erb' -o -iname '*.rhtml' \) \| cscope -q -i - -b<CR>:cs reset<CR><CR>
+autocmd FileType ruby,eruby nnoremap <silent> <F12> :!find . -not -path '*vendor/bundle*' -a \( -iname '*.rb' -o -iname '*.erb' -o -iname '*.rhtml' \) \| ctags --fields=afmikKlnsStz --sort=foldcase -L- -f ruby.tags<CR>:!find . -not -path '*vendor/bundle*' -a \( -iname '*.rb' -o -iname '*.erb' -o -iname '*.rhtml' \) \| cscope -q -i - -b<CR>:silent! cs add cscope.out<CR>:cs reset<CR><CR>
 
 "vim
 autocmd FileType vim call Collapse_SetRegexs('^\s*function!\?', '^\s*endfunction\s*$', '^\s*"')
@@ -264,7 +292,7 @@ autocmd FileType coffee nnoremap <silent> <F12> :!find . -not -path '*vendor/bun
 autocmd FileType c setl ts=2 sts=2 sw=2 et
 autocmd FileType c set tags=c.tags
 autocmd FileType c set omnifunc=ccomplete#Complete
-autocmd FileType c nnoremap <silent> <F12> :!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| ctags --sort=foldcase -L- -f c.tags<CR>:!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| cscope -q -i - -b<CR>:cs reset<CR><CR>
+autocmd FileType c nnoremap <silent> <F12> :!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| ctags --sort=foldcase -L- -f c.tags<CR>:!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| cscope -q -i - -b<CR>:silent! cs add cscope.out<CR>:cs reset<CR><CR>
 
 "go
 if exists("g:did_load_filetypes")
@@ -276,3 +304,5 @@ filetype plugin indent on
 syntax on
 autocmd FileType go highlight clear ExtraWhitespace
 autocmd FileType go setl ts=2 sts=2 sw=2 noexpandtab
+autocmd FileType go set tags=.go.tags,~/.go.tags
+autocmd FileType go nnoremap <silent> <F12> :!find . -iname '*.go' -a -not -path '*/Godeps/*' \| gotags -L='-' > .go.tags <CR>:!find . -iname '*.go' -a -not -path '*/Godeps/*' \| cscope -q -i - -b<CR>:silent! cs add cscope.out<CR>:cs reset<CR><CR>
