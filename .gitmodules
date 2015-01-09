@@ -37,3 +37,6 @@
 [submodule "submodules/tagbar"]
 	path = submodules/tagbar
 	url = https://github.com/majutsushi/tagbar
+[submodule "submodules/vim-bookmarks"]
+	path = submodules/vim-bookmarks
+	url = https://github.com/MattesGroeger/vim-bookmarks.git
