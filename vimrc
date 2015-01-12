@@ -25,6 +25,7 @@ set background=dark "use colors that look good on a dark background
 "colorscheme mine256 "use mine256 colorscheme
 colorscheme xoria256 "use xoria256 colorscheme
 "colorscheme mustang "use mustang colorscheme
+set modelines=2 "only look at the top 2 lines to check for modelines
 set backspace=indent,eol,start "make backspace work better
 set cursorline "highlight line cursor is on
 set cursorcolumn "highlight column cursor is on
@@ -56,6 +57,7 @@ set backupdir=~/.vimbackup,/tmp "where to store backup (~) files
 set directory=~/.vimswp,/tmp "where to store swap (.swp) files
 set undofile "allow undo across vim restarts
 set undodir=~/.vimundo,/tmp "where to store undo (.udf) files
+autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>:ccl<CR>
 
 "mappings
 "inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
@@ -112,7 +114,7 @@ autocmd BufReadPost * :CollapseAll
 "code navigation
 "find where method under cursor is called
 "nnoremap <F7> :cs find s <C-R>=expand("<cword>")<CR><CR>
-nmap <F7> :cs find s <C-R>=expand("<cword>")<CR><CR>:cl!<CR>
+nmap <F7> :cs find s <C-R>=expand("<cword>")<CR><CR>:copen<CR>
 "jump to definition of method under cursor
 "g<C-]> is part of the tags feature of vim - equivalent of :tjump <symbol
 "under cursor> - means jump to definition or popup menu if more than 1 def
@@ -133,7 +135,7 @@ let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_comp
 "let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
 let g:ctrlpmatcher_debug = 0
 nnoremap <silent> <C-n> :CtrlPTag<CR>
-nnoremap <silent> <C-m> :CtrlP<CR>
+"nnoremap <silent> <C-m> :CtrlP<CR>
 
 "taglist
 "let g:Tlist_Show_One_File = 1
@@ -198,6 +200,11 @@ let g:tagbar_type_go = {
 "hi default ShowMarksHLu ctermfg=white ctermbg=blue cterm=bold guifg=white guibg=blue gui=bold
 "hi default ShowMarksHLo ctermfg=white ctermbg=blue cterm=bold guifg=white guibg=blue gui=bold
 "hi default ShowMarksHLm ctermfg=white ctermbg=blue cterm=bold guifg=white guibg=blue gui=bold
+
+"vim-bookmarks
+let g:bookmark_save_per_working_dir = 1
+let g:bookmark_auto_save = 1
+let g:bookmark_auto_close = 1
 
 "BufferExplorer
 nnoremap <silent> <C-h> :BufExplorer<CR>j
