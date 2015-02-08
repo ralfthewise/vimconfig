@@ -57,6 +57,7 @@ set backupdir=~/.vimbackup,/tmp "where to store backup (~) files
 set directory=~/.vimswp,/tmp "where to store swap (.swp) files
 set undofile "allow undo across vim restarts
 set undodir=~/.vimundo,/tmp "where to store undo (.udf) files
+set ruler "show line,column,% of file in bottom line
 autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>:ccl<CR>
 
 "mappings
