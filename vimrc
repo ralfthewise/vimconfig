@@ -132,7 +132,7 @@ let g:acp_completeoptPreview = 1
 
 "ctrlp
 let g:ctrlp_extensions = ['tag']
-let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|app\/components\/|log\/)'
+let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|app\/components\/|Godeps\/|log\/)'
 "let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
 let g:ctrlpmatcher_debug = 0
 nnoremap <silent> <C-n> :CtrlPTag<CR>
@@ -303,14 +303,15 @@ autocmd FileType c set omnifunc=ccomplete#Complete
 autocmd FileType c nnoremap <silent> <F12> :!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| ctags --sort=foldcase -L- -f c.tags<CR>:!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| cscope -q -i - -b<CR>:silent! cs add cscope.out<CR>:cs reset<CR><CR>
 
 "go
-if exists("g:did_load_filetypes")
-  filetype off
-  filetype plugin indent off
-endif
-set runtimepath+=$GOROOT/misc/vim " replace $GOROOT with the output of: go env GOROOT
-filetype plugin indent on
-syntax on
+"if exists("g:did_load_filetypes")
+"  filetype off
+"  filetype plugin indent off
+"endif
+"set runtimepath+=$GOROOT/misc/vim " replace $GOROOT with the output of: go env GOROOT
+"filetype plugin indent on
+"syntax on
 autocmd FileType go highlight clear ExtraWhitespace
 autocmd FileType go setl ts=2 sts=2 sw=2 noexpandtab
-autocmd FileType go set tags=.go.tags,~/.go.tags
+"autocmd FileType go set tags=.go.tags,~/.go.tags
+autocmd FileType go set tags=.go.tags
 autocmd FileType go nnoremap <silent> <F12> :!find . -iname '*.go' -a -not -path '*/Godeps/*' \| gotags -L='-' > .go.tags <CR>:!find . -iname '*.go' -a -not -path '*/Godeps/*' \| cscope -q -i - -b<CR>:silent! cs add cscope.out<CR>:cs reset<CR><CR>
