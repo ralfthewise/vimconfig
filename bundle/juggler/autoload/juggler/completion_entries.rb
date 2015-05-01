@@ -18,6 +18,7 @@ module Juggler
       end
 
       vim_entries = self.entries.map {|e| e.to_vim_dict}
+      #TODO: yield in batches
       yield(vim_entries.join(','))
     end
   end

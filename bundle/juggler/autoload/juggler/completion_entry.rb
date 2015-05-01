@@ -1,13 +1,16 @@
 module Juggler
   class CompletionEntry
-    attr_accessor :tag, :index, :pri, :kind, :file, :info, :signature, :line, :excmd, :score
+    attr_accessor :source, :tag, :index, :pri, :kind, :file, :info, :signature, :line, :excmd, :score
 
-    def initialize(index: nil, pri: nil, kind: nil, tag: nil, file: nil)
+    def initialize(source:, tag: nil, index: nil, pri: nil, kind: nil, file: nil, signature: nil, info: nil)
+      self.source = source
+      self.tag = tag
       self.index = index
       self.pri = pri
       self.kind = kind
-      self.tag = tag
       self.file = file
+      self.signature = signature
+      self.info = info
     end
 
     def to_vim_dict

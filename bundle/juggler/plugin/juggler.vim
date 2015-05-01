@@ -12,4 +12,8 @@ endfunction
 call s:defineOption('g:juggler_fixupPopupMenu', 1)
 
 if g:juggler_fixupPopupMenu
+  inoremap <silent> <expr> <C-j> (pumvisible() ? "\<C-n>" : "\<C-j>")
+  inoremap <silent> <expr> <C-k> (pumvisible() ? "\<C-p>" : "\<C-k>")
+  inoremap <silent> <expr> <CR> (pumvisible() ? "\<C-y>" : "\<CR>")
+  inoremap <silent> <expr> <Tab> (pumvisible() ? "\<C-y>" : "\<Tab>")
 endif

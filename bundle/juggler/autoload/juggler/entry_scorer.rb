@@ -10,12 +10,23 @@ module Juggler
       @exact_first_letter = 10
       @case_insensitive_first_letter = 4
       @important_letter_weight = 1
+      @extension_matches_filetype = 2
+      @proximity_to_cursor = 5
+      @entry_source_weights = {
+        omni: 1,
+        ctags: 1
+      }
     end
 
     def score(entry)
-      return @exact_match if entry.tag == @search_text
-      return @case_insensitive_match if @search_text.casecmp(entry.tag) == 0
-      return 1
+      score = 0
+      if entry.tag == @search_text
+        score += @exact_match
+      elsif @search_text.casecmp(entry.tag) == 0
+        score += @case_insensitive_match
+      end
+
+      return score
     end
   end
 end
