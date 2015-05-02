@@ -8,7 +8,27 @@ if version < 700
   finish
 endif
 
+let s:plugin_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+
+function juggler#Foo()
+  let line = getline('.')
+  if len(line) == 0
+    return 0
+  endif
+
+  let posInfo = getpos('.')
+  let cursorIndex = posInfo[2] - 1
+  let cursorChar = line[cursorIndex]
+  if cursorIndex < len(line) && cursorChar =~ '\S'
+    return 0
+  endif
+
+  return 1
+endfunction
+
 function juggler#Enable()
+  call s:LoadRuby()
+  call s:SetCompleteFunc()
   augroup Juggler
     autocmd!
     autocmd CursorMovedI * call juggler#UpdatePopup()
@@ -39,7 +59,6 @@ function! juggler#Complete(findstart, base)
 endfunction
 
 function juggler#UpdatePopup()
-  call s:SetCompleteFunc()
   call feedkeys("\<C-x>\<C-u>\<C-p>\<Down>", 'n') "highlight first entry but leave originally typed text intact
   return '' "have to return empty string otherwise '0' will get inserted
 endfunction
@@ -65,7 +84,8 @@ endfunction
 function! s:GetJugglerCompletions(base)
   let s:juggler_completions = []
   ruby Juggler::Completer.instance.generate_completions
-  return {'words': s:juggler_completions, 'refresh': 'always'}
+  "return {'words': s:juggler_completions, 'refresh': 'always'}
+  return {'words': s:juggler_completions}
 endfunction
 
 function! s:GetTags(pat)
@@ -88,5 +108,10 @@ ruby << RUBYEOF
 RUBYEOF
 endfunction
 
-let s:plugin_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
-call s:LoadRuby()
+function s:shouldTriggerPopup()
+  let matches = matchlist(s:getCurrentText(), '\([\.:]*\)\(\w*\)$')
+endfunction
+
+function s:getCurrentText()
+  return strpart(getline('.'), 0, col('.') - 1)
+endfunction
