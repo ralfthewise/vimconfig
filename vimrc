@@ -39,7 +39,8 @@ filetype indent on "when a filetype is detected, load the indent for that filety
 set textwidth=0 "don't try to start a new line if current line starts to get really long
 set wrapmargin=0 "don't wrap when we reach the right margin
 set incsearch "incremental search
-set completeopt=longest,menuone,preview "in insert mode when doing completions, only insert longest common text, use popup menu even if only one match, show extra info about selected
+"set completeopt=longest,menuone,preview "in insert mode when doing completions, only insert longest common text, use popup menu even if only one match, show extra info about selected
+set completeopt=menuone
 set nohlsearch "don't highlight additional matches
 "set ignorecase "ignore case when using ctags
 set hidden "hide buffers rather than closing them when switching away from them
@@ -49,8 +50,8 @@ set wildignore=vendor/bundle/**,tmp/**,*.gif,*.png,*.jpg,*.swp,*.bak,*.pyc,*.cla
 set title "change the terminal's title
 "set visualbell "flash screen instead of beeping
 set noerrorbells "don't beep for error MESSAGES (errors still always beep)
-set verbosefile=/dev/null "discard all messages
 "set clipboard=unnamedplus "use X11 clipboard as default
+set verbosefile=/dev/null "discard all messages
 redir >>/dev/null "redirect messages to null (sort of the same as above line)
 let mapleader = "," "you can enter special commands with combinations that start with mapleader
 set backupdir=~/.vimbackup,/tmp "where to store backup (~) files
@@ -59,6 +60,15 @@ set undofile "allow undo across vim restarts
 set undodir=~/.vimundo,/tmp "where to store undo (.udf) files
 set ruler "show line,column,% of file in bottom line
 autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>:ccl<CR>
+set wildmenu "vim command completion
+set wildmode=longest:full,full "vim command completion
+
+"auto highlight word under cursor after 500 ms of idle
+"augroup auto_highlight
+"  au!
+"  au CursorHold * let @/ = '\V\<'.escape(expand('<cword>'), '\').'\>'
+"augroup end
+"setl updatetime=750
 
 "mappings
 "inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
@@ -82,6 +92,8 @@ imap kj <Esc>
 "copy/cut to OS clipboard in visual/select mode
 vmap Y "+y
 vmap X "+x
+"search for word under cursor
+nnoremap <F6> :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 
 "jump to the last position
 "autocmd BufWinLeave * mkview
@@ -103,7 +115,7 @@ nnoremap <silent> <Space> @=(foldlevel('.')?'za':'l')<CR>
 "create a fold by selecting text and hitting space
 vnoremap <Space> zf
 "open all folds by hitting ctrl-space
-vnoremap <Nul> zR
+"vnoremap <Nul> zR
 "anytime a new buffer is opened set fold method to indent
 "augroup vimrc
 "  au BufReadPre * setlocal foldmethod=syntax
@@ -111,6 +123,11 @@ vnoremap <Nul> zR
 autocmd BufReadPost * :CollapseAll
 "let SimpleFold_use_subfolds = 0
 
+" The Silver Searcher
+if executable('ag')
+  " Use ag over grep
+  set grepprg=ag\ --nogroup\ --nocolor\ --smart-case
+endif
 
 "code navigation
 "find where method under cursor is called
@@ -123,6 +140,8 @@ nmap <F7> :cs find s <C-R>=expand("<cword>")<CR><CR>:copen<CR>
 nmap <C-b> :cstag <C-R>=expand("<cword>")<CR><CR>
 
 "acp
+let g:juggler_enableAtStartup = 0
+let g:acp_enableAtStartup = 1
 let g:acp_completeoptPreview = 1
 
 "command-t
@@ -131,12 +150,18 @@ let g:acp_completeoptPreview = 1
 "let g:CommandTMatchWindowAtTop = 1
 
 "ctrlp
+let g:ctrlp_map = '<C-@>'
+let g:ctrlp_cmd = 'CtrlPMixed'
 let g:ctrlp_extensions = ['tag']
 let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|app\/components\/|Godeps\/|log\/)'
 "let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
 let g:ctrlpmatcher_debug = 0
-nnoremap <silent> <C-n> :CtrlPTag<CR>
-"nnoremap <silent> <C-m> :CtrlP<CR>
+nnoremap <silent> <C-t> :CtrlPTag<CR>
+"nnoremap <silent> <Nul> :CtrlP<CR>
+set timeout timeoutlen=1000 ttimeoutlen=100
+"set <F13>=[1;5S
+set <F13>=O1;5S
+nmap <F13> :TagbarToggle<CR>
 
 "taglist
 "let g:Tlist_Show_One_File = 1
@@ -228,12 +253,20 @@ xmap <leader>cc <plug>NERDCommenterAlignLeft
 ",cu to uncomment a line or selected block - already done natively by NERDCommenter
 
 "cscope
-"blow away all previous quickfix entries for all types of cscope searches
-set cscopequickfix=s-,c-,d-,i-,t-,e-
+set cscopetag " use both cscope and ctag for 'ctrl-]', ':ta', and 'vim -t'
+set csto=0 " check cscope for definition of a symbol before checking ctags
+" add cscope db
+if filereadable("cscope.out")
+  cs add cscope.out
+elseif $CSCOPE_DB != ""
+  cs add $CSCOPE_DB
+endif
+set cscopeverbose " show msg when any other cscope db added
+set cscopequickfix=s-,c-,d-,i-,t-,e- "blow away all previous quickfix entries for all types of cscope searches
 "jump to next quickfix entry and redisplay the quickfix list
-nnoremap <C-j> :cn<CR>:cl!<CR>
+nnoremap <C-j> :cn<CR>:copen<CR>
 "jump to previous quickfix entry and redisplay the quickfix list
-nnoremap <C-k> :cp<CR>:cl!<CR>
+nnoremap <C-k> :cp<CR>:copen<CR>
 
 "EasyMotion
 "move down by lines
