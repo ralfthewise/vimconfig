@@ -296,6 +296,9 @@ autocmd FileType python nnoremap <silent> <F12> :!find . -iname '*.py' \| ctags 
 autocmd FileType coffee set tags=coffee.tags
 autocmd FileType coffee nnoremap <silent> <F12> :!find . -not -path '*vendor/bundle*' -a -iname '*\.coffee*' \| ctags -L- -f coffee.tags<CR><CR>
 
+"json
+autocmd FileType json autocmd BufWritePre <buffer> %!python -m json.tool
+
 "c/c++
 autocmd FileType c setl ts=2 sts=2 sw=2 et
 autocmd FileType c set tags=c.tags
@@ -310,6 +313,7 @@ autocmd FileType c nnoremap <silent> <F12> :!find . -iname '*.c' -o -iname '*.h'
 "set runtimepath+=$GOROOT/misc/vim " replace $GOROOT with the output of: go env GOROOT
 "filetype plugin indent on
 "syntax on
+let g:go_fmt_command = "goimports"
 autocmd FileType go highlight clear ExtraWhitespace
 autocmd FileType go setl ts=2 sts=2 sw=2 noexpandtab
 "autocmd FileType go set tags=.go.tags,~/.go.tags
