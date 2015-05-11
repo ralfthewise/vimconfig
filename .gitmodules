@@ -43,3 +43,6 @@
 [submodule "submodules/vim-go"]
 	path = submodules/vim-go
 	url = https://github.com/fatih/vim-go.git
+[submodule "submodules/vim-jade"]
+	path = submodules/vim-jade
+	url = https://github.com/digitaltoad/vim-jade.git
