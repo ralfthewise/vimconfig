@@ -9,14 +9,16 @@ function s:defineOption(name, default)
   endif
 endfunction
 
-call s:defineOption('g:juggler_enableAtStartup', 0)
+call s:defineOption('g:juggler_enableAtStartup', 1)
 call s:defineOption('g:juggler_fixupPopupMenu', 1)
+call s:defineOption('g:juggler_parseCurrentPosRegex', '\([\.:]*\)\(\w*\)$')
+call s:defineOption('g:juggler_minTokenLength', 2)
 
 if g:juggler_fixupPopupMenu
-  inoremap <silent> <expr> <C-j> (pumvisible() ? "\<C-n>" : "\<C-j>")
-  inoremap <silent> <expr> <C-k> (pumvisible() ? "\<C-p>" : "\<C-k>")
-  inoremap <silent> <expr> <CR> (pumvisible() ? "\<C-y>" : "\<CR>")
-  inoremap <silent> <expr> <Tab> (pumvisible() ? "\<C-y>" : "\<Tab>")
+  inoremap <silent> <expr> <C-j> (pumvisible() ? "\<Down>" : "\<C-j>")
+  inoremap <silent> <expr> <C-k> (pumvisible() ? "\<Up>" : "\<C-k>")
+  imap <silent> <expr> <CR> (pumvisible() ? "\<C-y>" : "\<CR>")
+  imap <silent> <expr> <Tab> (pumvisible() ? "\<C-y>" : "\<Tab>")
 endif
 
 if g:juggler_enableAtStartup

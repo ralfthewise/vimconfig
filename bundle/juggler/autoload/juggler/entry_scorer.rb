@@ -20,10 +20,16 @@ module Juggler
 
     def score(entry)
       score = 0
-      if entry.tag == @search_text
-        score += @exact_match
-      elsif @search_text.casecmp(entry.tag) == 0
-        score += @case_insensitive_match
+      if !@search_text.nil? && !@search_text.empty? && !entry.tag.nil? && !entry.tag.empty?
+        if entry.tag == @search_text
+          score += @exact_match
+        elsif @search_text.casecmp(entry.tag) == 0
+          score += @case_insensitive_match
+        elsif @search_text[0] == entry.tag[0]
+          score += @exact_first_letter
+        elsif @search_text[0].casecmp(entry.tag[0]) == 0
+          score += @case_insensitive_first_letter
+        end
       end
 
       return score

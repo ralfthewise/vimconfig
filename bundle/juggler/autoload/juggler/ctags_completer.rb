@@ -2,11 +2,25 @@ require_relative 'completion_entry'
 
 module Juggler
   class CtagsCompleter
-    @@ctag_line1_regexp = /^>?\s+(\d+)\s+([FSC]*)\s+(\w)\s+(\S+)\s+(\S+)$/
+    #columns are:
+    #  #  pri kind tag               file
+
+    #example match:
+    #   2 F   fieldradarService ./test-ui/spec/1.2/incidents/incidents/controllers/exposed-controller.spec.coffee
+    #                line:40 language:coffee
+    #                radarService: $radarService
+
+    #or:
+    #  29 F   v    radarUrl          ./test-ui/integration/header_test.go
+    #                access:private line:16 type:string
+    #                16
+    @@ctag_line1_regexp = /^>?\s+(\d+)\s+([FSC]*)\s+(\w{,5})\s*(\S+)\s+(\S+)$/
     @@ctag_info_line_regexp = /([^:\s]+:[^:]+)(\s|$)/
     @@digit_regexp = /^\d+$/
 
     def generate_completions(base)
+      return if base.nil? || base.empty?
+
       ctag_output = VIM::evaluate("s:GetTags('/#{Juggler.escape_vim_singlequote_string(base)}')")
       entry = nil
       ctag_output.split("\n").each do |line|
@@ -34,6 +48,11 @@ module Juggler
         end
       end
       yield(entry) unless entry.nil?
+    end
+
+    protected
+    def generate_ctag_pattern(base)
+      return base.scan(/./).join('.*')
     end
   end
 end

@@ -1,6 +1,7 @@
 require 'singleton'
 require_relative 'omni_completer'
 require_relative 'ctags_completer'
+require_relative 'keyword_completer'
 require_relative 'entry_scorer'
 require_relative 'completion_entries'
 
@@ -11,22 +12,28 @@ module Juggler
     def initialize
       @omni_completer = OmniCompleter.new
       @ctags_completer = CtagsCompleter.new
+      @keyword_completer = KeywordCompleter.new
     end
 
     def generate_completions
-      #TODO: calculate base instead of using what was passed in by vim
-      base = VIM::evaluate('a:base')
-      scorer = EntryScorer.new(base)
+      cursor_info = VIM::evaluate('s:cursorinfo')
+      scorer = EntryScorer.new(cursor_info['token'])
       entries = CompletionEntries.new
 
       #omni completions
-      @omni_completer.generate_completions do |entry|
+      @omni_completer.generate_completions(cursor_info['token']) do |entry|
         entry.score = scorer.score(entry)
         entries.push(entry)
       end
 
       #ctags completions
-      @ctags_completer.generate_completions(base) do |entry|
+      @ctags_completer.generate_completions(cursor_info['token']) do |entry|
+        entry.score = scorer.score(entry)
+        entries.push(entry)
+      end
+
+      #keywords completions
+      @keyword_completer.generate_completions(cursor_info['token']) do |entry|
         entry.score = scorer.score(entry)
         entries.push(entry)
       end
