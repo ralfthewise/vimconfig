@@ -12,7 +12,7 @@ endif
 let s:plugin_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 
 function juggler#Enable()
-  inoremap <silent> <expr> <C-y> (pumvisible() ? juggler#UserCompleted("\<C-y>") : "\<C-y>")
+  imap <silent> <expr> <C-y> (pumvisible() ? <SID>UserCompleted("\<C-y>") : "\<C-y>")
 
   set lazyredraw "eliminate flickering
   call s:LoadRuby()
@@ -24,11 +24,20 @@ function juggler#Enable()
   nnoremap <silent> i i<C-r>=juggler#UpdatePopup()<CR>
   nnoremap <silent> a a<C-r>=juggler#UpdatePopup()<CR>
   nnoremap <silent> R R<C-r>=juggler#UpdatePopup()<CR>
+  inoremap <silent> <expr> <C-h> <SID>OnBackspace("\<C-h>")
+  inoremap <silent> <expr> <BS> <SID>OnBackspace("\<BS>")
   nmap <silent> <F12> :call <SID>UpdateTags()<CR>:cs reset<CR><CR>:redraw!<CR>:redrawstatus!<CR>
 
   "set these initially so we can always count on them being set
   let s:cursorinfo = {'linenum': -1, 'cursorindex': -1}
   let s:usercompleted = 0
+endfunction
+
+function! s:OnBackspace(bsSeq)
+  if pumvisible()
+    return "\<C-e>" . a:bsSeq
+  endif
+  return a:bsSeq
 endfunction
 
 function! s:UpdateTags()
@@ -42,7 +51,7 @@ function! s:UpdateTags()
   return ''
 endfunction
 
-function! juggler#UserCompleted(resetaction)
+function! s:UserCompleted(resetaction)
   "let's flag our state as in the process of completing due to user action
   "so that the next time a CursorMovedI event is fired we can ignore
   "it - not re-popup the menu right after the user dismissed it
