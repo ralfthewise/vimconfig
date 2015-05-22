@@ -140,8 +140,8 @@ nmap <F7> :cs find s <C-R>=expand("<cword>")<CR><CR>:copen<CR>
 nmap <C-b> :cstag <C-R>=expand("<cword>")<CR><CR>
 
 "acp
-let g:juggler_enableAtStartup = 0
-let g:acp_enableAtStartup = 1
+let g:juggler_enableAtStartup = 1
+let g:acp_enableAtStartup = 0
 let g:acp_completeoptPreview = 1
 
 "command-t
@@ -153,7 +153,8 @@ let g:acp_completeoptPreview = 1
 let g:ctrlp_map = '<C-@>'
 let g:ctrlp_cmd = 'CtrlPMixed'
 let g:ctrlp_extensions = ['tag']
-let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|app\/components\/|Godeps\/|log\/)'
+"let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|app\/components\/|Godeps\/|log\/)'
+let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|Godeps\/|log\/)'
 "let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
 let g:ctrlpmatcher_debug = 0
 nnoremap <silent> <C-t> :CtrlPTag<CR>
