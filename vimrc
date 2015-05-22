@@ -294,19 +294,19 @@ au BufRead,BufNewFile *.hbs set filetype=html
 
 "language specific stuff
 "ruby
-function s:add_global_ruby_cscope()
-  if filereadable($HOME . "/.ruby.cscope") && !cscope_connection(2, $HOME . "/.ruby.cscope")
-    cscope add ~/.ruby.cscope
-  endif
-endfunction
+"function s:add_global_ruby_cscope()
+"  if filereadable($HOME . "/.ruby.cscope") && !cscope_connection(2, $HOME . "/.ruby.cscope")
+"    cscope add ~/.ruby.cscope
+"  endif
+"endfunction
 "autocmd FileType ruby,eruby call s:add_global_ruby_cscope()
 "autocmd FileType ruby,eruby set omnifunc=rubycomplete#Complete
-autocmd FileType ruby,eruby set tags=ruby.tags
+"autocmd FileType ruby,eruby set tags=ruby.tags
 autocmd FileType ruby,eruby let g:rubycomplete_buffer_loading = 1
 autocmd FileType ruby,eruby let g:rubycomplete_rails = 1
 autocmd FileType ruby,eruby let g:rubycomplete_classes_in_global = 1
 autocmd FileType ruby set iskeyword=@,48-57,_,?,!,192-255
-autocmd FileType ruby,eruby nnoremap <silent> <F12> :!find . -not -path '*vendor/bundle*' -a \( -iname '*.rb' -o -iname '*.erb' -o -iname '*.rhtml' \) \| ctags --fields=afmikKlnsStz --sort=foldcase -L- -f ruby.tags<CR>:!find . -not -path '*vendor/bundle*' -a \( -iname '*.rb' -o -iname '*.erb' -o -iname '*.rhtml' \) \| cscope -q -i - -b<CR>:silent! cs add cscope.out<CR>:cs reset<CR><CR>
+"autocmd FileType ruby,eruby nnoremap <silent> <F12> :!find . -not -path '*vendor/bundle*' -a \( -iname '*.rb' -o -iname '*.erb' -o -iname '*.rhtml' \) \| ctags --fields=afmikKlnsStz --sort=foldcase -L- -f ruby.tags<CR>:!find . -not -path '*vendor/bundle*' -a \( -iname '*.rb' -o -iname '*.erb' -o -iname '*.rhtml' \) \| cscope -q -i - -b<CR>:silent! cs add cscope.out<CR>:cs reset<CR><CR>
 
 "vim
 autocmd FileType vim call Collapse_SetRegexs('^\s*function!\?', '^\s*endfunction\s*$', '^\s*"')
@@ -314,30 +314,30 @@ autocmd FileType vim call Collapse_SetRegexs('^\s*function!\?', '^\s*endfunction
 "python
 autocmd FileType python call Collapse_SetRegexs('^\s*def\s', '', '^\s*#')
 autocmd FileType python setl ts=4 sts=4 sw=4 et
-function s:add_global_python_cscope()
-  if filereadable($HOME . "/.python.cscope") && !cscope_connection(2, $HOME . "/.python.cscope")
-    cscope add ~/.python.cscope
-  endif
-endfunction
+"function s:add_global_python_cscope()
+"  if filereadable($HOME . "/.python.cscope") && !cscope_connection(2, $HOME . "/.python.cscope")
+"    cscope add ~/.python.cscope
+"  endif
+"endfunction
 "autocmd FileType python call s:add_global_python_cscope()
-autocmd FileType python set tags=python.tags,~/.python.ctags
+"autocmd FileType python set tags=python.tags,~/.python.ctags
 autocmd FileType python set omnifunc=pythoncomplete#Complete
 "autocmd FileType python nnoremap <silent> <C-F12> :!find /usr/lib/python`python -c 'import sys; print sys.version[:3]'` -name '*.py' -perm -444\| cscope -f ~/.python.cscope -q -i - -b<CR>:cs reset<CR><CR>
-autocmd FileType python nnoremap <silent> <C-F12> :!find /usr/lib/python`python -c 'import sys; print sys.version[:3]'` -name '*.py' -perm -444\| ctags --sort=foldcase -f ~/.python.ctags -L-<CR>
-autocmd FileType python nnoremap <silent> <F12> :!find . -iname '*.py' \| ctags --sort=foldcase -L- -f python.tags<CR>:!find . -iname '*.py' \| cscope -q -i - -b<CR>:cs reset<CR><CR>
+"autocmd FileType python nnoremap <silent> <C-F12> :!find /usr/lib/python`python -c 'import sys; print sys.version[:3]'` -name '*.py' -perm -444\| ctags --sort=foldcase -f ~/.python.ctags -L-<CR>
+"autocmd FileType python nnoremap <silent> <F12> :!find . -iname '*.py' \| ctags --sort=foldcase -L- -f python.tags<CR>:!find . -iname '*.py' \| cscope -q -i - -b<CR>:cs reset<CR><CR>
 
 "coffeescript
-autocmd FileType coffee set tags=coffee.tags
-autocmd FileType coffee nnoremap <silent> <F12> :!find . -not -path '*vendor/bundle*' -a -iname '*\.coffee*' \| ctags -L- -f coffee.tags<CR><CR>
+"autocmd FileType coffee set tags=coffee.tags
+"autocmd FileType coffee nnoremap <silent> <F12> :!find . -not -path '*vendor/bundle*' -a -iname '*\.coffee*' \| ctags -L- -f coffee.tags<CR><CR>
 
 "json
 autocmd FileType json autocmd BufWritePre <buffer> %!python -m json.tool
 
 "c/c++
 autocmd FileType c setl ts=2 sts=2 sw=2 et
-autocmd FileType c set tags=c.tags
+"autocmd FileType c set tags=c.tags
 autocmd FileType c set omnifunc=ccomplete#Complete
-autocmd FileType c nnoremap <silent> <F12> :!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| ctags --sort=foldcase -L- -f c.tags<CR>:!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| cscope -q -i - -b<CR>:silent! cs add cscope.out<CR>:cs reset<CR><CR>
+"autocmd FileType c nnoremap <silent> <F12> :!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| ctags --sort=foldcase -L- -f c.tags<CR>:!find . -iname '*.c' -o -iname '*.h' -o -iname '*.cpp' \| cscope -q -i - -b<CR>:silent! cs add cscope.out<CR>:cs reset<CR><CR>
 
 "go
 "if exists("g:did_load_filetypes")
@@ -351,5 +351,5 @@ let g:go_fmt_command = "goimports"
 autocmd FileType go highlight clear ExtraWhitespace
 autocmd FileType go setl ts=2 sts=2 sw=2 noexpandtab
 "autocmd FileType go set tags=.go.tags,~/.go.tags
-autocmd FileType go set tags=.go.tags
-autocmd FileType go nnoremap <silent> <F12> :!find . -iname '*.go' -a -not -path '*/Godeps/*' \| gotags -L='-' > .go.tags <CR>:!find . -iname '*.go' -a -not -path '*/Godeps/*' \| cscope -q -i - -b<CR>:silent! cs add cscope.out<CR>:cs reset<CR><CR>
+"autocmd FileType go set tags=.go.tags
+"autocmd FileType go nnoremap <silent> <F12> :!find . -iname '*.go' -a -not -path '*/Godeps/*' \| gotags -L='-' > .go.tags <CR>:!find . -iname '*.go' -a -not -path '*/Godeps/*' \| cscope -q -i - -b<CR>:silent! cs add cscope.out<CR>:cs reset<CR><CR>
