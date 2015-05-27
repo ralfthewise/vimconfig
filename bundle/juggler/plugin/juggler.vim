@@ -14,6 +14,10 @@ call s:defineOption('g:juggler_fixupPopupMenu', 1)
 call s:defineOption('g:juggler_parseCurrentPosRegex', '\([\.:]*\)\(\w*\)$')
 call s:defineOption('g:juggler_minTokenLength', 2)
 
+call s:defineOption('g:juggler_useOmniCompleter', 0)
+call s:defineOption('g:juggler_useTagsCompleter', 1)
+call s:defineOption('g:juggler_useKeywordCompleter', 1)
+
 if g:juggler_fixupPopupMenu
   inoremap <silent> <expr> <C-j> (pumvisible() ? "\<Down>" : "\<C-j>")
   inoremap <silent> <expr> <C-k> (pumvisible() ? "\<Up>" : "\<C-k>")

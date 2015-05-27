@@ -71,7 +71,7 @@ function! juggler#Complete(findstart, base)
     endif
 
     "make sure omnifunc gets called if there is one
-    if &omnifunc != ""
+    if g:juggler_useOmniCompleter && &omnifunc != ""
       call call(&omnifunc, [a:findstart, a:base])
       "TODO: should we return the result if it's valid?  And what
       "should we do if result differs from s:cursorinfo.matchstart?

@@ -10,9 +10,13 @@ module Juggler
     include Singleton
 
     def initialize
-      @omni_completer = OmniCompleter.new
-      @ctags_completer = CtagsCompleter.new
-      @keyword_completer = KeywordCompleter.new
+      @use_omni = VIM::evaluate('g:juggler_useOmniCompleter') == 1
+      @use_tags = VIM::evaluate('g:juggler_useTagsCompleter') == 1
+      @use_keyword = VIM::evaluate('g:juggler_useKeywordCompleter') == 1
+
+      @omni_completer = OmniCompleter.new if @use_omni
+      @ctags_completer = CtagsCompleter.new if @use_tags
+      @keyword_completer = KeywordCompleter.new if @use_keyword
     end
 
     def generate_completions
@@ -21,21 +25,27 @@ module Juggler
       entries = CompletionEntries.new
 
       #omni completions
-      @omni_completer.generate_completions(cursor_info['token']) do |entry|
-        entry.score = scorer.score(entry)
-        entries.push(entry)
+      if @use_omni
+        @omni_completer.generate_completions(cursor_info['token']) do |entry|
+          entry.score = scorer.score(entry)
+          entries.push(entry)
+        end
       end
 
       #ctags completions
-      @ctags_completer.generate_completions(cursor_info['token']) do |entry|
-        entry.score = scorer.score(entry)
-        entries.push(entry)
+      if @use_tags
+        @ctags_completer.generate_completions(cursor_info['token']) do |entry|
+          entry.score = scorer.score(entry)
+          entries.push(entry)
+        end
       end
 
       #keywords completions
-      @keyword_completer.generate_completions(cursor_info['token']) do |entry|
-        entry.score = scorer.score(entry)
-        entries.push(entry)
+      if @use_keyword
+        @keyword_completer.generate_completions(cursor_info['token']) do |entry|
+          entry.score = scorer.score(entry)
+          entries.push(entry)
+        end
       end
 
       entries.process do |vim_arr|
