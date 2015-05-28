@@ -179,7 +179,11 @@ function! s:GetKeywords(pat)
 endfunction
 
 function! s:KeywordTags(pat)
-  exe 'ilist ' . a:pat
+  "exe 'ilist! ' . a:pat
+
+  let buf = bufnr('')
+  exe 'bufdo ilist! ' . a:pat
+  exe 'b ' . buf
 endfunction
 
 function! s:LoadRuby()
