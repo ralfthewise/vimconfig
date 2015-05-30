@@ -182,7 +182,10 @@ function! s:KeywordTags(pat)
   "exe 'ilist! ' . a:pat
 
   let buf = bufnr('')
+  let save_eventignore = &eventignore
+  set eventignore=all
   exe 'bufdo ilist! ' . a:pat
+  let &eventignore = save_eventignore
   exe 'b ' . buf
 endfunction
 
