@@ -9,7 +9,7 @@ module Juggler
     def generate_completions(base)
       return if base.nil? || base.empty?
 
-      base_regex = Regexp.new(generate_scan_pattern(base), Regexp::IGNORECASE)
+      base_regex = Regexp.new(Juggler.generate_scan_base_pattern(base), Regexp::IGNORECASE)
       keyword_output = VIM::evaluate("s:GetKeywords('/\\c#{Juggler.escape_vim_singlequote_string(generate_keyword_pattern(base))}')")
       keyword_output.split("\n").each do |line|
         if match = @@keyword_regexp.match(line)
@@ -24,10 +24,6 @@ module Juggler
     end
 
     protected
-    def generate_scan_pattern(base)
-      return '\b\w*' + base.scan(/./).join('\w*') + '\w*\b'
-    end
-
     def generate_keyword_pattern(base)
       return base.scan(/./).join('.*')
     end

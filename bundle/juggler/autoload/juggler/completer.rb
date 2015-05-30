@@ -1,6 +1,7 @@
 require 'singleton'
 require_relative 'omni_completer'
 require_relative 'ctags_completer'
+require_relative 'cscope_completer'
 require_relative 'keyword_completer'
 require_relative 'entry_scorer'
 require_relative 'completion_entries'
@@ -12,6 +13,7 @@ module Juggler
     def initialize
       @omni_completer = OmniCompleter.new
       @ctags_completer = CtagsCompleter.new
+      @cscope_completer = CscopeCompleter.new
       @keyword_completer = KeywordCompleter.new
     end
 
@@ -28,6 +30,12 @@ module Juggler
 
       #ctags completions
       @ctags_completer.generate_completions(cursor_info['token']) do |entry|
+        entry.score = scorer.score(entry)
+        entries.push(entry)
+      end
+
+      #cscope completions
+      @cscope_completer.generate_completions(cursor_info['token']) do |entry|
         entry.score = scorer.score(entry)
         entries.push(entry)
       end

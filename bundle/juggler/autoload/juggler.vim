@@ -182,6 +182,20 @@ function! s:KeywordTags(pat)
   exe 'ilist ' . a:pat
 endfunction
 
+function! s:GetCscope(pat)
+  let save_cscopequickfix = &cscopequickfix
+  set cscopequickfix=
+  redir => cscope_output
+  silent! call s:CscopeTags(a:pat)
+  redir END
+  let &cscopequickfix = save_cscopequickfix
+  return cscope_output
+endfunction
+
+function! s:CscopeTags(pat)
+  exe 'cs find e ' . a:pat
+endfunction
+
 function! s:LoadRuby()
 ruby << RUBYEOF
   plugin_path = VIM::evaluate('s:plugin_path')

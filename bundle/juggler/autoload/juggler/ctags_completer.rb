@@ -6,7 +6,7 @@ module Juggler
     #  #  pri kind tag               file
 
     #example match:
-    #   2 F   fieldradarService ./test-ui/spec/1.2/incidents/incidents/controllers/exposed-controller.spec.coffee
+    # > 2 F   fieldradarService ./test-ui/spec/1.2/incidents/incidents/controllers/exposed-controller.spec.coffee
     #                line:40 language:coffee
     #                radarService: $radarService
 

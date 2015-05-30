@@ -2,7 +2,9 @@ module Juggler
   class CompletionEntry
     attr_accessor :source, :tag, :index, :pri, :kind, :file, :info, :signature, :line, :excmd, :score
 
-    def initialize(source:, tag: nil, line: nil, index: nil, pri: nil, kind: nil, file: nil, signature: nil, info: nil)
+    def initialize(source: nil, tag: nil, line: nil, index: nil, pri: nil, kind: nil, file: nil, signature: nil, info: nil)
+      raise Exception.new(':source is a required') if source.nil?
+
       self.source = source
       self.tag = tag
       self.index = index

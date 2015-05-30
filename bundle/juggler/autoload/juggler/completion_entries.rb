@@ -19,7 +19,7 @@ module Juggler
         result
       end
 
-      vim_entries = self.entries.map {|e| e.to_vim_dict}
+      vim_entries = self.entries[0..99].map {|e| e.to_vim_dict}
       #TODO: yield in batches
       yield(vim_entries.join(','))
     end
