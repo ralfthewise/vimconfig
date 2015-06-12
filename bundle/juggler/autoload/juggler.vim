@@ -158,17 +158,7 @@ function! s:GetJugglerCompletions()
 endfunction
 
 function! s:GetTags(pat)
-  redir => ctag_output
-  silent! call s:OutputTags(a:pat)
-  redir END
-  return ctag_output
-endfunction
-
-function! s:OutputTags(pat)
-  "would like to do: taglist(a:pat)
-  "but taglist() doesn't allow for case-insensitive matching
-  "TODO: look into using '\c' in the search pattern for case insensitivity
-  exe 'ts ' . a:pat
+  return taglist(a:pat)
 endfunction
 
 function! s:GetKeywords(pat)

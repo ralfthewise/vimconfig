@@ -16,7 +16,20 @@ module Juggler
     end
 
     def to_vim_dict
-      return "{'word':'%s','menu':'%s','kind':'%s','info':'%s - %s'}" % [tag, signature, kind, file, info].map{|x| Juggler.escape_vim_singlequote_string(x)}
+      return "{'word':'%s','menu':'%s','kind':'%s','info':'%s'}" % [tag, generate_menu_info, kind, generate_preview_info].map{|x| Juggler.escape_vim_singlequote_string(x)}
+    end
+
+    def to_s
+      return to_vim_dict
+    end
+
+    protected
+    def generate_menu_info
+      signature || excmd
+    end
+
+    def generate_preview_info
+      "#{file} - #{info}"
     end
   end
 end
