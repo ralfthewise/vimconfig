@@ -1,5 +1,8 @@
 module Juggler
   class CompletionEntry
+    #to match lines like: /^    foo = (a) ->$/
+    @@excmd_regexp = /^\/\^\s*(.*\S)\s*\$\/$/
+
     attr_accessor :source, :tag, :index, :pri, :kind, :file, :info, :signature, :line, :excmd, :score
 
     def initialize(source: nil, tag: nil, line: nil, index: nil, pri: nil, kind: nil, file: nil, signature: nil, info: nil)
@@ -25,7 +28,16 @@ module Juggler
 
     protected
     def generate_menu_info
-      signature || excmd
+      return signature if signature
+
+      if excmd
+        if match = @@excmd_regexp.match(excmd)
+          return match[1].rstrip
+        end
+        return excmd
+      end
+
+      return ''
     end
 
     def generate_preview_info

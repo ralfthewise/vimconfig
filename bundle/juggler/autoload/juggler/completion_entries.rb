@@ -1,5 +1,7 @@
 module Juggler
   class CompletionEntries
+    @@max_entries_to_return = 100
+
     attr_accessor :entries
 
     def initialize
@@ -19,7 +21,8 @@ module Juggler
         result
       end
 
-      vim_entries = self.entries[0..99].map {|e| e.to_vim_dict}
+      vim_entries = self.entries[0..(@@max_entries_to_return - 1)].map {|e| e.to_vim_dict}
+
       #TODO: yield in batches
       yield(vim_entries.join(','))
     end
