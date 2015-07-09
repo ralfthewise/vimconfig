@@ -26,7 +26,26 @@ function juggler#Enable()
   nnoremap <silent> R R<C-r>=juggler#UpdatePopup()<CR>
   inoremap <silent> <expr> <C-h> <SID>OnBackspace("\<C-h>")
   inoremap <silent> <expr> <BS> <SID>OnBackspace("\<BS>")
-  nmap <silent> <F12> :call <SID>UpdateTags()<CR>:cs reset<CR><CR>:redraw!<CR>:redrawstatus!<CR>
+
+  let s:indexesused = (g:juggler_useTagsCompleter && g:juggler_manageTags) || (g:juggler_useCscopeCompleter && g:juggler_manageCscope)
+  if s:indexesused
+    let s:indexespath = '' "will get updated by init_indexes call below
+    nmap <silent> <F12> :call <SID>UpdateIndexes()<CR>:cs reset<CR><CR>:redraw!<CR>:redrawstatus!<CR>
+    ruby Juggler::Completer.instance.init_indexes
+
+    if g:juggler_useTagsCompleter && g:juggler_manageTags
+      execute 'set tags=' . s:indexespath . '/tags'
+    endif
+
+    if g:juggler_useCscopeCompleter && g:juggler_manageCscope
+      cs kill -1
+      if filereadable(s:indexespath . '/cscope.out')
+        execute 'silent cscope add ' . s:indexespath . '/cscope.out'
+      else
+        call s:UpdateCscope()
+      endif
+    endif
+  endif
 
   "set these initially so we can always count on them being set
   let s:cursorinfo = {'linenum': -1, 'cursorindex': -1}
@@ -40,15 +59,24 @@ function! s:OnBackspace(bsSeq)
   return a:bsSeq
 endfunction
 
-function! s:UpdateTags()
-  silent !find . -type f -not -name 'cscope.*' -not -name 'tags' -not -path '*.git*' -not -path '*/vendor/*' -not -path '*/Godeps/*' -not -path '*/node_modules/*' -not -path '*/tmp/*' -not -path '*/dist/*' -exec grep -Il . {} ';' | ctags --fields=afmikKlnsStz --sort=foldcase -L- -f tags
-  silent !find . -type f -not -name 'cscope.*' -not -name 'tags' -not -path '*.git*' -not -path '*/vendor/*' -not -path '*/Godeps/*' -not -path '*/node_modules/*' -not -path '*/tmp/*' -not -path '*/dist/*' -exec grep -Il . {} ';' | cscope -q -i - -b -U
-  if cscope_connection()
-    cscope reset
-  else
-    cscope add cscope.out
-  endif
+function! s:UpdateIndexes()
+  call s:UpdateTags()
+  call s:UpdateCscope()
   return ''
+endfunction
+
+function! s:UpdateTags()
+  execute 'silent !find . -type f -not -name ''cscope.*'' -not -name ''tags'' -not -path ''*.git*'' -not -path ''*/vendor/*'' -not -path ''*/Godeps/*'' -not -path ''*/node_modules/*'' -not -path ''*/tmp/*'' -not -path ''*/dist/*'' -exec grep -Il . {} '';'' | ctags --fields=afmikKlnsStz --sort=foldcase -L- -f ''' . s:indexespath . '/tags'''
+endfunction
+
+function! s:UpdateCscope()
+  let cwd = getcwd()
+  execute 'silent !cd ''' . s:indexespath . ''' && find ''' . cwd . ''' -type f -not -name ''cscope.*'' -not -name ''tags'' -not -path ''*.git*'' -not -path ''*/vendor/*'' -not -path ''*/Godeps/*'' -not -path ''*/node_modules/*'' -not -path ''*/tmp/*'' -not -path ''*/dist/*'' -exec grep -Il . {} '';'' | cscope -q -i - -b -U'
+  if cscope_connection()
+    silent cscope reset
+  else
+    execute 'silent cscope add ' . s:indexespath . '/cscope.out'
+  endif
 endfunction
 
 function! s:UserCompleted(resetaction)

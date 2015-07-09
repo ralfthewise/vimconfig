@@ -1,4 +1,6 @@
+require 'fileutils'
 require 'singleton'
+require 'digest/sha1'
 require_relative 'omni_completer'
 require_relative 'ctags_completer'
 require_relative 'cscope_completer'
@@ -20,6 +22,18 @@ module Juggler
       @ctags_completer = CtagsCompleter.new if @use_tags
       @cscope_completer = CscopeCompleter.new if @use_cscope
       @keyword_completer = KeywordCompleter.new if @use_keyword
+
+      @indexes_path = nil
+    end
+
+    def init_indexes
+      if @indexes_path.nil?
+        cwd = VIM::evaluate('getcwd()')
+        digest = Digest::SHA1.hexdigest(cwd)
+        @indexes_path = File.join(Dir.home, '.vim_indexes', digest)
+        FileUtils.mkdir_p(@indexes_path)
+        VIM::command("let s:indexespath = '#{Juggler.escape_vim_singlequote_string(@indexes_path)}'")
+      end
     end
 
     def generate_completions

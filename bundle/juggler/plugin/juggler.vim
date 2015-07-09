@@ -16,7 +16,9 @@ call s:defineOption('g:juggler_minTokenLength', 2)
 
 call s:defineOption('g:juggler_useOmniCompleter', 0)
 call s:defineOption('g:juggler_useTagsCompleter', 1)
+call s:defineOption('g:juggler_manageTags', 1)
 call s:defineOption('g:juggler_useCscopeCompleter', 1)
+call s:defineOption('g:juggler_manageCscope', 1)
 call s:defineOption('g:juggler_useKeywordCompleter', 1)
 
 if g:juggler_fixupPopupMenu
