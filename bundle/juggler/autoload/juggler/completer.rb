@@ -1,6 +1,7 @@
 require 'fileutils'
 require 'singleton'
 require 'digest/sha1'
+require_relative 'cscope_service'
 require_relative 'omni_completer'
 require_relative 'ctags_completer'
 require_relative 'cscope_completer'
@@ -15,25 +16,31 @@ module Juggler
     def initialize
       @use_omni = VIM::evaluate('g:juggler_useOmniCompleter') == 1
       @use_tags = VIM::evaluate('g:juggler_useTagsCompleter') == 1
+      @manage_tags = VIM::evaluate('g:juggler_manageTags') == 1
       @use_cscope = VIM::evaluate('g:juggler_useCscopeCompleter') == 1
+      @manage_cscope = VIM::evaluate('g:juggler_manageCscope') == 1
       @use_keyword = VIM::evaluate('g:juggler_useKeywordCompleter') == 1
 
-      @omni_completer = OmniCompleter.new if @use_omni
-      @ctags_completer = CtagsCompleter.new if @use_tags
-      @cscope_completer = CscopeCompleter.new if @use_cscope
-      @keyword_completer = KeywordCompleter.new if @use_keyword
-
-      @indexes_path = nil
+      init_indexes
+      init_completers
     end
 
     def init_indexes
-      if @indexes_path.nil?
+      if ((@use_tags && @manage_tags) || (@use_cscope && @manage_cscope))
         cwd = VIM::evaluate('getcwd()')
         digest = Digest::SHA1.hexdigest(cwd)
         @indexes_path = File.join(Dir.home, '.vim_indexes', digest)
         FileUtils.mkdir_p(@indexes_path)
         VIM::command("let s:indexespath = '#{Juggler.escape_vim_singlequote_string(@indexes_path)}'")
+        @cscope_service = CscopeService.new(File.join(@indexes_path, 'cscope.out')) if (@use_cscope && @manage_cscope)
       end
+    end
+
+    def init_completers
+      @omni_completer = OmniCompleter.new if @use_omni
+      @ctags_completer = CtagsCompleter.new if @use_tags
+      @cscope_completer = CscopeCompleter.new(@cscope_service) if @use_cscope
+      @keyword_completer = KeywordCompleter.new if @use_keyword
     end
 
     def generate_completions

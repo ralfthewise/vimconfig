@@ -27,18 +27,20 @@ function juggler#Enable()
   inoremap <silent> <expr> <C-h> <SID>OnBackspace("\<C-h>")
   inoremap <silent> <expr> <BS> <SID>OnBackspace("\<BS>")
 
+  "initialize our completer singleton
+  let s:indexespath = '' "will get updated by Juggler::Completer
+  ruby Juggler::Completer.instance
+
   let s:indexesused = (g:juggler_useTagsCompleter && g:juggler_manageTags) || (g:juggler_useCscopeCompleter && g:juggler_manageCscope)
   if s:indexesused
-    let s:indexespath = '' "will get updated by init_indexes call below
     nmap <silent> <F12> :call <SID>UpdateIndexes()<CR>:cs reset<CR><CR>:redraw!<CR>:redrawstatus!<CR>
-    ruby Juggler::Completer.instance.init_indexes
 
     if g:juggler_useTagsCompleter && g:juggler_manageTags
       execute 'set tags=' . s:indexespath . '/tags'
     endif
 
     if g:juggler_useCscopeCompleter && g:juggler_manageCscope
-      cs kill -1
+      silent cscope kill -1
       if filereadable(s:indexespath . '/cscope.out')
         execute 'silent cscope add ' . s:indexespath . '/cscope.out'
       else
@@ -71,7 +73,7 @@ endfunction
 
 function! s:UpdateCscope()
   let cwd = getcwd()
-  execute 'silent !cd ''' . s:indexespath . ''' && find ''' . cwd . ''' -type f -not -name ''cscope.*'' -not -name ''tags'' -not -path ''*.git*'' -not -path ''*/vendor/*'' -not -path ''*/Godeps/*'' -not -path ''*/node_modules/*'' -not -path ''*/tmp/*'' -not -path ''*/dist/*'' -exec grep -Il . {} '';'' | cscope -q -i - -b -U'
+  execute 'silent !cd ''' . s:indexespath . ''' && find ''' . cwd . ''' -type f -not -name ''cscope.*'' -not -name ''tags'' -not -path ''*.git*'' -not -path ''*/vendor/*'' -not -path ''*/Godeps/*'' -not -path ''*/node_modules/*'' -not -path ''*/tmp/*'' -not -path ''*/dist/*'' -exec grep -Il . {} '';'' | sed ''s/^\(.*[ \t].*\)$/"\1"/'' | cscope -q -i - -b -U'
   if cscope_connection()
     silent cscope reset
   else
