@@ -12,7 +12,7 @@ module Juggler
     def query(pattern)
       result = []
       IO.popen("cscope -dC -L -f'#{@cscope_db}' -6'#{pattern}'", 'w+') do |sp|
-        sp.read.split("\n").each_with_index do |line,index|
+        Juggler.clean_utf8(sp.read).split("\n").each_with_index do |line,index|
           if match = @@cscope_line_regexp.match(line)
             result << {index: index, file: match[1], kind: match[2], line: match[3], tag_line: match[4]}
           end

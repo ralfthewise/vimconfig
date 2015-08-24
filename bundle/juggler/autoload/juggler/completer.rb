@@ -27,6 +27,7 @@ module Juggler
 
     def init_indexes
       if ((@use_tags && @manage_tags) || (@use_cscope && @manage_cscope))
+        #TODO: don't use getcwd() but instead be smart about where the project root is
         cwd = VIM::evaluate('getcwd()')
         digest = Digest::SHA1.hexdigest(cwd)
         @indexes_path = File.join(Dir.home, '.vim_indexes', digest)
