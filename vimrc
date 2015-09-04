@@ -123,11 +123,16 @@ vnoremap <Space> zf
 autocmd BufReadPost * :CollapseAll
 "let SimpleFold_use_subfolds = 0
 
-" The Silver Searcher
+" Searching in files
+" Use the Silver Searcher if possible
 if executable('ag')
   " Use ag over grep
   set grepprg=ag\ --nogroup\ --nocolor\ --smart-case
 endif
+" Define a command to find text in files
+command -nargs=+ -bar FindInFiles silent! grep! <args>|cwindow|redraw!
+nmap <F3> :FindInFiles<Space>
+nmap <leader><F3> :FindInFiles <C-R>=expand("<cword>")<CR><CR>
 
 "code navigation
 "find where method under cursor is called
@@ -142,6 +147,7 @@ nmap <C-b> :cstag <C-R>=expand("<cword>")<CR><CR>
 "acp
 let g:juggler_enableAtStartup = 1
 let g:juggler_useCscopeCompleter = 1
+let g:juggler_useOmniCompleter = 0
 let g:acp_enableAtStartup = 0
 let g:acp_completeoptPreview = 1
 
@@ -151,8 +157,9 @@ let g:acp_completeoptPreview = 1
 "let g:CommandTMatchWindowAtTop = 1
 
 "ctrlp
+let g:ctrlp_working_path_mode = '0'
 let g:ctrlp_map = '<C-@>'
-let g:ctrlp_cmd = 'CtrlPMixed'
+"let g:ctrlp_cmd = 'CtrlPMixed' "careful here, when searching MRU it is across all sessions/historical MRUs
 let g:ctrlp_extensions = ['tag']
 "let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|app\/components\/|Godeps\/|log\/)'
 let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|Godeps\/|log\/)'
