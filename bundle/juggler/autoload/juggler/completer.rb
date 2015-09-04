@@ -51,36 +51,45 @@ module Juggler
 
       #omni completions
       if @use_omni
+        start = Time.now
         @omni_completer.generate_completions(cursor_info['token']) do |entry|
           entry.score = scorer.score(entry)
           entries.push(entry)
         end
+        Juggler.logger.debug { "omni completions took #{Time.now - start} seconds" }
       end
 
       #ctags completions
       if @use_tags
+        start = Time.now
         @ctags_completer.generate_completions(cursor_info['token']) do |entry|
           entry.score = scorer.score(entry)
           entries.push(entry)
         end
+        Juggler.logger.debug { "ctags completions took #{Time.now - start} seconds" }
       end
 
       #cscope completions
       if @use_cscope
+        start = Time.now
         @cscope_completer.generate_completions(cursor_info['token']) do |entry|
           entry.score = scorer.score(entry)
           entries.push(entry)
         end
+        Juggler.logger.debug { "cscope completions took #{Time.now - start} seconds" }
       end
 
       #keywords completions
       if @use_keyword
+        start = Time.now
         @keyword_completer.generate_completions(cursor_info['token']) do |entry|
           entry.score = scorer.score(entry)
           entries.push(entry)
         end
+        Juggler.logger.debug { "keywords completions took #{Time.now - start} seconds" }
       end
 
+      Juggler.logger.info { "#{entries.count} entries found" }
       entries.process do |vim_arr|
         VIM::command("call extend(s:juggler_completions, [#{vim_arr}])")
       end

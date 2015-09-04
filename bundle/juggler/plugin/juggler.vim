@@ -10,6 +10,7 @@ function s:defineOption(name, default)
 endfunction
 
 call s:defineOption('g:juggler_enableAtStartup', 1)
+call s:defineOption('g:juggler_logLevel', 'error')
 call s:defineOption('g:juggler_fixupPopupMenu', 1)
 call s:defineOption('g:juggler_parseCurrentPosRegex', '\([\.:]*\)\(\w*\)$')
 call s:defineOption('g:juggler_minTokenLength', 2)

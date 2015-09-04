@@ -8,11 +8,16 @@ module Juggler
       self.entries = []
     end
 
+    def count
+      return self.entries.length
+    end
+
     def push(entry)
       self.entries.push(entry)
     end
 
     def process
+      start = Time.now
       self.entries.sort! do |a,b|
         result = b.score - a.score
         if !a.tag.nil? && !b.tag.nil?
@@ -20,6 +25,7 @@ module Juggler
         end
         result
       end
+      Juggler.logger.debug { "sorting completion entries took #{Time.now - start} seconds" }
 
       vim_entries = self.entries[0..(@@max_entries_to_return - 1)].map {|e| e.to_vim_dict}
 
