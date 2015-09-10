@@ -46,50 +46,59 @@ module Juggler
 
     def generate_completions
       cursor_info = VIM::evaluate('s:cursorinfo')
+      Juggler.logger.debug("Generating completions for: #{cursor_info['token']}")
       scorer = EntryScorer.new(cursor_info['token'])
       entries = CompletionEntries.new
 
       #omni completions
       if @use_omni
         start = Time.now
+        count = 0
         @omni_completer.generate_completions(cursor_info['token']) do |entry|
           entry.score = scorer.score(entry)
           entries.push(entry)
+          count += 1
         end
-        Juggler.logger.debug { "omni completions took #{Time.now - start} seconds" }
+        Juggler.logger.debug { "omni completions took #{Time.now - start} seconds and found #{count} entries" }
       end
 
       #ctags completions
       if @use_tags
         start = Time.now
+        count = 0
         @ctags_completer.generate_completions(cursor_info['token']) do |entry|
           entry.score = scorer.score(entry)
           entries.push(entry)
+          count += 1
         end
-        Juggler.logger.debug { "ctags completions took #{Time.now - start} seconds" }
+        Juggler.logger.debug { "ctags completions took #{Time.now - start} seconds and found #{count} entries" }
       end
 
       #cscope completions
       if @use_cscope
         start = Time.now
+        count = 0
         @cscope_completer.generate_completions(cursor_info['token']) do |entry|
           entry.score = scorer.score(entry)
           entries.push(entry)
+          count += 1
         end
-        Juggler.logger.debug { "cscope completions took #{Time.now - start} seconds" }
+        Juggler.logger.debug { "cscope completions took #{Time.now - start} seconds and found #{count} entries" }
       end
 
       #keywords completions
       if @use_keyword
         start = Time.now
+        count = 0
         @keyword_completer.generate_completions(cursor_info['token']) do |entry|
           entry.score = scorer.score(entry)
           entries.push(entry)
+          count += 1
         end
-        Juggler.logger.debug { "keywords completions took #{Time.now - start} seconds" }
+        Juggler.logger.debug { "keywords completions took #{Time.now - start} seconds and found #{count} entries" }
       end
 
-      Juggler.logger.info { "#{entries.count} entries found" }
+      Juggler.logger.info { "#{entries.count} total entries found" }
       entries.process do |vim_arr|
         VIM::command("call extend(s:juggler_completions, [#{vim_arr}])")
       end

@@ -11,7 +11,7 @@ module Juggler
   end
 
   def self.generate_scan_base_pattern(base)
-    return '\b' + base.scan(/./).join('\w*') + '\w*\b' if base.length <= 2
+    return base.scan(/./).join('\w*') if base.length <= 2
     return '\b\w*' + base.scan(/./).join('\w*') + '\w*\b'
   end
 

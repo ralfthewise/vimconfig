@@ -68,7 +68,8 @@ function! s:UpdateIndexes()
 endfunction
 
 function! s:UpdateTags()
-  execute 'silent !find . -type f -not -name ''cscope.*'' -not -name ''tags'' -not -path ''*.git*'' -not -path ''*/vendor/*'' -not -path ''*/Godeps/*'' -not -path ''*/node_modules/*'' -not -path ''*/tmp/*'' -not -path ''*/dist/*'' -not -path ''*/log/*'' -not -path ''*/bower_components/*'' -not -path ''*/test-ui/reports/*'' -exec grep -Il . {} '';'' | ctags --fields=afmikKlnsStz --sort=foldcase -L- -f ''' . s:indexespath . '/tags'''
+  let cwd = getcwd()
+  execute 'silent !cd ''' . s:indexespath . ''' && find ''' . cwd . ''' -type f -not -name ''cscope.*'' -not -name ''tags'' -not -path ''*.git*'' -not -path ''*/vendor/*'' -not -path ''*/Godeps/*'' -not -path ''*/node_modules/*'' -not -path ''*/tmp/*'' -not -path ''*/dist/*'' -not -path ''*/log/*'' -not -path ''*/bower_components/*'' -not -path ''*/test-ui/reports/*'' -exec grep -Il . {} '';'' | ctags --fields=afmikKlnsStz --sort=foldcase -L- -f tags'
 endfunction
 
 function! s:UpdateCscope()
