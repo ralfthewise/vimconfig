@@ -31,7 +31,7 @@ function juggler#Enable()
   let s:indexespath = '' "will get updated by Juggler::Completer
   ruby Juggler::Completer.instance
 
-  let s:indexesused = (g:juggler_useTagsCompleter && g:juggler_manageTags) || (g:juggler_useCscopeCompleter && g:juggler_manageCscope)
+  let s:indexesused = (s:indexespath != '')
   if s:indexesused
     nmap <silent> <F12> :call <SID>UpdateIndexes()<CR>:cs reset<CR><CR>:redraw!<CR>:redrawstatus!<CR>
 
@@ -69,13 +69,13 @@ endfunction
 
 function! s:UpdateTags()
   let cwd = getcwd()
-  execute 'silent !cd ''' . s:indexespath . ''' && find ''' . cwd . ''' -type f -not -name ''cscope.*'' -not -name ''tags'' -not -path ''*.git*'' -not -path ''*/vendor/*'' -not -path ''*/Godeps/*'' -not -path ''*/node_modules/*'' -not -path ''*/tmp/*'' -not -path ''*/dist/*'' -not -path ''*/log/*'' -not -path ''*/bower_components/*'' -not -path ''*/test-ui/reports/*'' -exec grep -Il . {} '';'' | ctags --fields=afmikKlnsStz --sort=foldcase -L- -f tags'
+  execute 'silent !cd ''' . s:indexespath . ''' && find ''' . cwd . ''' -type f -not -name ''cscope.*'' -not -name ''tags'' -not -path ''* *'' -not -path ''*.git*'' -not -path ''*/vendor/*'' -not -path ''*/Godeps/*'' -not -path ''*/node_modules/*'' -not -path ''*/tmp/*'' -not -path ''*/dist/*'' -not -path ''*/log/*'' -not -path ''*/bower_components/*'' -not -path ''*/test-ui/reports/*'' -exec grep -Il . {} '';'' | ctags --fields=afmikKlnsStz --sort=foldcase -L- -f tags'
 endfunction
 
 function! s:UpdateCscope()
   "FYI cscope has a bug where filenames with a space in them are broken: http://sourceforge.net/p/cscope/bugs/282/
   let cwd = getcwd()
-  execute 'silent !cd ''' . s:indexespath . ''' && find ''' . cwd . ''' -type f -not -name ''cscope.*'' -not -name ''tags'' -not -path ''*.git*'' -not -path ''*/vendor/*'' -not -path ''*/Godeps/*'' -not -path ''*/node_modules/*'' -not -path ''*/tmp/*'' -not -path ''*/dist/*'' -not -path ''*/log/*'' -exec grep -Il . {} '';'' | sed ''s/^\(.*[ \t].*\)$/"\1"/'' | cscope -q -i - -b -U'
+  execute 'silent !cd ''' . s:indexespath . ''' && find ''' . cwd . ''' -type f -not -name ''cscope.*'' -not -name ''tags'' -not -path ''* *'' -not -path ''*.git*'' -not -path ''*/vendor/*'' -not -path ''*/Godeps/*'' -not -path ''*/node_modules/*'' -not -path ''*/tmp/*'' -not -path ''*/dist/*'' -not -path ''*/log/*'' -exec grep -Il . {} '';'' | sed ''s/^\(.*[ \t].*\)$/"\1"/'' | cscope -q -i - -b -U'
   if cscope_connection()
     silent cscope reset
   else

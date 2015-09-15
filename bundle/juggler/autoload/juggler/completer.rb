@@ -27,9 +27,13 @@ module Juggler
 
     def init_indexes
       if ((@use_tags && @manage_tags) || (@use_cscope && @manage_cscope))
-        #TODO: don't use getcwd() but instead be smart about where the project root is
-        cwd = VIM::evaluate('getcwd()')
-        digest = Digest::SHA1.hexdigest(cwd)
+        project_dir = determine_project_dir
+        if project_dir.nil?
+          @use_tags = @manage_tags = @use_cscope = @manage_cscope = false
+          return
+        end
+
+        digest = Digest::SHA1.hexdigest(project_dir)
         @indexes_path = File.join(Dir.home, '.vim_indexes', digest)
         FileUtils.mkdir_p(@indexes_path)
         VIM::command("let s:indexespath = '#{Juggler.escape_vim_singlequote_string(@indexes_path)}'")
@@ -102,6 +106,35 @@ module Juggler
       entries.process do |vim_arr|
         VIM::command("call extend(s:juggler_completions, [#{vim_arr}])")
       end
+    end
+
+    protected
+    def determine_project_dir
+      cwd = VIM::evaluate('getcwd()')
+      buf = File.absolute_path(VIM::evaluate('bufname("%")'))
+      buf_wd = File.expand_path('..', buf)
+      result = walk_tree_looking_for_project(cwd)
+      result = walk_tree_looking_for_project(buf_wd) if result.nil?
+      Dir.chdir(cwd)
+      return result
+    end
+
+    def walk_tree_looking_for_project(cwd)
+      #walk up the tree until we find a VCS entry
+      while valid_project_dir?(cwd)
+        Dir.chdir(cwd)
+        if Dir.glob(['.git']).length > 0
+          return cwd
+        end
+        cwd = File.expand_path('..')
+      end
+      return nil
+    end
+
+    def valid_project_dir?(d)
+      return false if d == Dir.home
+      return false if d == '/'
+      return true
     end
   end
 end
