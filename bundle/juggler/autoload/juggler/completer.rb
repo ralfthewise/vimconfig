@@ -60,7 +60,7 @@ module Juggler
         count = 0
         @omni_completer.generate_completions(cursor_info['token']) do |entry|
           entry.score = scorer.score(entry)
-          entries.push(entry)
+          entries.add(entry)
           count += 1
         end
         Juggler.logger.debug { "omni completions took #{Time.now - start} seconds and found #{count} entries" }
@@ -72,7 +72,7 @@ module Juggler
         count = 0
         @ctags_completer.generate_completions(cursor_info['token']) do |entry|
           entry.score = scorer.score(entry)
-          entries.push(entry)
+          entries.add(entry)
           count += 1
         end
         Juggler.logger.debug { "ctags completions took #{Time.now - start} seconds and found #{count} entries" }
@@ -84,7 +84,7 @@ module Juggler
         count = 0
         @cscope_completer.generate_completions(cursor_info['token']) do |entry|
           entry.score = scorer.score(entry)
-          entries.push(entry)
+          entries.add(entry)
           count += 1
         end
         Juggler.logger.debug { "cscope completions took #{Time.now - start} seconds and found #{count} entries" }
@@ -96,7 +96,7 @@ module Juggler
         count = 0
         @keyword_completer.generate_completions(cursor_info['token']) do |entry|
           entry.score = scorer.score(entry)
-          entries.push(entry)
+          entries.add(entry)
           count += 1
         end
         Juggler.logger.debug { "keywords completions took #{Time.now - start} seconds and found #{count} entries" }

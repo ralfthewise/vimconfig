@@ -1,5 +1,7 @@
 module Juggler
   class CompletionEntry
+    @@max_menu_info_length = 64
+
     #to match lines like: /^    foo = (a) ->$/
     @@excmd_regexp = /^\/\^\s*(.*\S)\s*\$\/$/
 
@@ -19,7 +21,7 @@ module Juggler
     end
 
     def to_vim_dict
-      return "{'word':'%s','menu':'%s','kind':'%s','info':'%s'}" % [tag, generate_menu_info, kind, generate_preview_info].map{|x| Juggler.escape_vim_singlequote_string(x)}
+      return "{'word':'%s  ','menu':'%s','kind':'%s  ','info':'%s'}" % [tag, generate_menu_info, kind, generate_preview_info].map{|x| Juggler.escape_vim_singlequote_string(x)}
     end
 
     def to_s
@@ -28,16 +30,18 @@ module Juggler
 
     protected
     def generate_menu_info
-      return signature if signature
+      result = signature
 
-      if excmd
+      if !result && excmd
         if match = @@excmd_regexp.match(excmd)
-          return match[1].rstrip
+          result = match[1].rstrip
+        else
+          result = excmd
         end
-        return excmd
       end
 
-      return ''
+      result = '' unless result
+      return result[0..@@max_menu_info_length]
     end
 
     def generate_preview_info

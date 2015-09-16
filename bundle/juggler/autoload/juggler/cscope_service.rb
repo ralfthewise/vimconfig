@@ -10,11 +10,14 @@ module Juggler
     end
 
     def query(pattern)
+      pattern = generate_cscope_pattern(pattern)
+
       result = []
       IO.popen("cscope -dC -L -f'#{@cscope_db}' -6'#{pattern}'", 'w+') do |sp|
         Juggler.clean_utf8(sp.read).split("\n").each_with_index do |line,index|
           if match = @@cscope_line_regexp.match(line)
-            result << {index: index, file: match[1], kind: match[2], line: match[3], tag_line: match[4]}
+            kind = (match[2] == '<unknown>' ? nil : match[2])
+            result << {index: index, file: match[1], kind: kind, line: match[3], tag_line: match[4]}
           end
         end
       end
@@ -31,6 +34,13 @@ module Juggler
       #  sp.write("6.*token.*\n");
       #  puts sp.readpartial(1024)
       #end
+    end
+
+    #cscope egrep is pretty bad - very few character classes
+    def generate_cscope_pattern(base)
+      return "^(.* )?#{base}" if base.length <= 2
+      return "^(.* )?#{base}"
+      #return '^(.* )?p[a-zA-Z0-9]*a'
     end
   end
 end
