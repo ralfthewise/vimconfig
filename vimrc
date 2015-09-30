@@ -26,6 +26,7 @@ set background=dark "use colors that look good on a dark background
 colorscheme xoria256 "use xoria256 colorscheme
 "colorscheme mustang "use mustang colorscheme
 set modelines=2 "only look at the top 2 lines to check for modelines
+set laststatus=2 "always show a status line
 set backspace=indent,eol,start "make backspace work better
 set cursorline "highlight line cursor is on
 set cursorcolumn "highlight column cursor is on
@@ -148,9 +149,13 @@ nmap <C-b> :cstag <C-R>=expand("<cword>")<CR><CR>
 let g:juggler_enableAtStartup = 1
 let g:juggler_logLevel = 'debug'
 let g:juggler_useCscopeCompleter = 1
-let g:juggler_useOmniCompleter = 0
+let g:juggler_useOmniCompleter = 1
+let g:juggler_additionalPathExcludes = ['*/test-ui/reports/*']
 let g:acp_enableAtStartup = 0
 let g:acp_completeoptPreview = 1
+
+"syntastic
+let g:syntastic_go_checkers = ['golint', 'govet']
 
 "command-t
 "nnoremap <silent> <C-n> :CommandTTag<CR>

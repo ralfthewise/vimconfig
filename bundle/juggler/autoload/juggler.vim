@@ -33,7 +33,7 @@ function juggler#Enable()
 
   let s:indexesused = (s:indexespath != '')
   if s:indexesused
-    nmap <silent> <F12> :call <SID>UpdateIndexes()<CR>:cs reset<CR><CR>:redraw!<CR>:redrawstatus!<CR>
+    nmap <silent> <F12> :call <SID>UpdateIndexes(0, 0, 0)<CR>
 
     if g:juggler_useTagsCompleter && g:juggler_manageTags
       execute 'set tags=' . s:indexespath . '/tags'
@@ -42,9 +42,9 @@ function juggler#Enable()
     if g:juggler_useCscopeCompleter && g:juggler_manageCscope
       silent cscope kill -1
       if filereadable(s:indexespath . '/cscope.out')
-        execute 'silent cscope add ' . s:indexespath . '/cscope.out'
+        execute 'silent! cscope add ' . s:indexespath . '/cscope.out'
       else
-        call s:UpdateCscope()
+        call s:UpdateIndexes(1, 0, 0)
       endif
     endif
   endif
@@ -61,26 +61,27 @@ function! s:OnBackspace(bsSeq)
   return a:bsSeq
 endfunction
 
-function! s:UpdateIndexes()
-  call s:UpdateTags()
-  call s:UpdateCscope()
-  return ''
-endfunction
-
-function! s:UpdateTags()
-  let cwd = getcwd()
-  execute 'silent !cd ''' . s:indexespath . ''' && find ''' . cwd . ''' -type f -not -name ''cscope.*'' -not -name ''tags'' -not -path ''* *'' -not -path ''*.git*'' -not -path ''*/vendor/*'' -not -path ''*/Godeps/*'' -not -path ''*/node_modules/*'' -not -path ''*/tmp/*'' -not -path ''*/dist/*'' -not -path ''*/log/*'' -not -path ''*/bower_components/*'' -not -path ''*/test-ui/reports/*'' -exec grep -Il . {} '';'' | ctags --fields=afmikKlnsStz --sort=foldcase -L- -f tags'
-endfunction
-
-function! s:UpdateCscope()
-  "FYI cscope has a bug where filenames with a space in them are broken: http://sourceforge.net/p/cscope/bugs/282/
-  let cwd = getcwd()
-  execute 'silent !cd ''' . s:indexespath . ''' && find ''' . cwd . ''' -type f -not -name ''cscope.*'' -not -name ''tags'' -not -path ''* *'' -not -path ''*.git*'' -not -path ''*/vendor/*'' -not -path ''*/Godeps/*'' -not -path ''*/node_modules/*'' -not -path ''*/tmp/*'' -not -path ''*/dist/*'' -not -path ''*/log/*'' -exec grep -Il . {} '';'' | sed ''s/^\(.*[ \t].*\)$/"\1"/'' | cscope -q -i - -b -U'
-  if cscope_connection()
-    silent cscope reset
+function! s:UpdateIndexes(quiet, onlyCurrentFile, reset)
+  let oldstatus = &statusline
+  set statusline=Updating\ indexes...
+  let rubyExec = 'ruby Juggler::Completer.instance.update_indexes(only_current_file: ' . a:onlyCurrentFile . ', reset: ' . a:reset . ')'
+  if a:quiet
+    execute 'silent! ' . rubyExec
   else
-    execute 'silent cscope add ' . s:indexespath . '/cscope.out'
+    execute rubyExec
   endif
+
+  "TODO: is this needed?  or will cscope pick up changes to the file
+  "automatically?
+  if g:juggler_useCscopeCompleter && g:juggler_manageCscope
+    if cscope_connection()
+      silent! cscope reset
+    else
+      execute 'silent! cscope add ' . s:indexespath . '/cscope.out'
+    endif
+  endif
+  let &statusline = oldstatus
+  return ''
 endfunction
 
 function! s:UserCompleted(resetaction)

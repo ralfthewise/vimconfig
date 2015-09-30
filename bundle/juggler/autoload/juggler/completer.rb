@@ -1,5 +1,6 @@
 require 'fileutils'
 require 'singleton'
+require 'shellwords'
 require 'digest/sha1'
 require_relative 'cscope_service'
 require_relative 'omni_completer'
@@ -38,6 +39,36 @@ module Juggler
         FileUtils.mkdir_p(@indexes_path)
         VIM::command("let s:indexespath = '#{Juggler.escape_vim_singlequote_string(@indexes_path)}'")
         @cscope_service = CscopeService.new(File.join(@indexes_path, 'cscope.out')) if (@use_cscope && @manage_cscope)
+      end
+    end
+
+    def update_indexes(only_current_file: 0, reset: 0)
+      if ((@use_tags && @manage_tags) || (@use_cscope && @manage_cscope))
+        cwd = VIM::evaluate('getcwd()')
+        path_excludes = VIM::evaluate('g:juggler_pathExcludes')
+        Juggler.logger.debug { "Excluding the following while updating indexes: #{path_excludes}" }
+
+        #tags
+        if (@use_tags && @manage_tags)
+          cmd = "cd #{Shellwords.escape(@indexes_path)} && find #{Shellwords.escape(cwd)} -type f -not -path "
+          cmd += path_excludes.map {|e| Shellwords.escape(e)}.join(' -not -path ')
+          cmd += " -exec grep -Il . {} ';' | ctags --fields=afmikKlnsStz --sort=foldcase -L- -f tags > /dev/null 2>&1"
+          Juggler.logger.debug { "Updating tags with the following command: #{cmd}" }
+          unless system(cmd)
+            Juggler.logger.error { "Error updating tags with the following command: #{cmd}" }
+          end
+        end
+
+        #cscope
+        if (@use_cscope && @manage_cscope)
+          cmd = "cd #{Shellwords.escape(@indexes_path)} && find #{Shellwords.escape(cwd)} -type f -not -path "
+          cmd += (path_excludes + ['* *']).map {|e| Shellwords.escape(e)}.join(' -not -path ') #cscope has a bug where filenames with a space in them are broken: http://sourceforge.net/p/cscope/bugs/282/
+          cmd += " -exec grep -Il . {} ';' | sed 's/^\\(.*[ \\t].*\\)$/\"\\1\"/' | cscope -q -i - -b -U > /dev/null 2>&1"
+          Juggler.logger.debug { "Updating cscope with the following command: #{cmd}" }
+          unless system(cmd)
+            Juggler.logger.error { "Error updating cscope with the following command: #{cmd}" }
+          end
+        end
       end
     end
 

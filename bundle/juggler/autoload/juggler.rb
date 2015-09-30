@@ -37,6 +37,8 @@ end
 class VimLoggerIO
   def write(msg)
     VIM::command("echom '#{Juggler.escape_vim_singlequote_string(msg)}'")
+    VIM::command('redraw!')
+    VIM::command('redrawstatus')
     return msg.to_s.length
   end
   def close; end

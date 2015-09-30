@@ -9,6 +9,23 @@ function s:defineOption(name, default)
   endif
 endfunction
 
+let g:juggler_defaultPathExcludes = [
+  \'*/cscope.*',
+  \'*/tags',
+  \'*.git*',
+  \'*.hg*',
+  \'*.svn*',
+  \'*/log/*',
+  \'*/tmp/*',
+  \'*/dist/*',
+  \'*/vendor/*',
+  \'*/Godeps/*',
+  \'*/node_modules/*',
+  \'*/bower_components/*',
+\]
+let g:juggler_additionalPathExcludes = []
+call s:defineOption('g:juggler_pathExcludes', g:juggler_defaultPathExcludes + g:juggler_additionalPathExcludes)
+
 call s:defineOption('g:juggler_enableAtStartup', 1)
 call s:defineOption('g:juggler_logLevel', 'error')
 call s:defineOption('g:juggler_fixupPopupMenu', 1)
