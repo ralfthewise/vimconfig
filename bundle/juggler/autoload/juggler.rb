@@ -19,6 +19,11 @@ module Juggler
     @@logger ||= create_logger
   end
 
+  def self.refresh
+    VIM::command('redraw!')
+    VIM::command('redrawstatus')
+  end
+
   def self.create_logger
     l = Logger.new(VimLoggerIO.new)
     l.formatter = proc { |severity, datetime, progname, msg|
@@ -37,8 +42,6 @@ end
 class VimLoggerIO
   def write(msg)
     VIM::command("echom '#{Juggler.escape_vim_singlequote_string(msg)}'")
-    VIM::command('redraw!')
-    VIM::command('redrawstatus')
     return msg.to_s.length
   end
   def close; end

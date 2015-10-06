@@ -42,30 +42,49 @@ module Juggler
       end
     end
 
-    def update_indexes(only_current_file: 0, reset: 0)
+    def update_indexes(only_current_file: 0)
       if ((@use_tags && @manage_tags) || (@use_cscope && @manage_cscope))
-        cwd = VIM::evaluate('getcwd()')
+        cwd = Shellwords.escape(VIM::evaluate('getcwd()'))
         path_excludes = VIM::evaluate('g:juggler_pathExcludes')
         Juggler.logger.debug { "Excluding the following while updating indexes: #{path_excludes}" }
 
+        cd_cmd = "cd #{Shellwords.escape(@indexes_path)}"
+        find_files_ctags_cmd = "echo #{Shellwords.escape($curbuf.name)}"
+        find_files_cscope_cmd = 'cat cscope.files'
+        ctags_cmd = "ctags --append --fields=afmikKlnsStz --sort=foldcase -L- -f tags > /dev/null 2>&1"
+        cscope_cmd = "cscope -q -i - -b -U > /dev/null 2>&1"
+        if only_current_file == 0
+          ctags_cmd = "ctags --fields=afmikKlnsStz --sort=foldcase -L- -f tags > /dev/null 2>&1"
+          find_files_ctags_cmd = "find #{cwd} -type f -not -path " + path_excludes.map {|e| Shellwords.escape(e)}.join(' -not -path ') + " -exec grep -Il . {} ';' > tags.files && cat tags.files"
+          find_files_cscope_cmd = "find #{cwd} -type f -not -path " + (path_excludes + ['* *']).map {|e| Shellwords.escape(e)}.join(' -not -path ') + " -exec grep -Il . {} ';' | sed 's/^\\(.*[ \\t].*\\)$/\"\\1\"/' > cscope.files && cat cscope.files"
+        end
+
         #tags
         if (@use_tags && @manage_tags)
-          cmd = "cd #{Shellwords.escape(@indexes_path)} && find #{Shellwords.escape(cwd)} -type f -not -path "
-          cmd += path_excludes.map {|e| Shellwords.escape(e)}.join(' -not -path ')
-          cmd += " -exec grep -Il . {} ';' | ctags --fields=afmikKlnsStz --sort=foldcase -L- -f tags > /dev/null 2>&1"
+          #TODO: remove tags for current file before running ctags so that just updating for the current file works correctly
+          cmd = "#{cd_cmd} && #{find_files_ctags_cmd} | #{ctags_cmd}"
           Juggler.logger.debug { "Updating tags with the following command: #{cmd}" }
-          unless system(cmd)
+          Juggler.refresh
+          start = Time.now
+          if system(cmd)
+            Juggler.logger.debug { "Updating tags took #{Time.now - start} seconds" }
+            Juggler.refresh
+          else
             Juggler.logger.error { "Error updating tags with the following command: #{cmd}" }
           end
         end
 
         #cscope
         if (@use_cscope && @manage_cscope)
-          cmd = "cd #{Shellwords.escape(@indexes_path)} && find #{Shellwords.escape(cwd)} -type f -not -path "
-          cmd += (path_excludes + ['* *']).map {|e| Shellwords.escape(e)}.join(' -not -path ') #cscope has a bug where filenames with a space in them are broken: http://sourceforge.net/p/cscope/bugs/282/
-          cmd += " -exec grep -Il . {} ';' | sed 's/^\\(.*[ \\t].*\\)$/\"\\1\"/' | cscope -q -i - -b -U > /dev/null 2>&1"
+          FileUtils.rm(Dir.glob(File.join(@indexes_path, 'cscope.*'))) if only_current_file == 0
+          cmd = "#{cd_cmd} && #{find_files_cscope_cmd} | #{cscope_cmd}"
           Juggler.logger.debug { "Updating cscope with the following command: #{cmd}" }
-          unless system(cmd)
+          Juggler.refresh
+          start = Time.now
+          if system(cmd)
+            Juggler.logger.debug { "Updating cscope took #{Time.now - start} seconds" }
+            Juggler.refresh
+          else
             Juggler.logger.error { "Error updating cscope with the following command: #{cmd}" }
           end
         end

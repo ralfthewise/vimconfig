@@ -33,10 +33,16 @@ function juggler#Enable()
 
   let s:indexesused = (s:indexespath != '')
   if s:indexesused
-    nmap <silent> <F12> :call <SID>UpdateIndexes(0, 0, 0)<CR>
+    nmap <silent> <F12> :call <SID>UpdateIndexes(0, 0)<CR>
+    augroup Juggler
+      autocmd BufWritePost * call s:UpdateIndexes(0, 1)
+    augroup END
 
     if g:juggler_useTagsCompleter && g:juggler_manageTags
       execute 'set tags=' . s:indexespath . '/tags'
+      if !filereadable(s:indexespath . '/tags')
+        call s:UpdateIndexes(1, 0)
+      endif
     endif
 
     if g:juggler_useCscopeCompleter && g:juggler_manageCscope
@@ -44,7 +50,7 @@ function juggler#Enable()
       if filereadable(s:indexespath . '/cscope.out')
         execute 'silent! cscope add ' . s:indexespath . '/cscope.out'
       else
-        call s:UpdateIndexes(1, 0, 0)
+        call s:UpdateIndexes(1, 0)
       endif
     endif
   endif
@@ -61,10 +67,10 @@ function! s:OnBackspace(bsSeq)
   return a:bsSeq
 endfunction
 
-function! s:UpdateIndexes(quiet, onlyCurrentFile, reset)
+function! s:UpdateIndexes(quiet, onlyCurrentFile)
   let oldstatus = &statusline
   set statusline=Updating\ indexes...
-  let rubyExec = 'ruby Juggler::Completer.instance.update_indexes(only_current_file: ' . a:onlyCurrentFile . ', reset: ' . a:reset . ')'
+  let rubyExec = 'ruby Juggler::Completer.instance.update_indexes(only_current_file: ' . a:onlyCurrentFile . ')'
   if a:quiet
     execute 'silent! ' . rubyExec
   else
