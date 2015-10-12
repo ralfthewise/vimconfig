@@ -130,10 +130,10 @@ if executable('ag')
   " Use ag over grep
   set grepprg=ag\ --nogroup\ --nocolor\ --smart-case
 endif
-" Define a command to find text in files
-command -nargs=+ -bar FindInFiles silent! grep! <args>|cwindow|redraw!
-nmap <F3> :FindInFiles<Space>
-nmap <leader><F3> :FindInFiles <C-R>=expand("<cword>")<CR><CR>
+" Finding text in files
+"command -nargs=+ -bar FindInFiles silent! grep! <args>|cwindow|redraw!
+"nmap <F3> :JugglerFind<CR>
+nmap <F3> :JugglerFind <C-R>=expand("<cword>")<CR><CR>
 
 "code navigation
 "find where method under cursor is called

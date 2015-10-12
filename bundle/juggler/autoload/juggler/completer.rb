@@ -42,27 +42,52 @@ module Juggler
       end
     end
 
+    def find
+      srchstr = VIM::evaluate('srchstr').to_s
+      grep_cmd = 'ag --nogroup --nocolor --smart-case --hidden'
+      if srchstr.start_with?('/')
+        srchstr = srchstr[1..-1] #strip off beginning '/'
+        Juggler.logger.debug { "Searching for the regex: #{srchstr}" }
+      else
+        srchstr = srchstr[1..-1] if srchstr.start_with?('\/') #strip off beginning '\'
+        Juggler.logger.debug { "Searching for the text: #{srchstr}" }
+        grep_cmd += ' --literal'
+      end
+      grep_cmd = "#{find_files_cmd} -exec #{grep_cmd} #{Shellwords.escape(srchstr)} {} +"
+      Juggler.logger.debug { "Using grep command: #{grep_cmd}" }
+
+      start = Time.now
+      #result = `#{grep_cmd}`
+      #Juggler.logger.debug { "Result: #{result}" }
+      #VIM::command("cgetexpr '#{Juggler.escape_vim_singlequote_string(result)}'")
+      VIM::command("cgetexpr system('#{Juggler.escape_vim_singlequote_string(grep_cmd)}')")
+      Juggler.logger.debug { "Text search took #{Time.now - start} seconds" }
+
+      VIM::command('cwindow')
+      Juggler.refresh
+    end
+
     def update_indexes(only_current_file: 0)
       if ((@use_tags && @manage_tags) || (@use_cscope && @manage_cscope))
-        cwd = Shellwords.escape(VIM::evaluate('getcwd()'))
-        path_excludes = VIM::evaluate('g:juggler_pathExcludes')
-        Juggler.logger.debug { "Excluding the following while updating indexes: #{path_excludes}" }
+        #cwd = Shellwords.escape(VIM::evaluate('getcwd()'))
+        #path_excludes = VIM::evaluate('g:juggler_pathExcludes')
+        #Juggler.logger.debug { "Excluding the following while updating indexes: #{path_excludes}" }
 
+        only_current_file = 0 if !File.exists?(File.join(@indexes_path, 'tags.files')) || !File.exists?(File.join(@indexes_path, 'cscope.files'))
         cd_cmd = "cd #{Shellwords.escape(@indexes_path)}"
-        find_files_ctags_cmd = "echo #{Shellwords.escape($curbuf.name)}"
-        find_files_cscope_cmd = 'cat cscope.files'
-        ctags_cmd = "ctags --append --fields=afmikKlnsStz --sort=foldcase -L- -f tags > /dev/null 2>&1"
-        cscope_cmd = "cscope -q -i - -b -U > /dev/null 2>&1"
+        ctags_cmd = "echo #{Shellwords.escape($curbuf.name)} | ctags --append --fields=afmikKlnsStz --sort=foldcase -L - -f tags > /dev/null 2>&1"
+        cscope_cmd = "cscope -q -b -U > /dev/null 2>&1"
         if only_current_file == 0
-          ctags_cmd = "ctags --fields=afmikKlnsStz --sort=foldcase -L- -f tags > /dev/null 2>&1"
-          find_files_ctags_cmd = "find #{cwd} -type f -not -path " + path_excludes.map {|e| Shellwords.escape(e)}.join(' -not -path ') + " -exec grep -Il . {} ';' > tags.files && cat tags.files"
-          find_files_cscope_cmd = "find #{cwd} -type f -not -path " + (path_excludes + ['* *']).map {|e| Shellwords.escape(e)}.join(' -not -path ') + " -exec grep -Il . {} ';' | sed 's/^\\(.*[ \\t].*\\)$/\"\\1\"/' > cscope.files && cat cscope.files"
+          ctags_cmd = "#{find_files_cmd(absolute_path: true)} -exec grep -Il . {} + > tags.files && ctags --fields=afmikKlnsStz --sort=foldcase -L tags.files -f tags > /dev/null 2>&1"
+          cscope_cmd = "#{find_files_cmd(absolute_path: true, for_cscope: true)} -exec grep -Il . {} + > cscope.files && cscope -q -b -U > /dev/null 2>&1"
+          #find_files_ctags_cmd = "find #{cwd} -type f -not -path " + path_excludes.map {|e| Shellwords.escape(e)}.join(' -not -path ') + " -exec grep -Il . {} ';' > tags.files && cat tags.files"
+          #find_files_cscope_cmd = "find #{cwd} -type f -not -path " + (path_excludes + ['* *']).map {|e| Shellwords.escape(e)}.join(' -not -path ') + " -exec grep -Il . {} ';' | sed 's/^\\(.*[ \\t].*\\)$/\"\\1\"/' > cscope.files && cat cscope.files"
         end
 
         #tags
         if (@use_tags && @manage_tags)
           #TODO: remove tags for current file before running ctags so that just updating for the current file works correctly
-          cmd = "#{cd_cmd} && #{find_files_ctags_cmd} | #{ctags_cmd}"
+          cmd = "#{cd_cmd} && #{ctags_cmd}"
           Juggler.logger.debug { "Updating tags with the following command: #{cmd}" }
           Juggler.refresh
           start = Time.now
@@ -77,7 +102,7 @@ module Juggler
         #cscope
         if (@use_cscope && @manage_cscope)
           FileUtils.rm(Dir.glob(File.join(@indexes_path, 'cscope.*'))) if only_current_file == 0
-          cmd = "#{cd_cmd} && #{find_files_cscope_cmd} | #{cscope_cmd}"
+          cmd = "#{cd_cmd} && #{cscope_cmd}"
           Juggler.logger.debug { "Updating cscope with the following command: #{cmd}" }
           Juggler.refresh
           start = Time.now
@@ -88,6 +113,7 @@ module Juggler
             Juggler.logger.error { "Error updating cscope with the following command: #{cmd}" }
           end
         end
+        Juggler.refresh
       end
     end
 
@@ -185,6 +211,21 @@ module Juggler
       return false if d == Dir.home
       return false if d == '/'
       return true
+    end
+
+    def find_files_cmd(absolute_path: false, for_cscope: false)
+      #path_spec = absolute_path ? Shellwords.escape(VIM::evaluate('getcwd()')) : '*'
+      path_spec = absolute_path ? Shellwords.escape(VIM::evaluate('getcwd()')) : '.'
+      path_excludes = VIM::evaluate('g:juggler_pathExcludes')
+
+      if for_cscope
+        #cscope can't handle paths that include a space
+        #if they ever fix it to handle spaces in filenames, you might have to pipe it to some sed magic like so:
+        #  | sed 's/^\\(.*[ \\t].*\\)$/\"\\1\"/'"
+        return "find #{path_spec} -type f -not -path " + (path_excludes + ['* *']).map {|e| Shellwords.escape(e)}.join(' -not -path ')
+      else
+        return "find #{path_spec} -type f -not -path " + path_excludes.map {|e| Shellwords.escape(e)}.join(' -not -path ')
+      end
     end
   end
 end

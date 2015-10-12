@@ -20,8 +20,7 @@ module Juggler
   end
 
   def self.refresh
-    VIM::command('redraw!')
-    VIM::command('redrawstatus')
+    VIM::command('redraw!|redrawstatus')
   end
 
   def self.create_logger

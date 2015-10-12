@@ -69,7 +69,7 @@ endfunction
 
 function! s:UpdateIndexes(quiet, onlyCurrentFile)
   let oldstatus = &statusline
-  set statusline=Updating\ indexes...
+  if !a:onlyCurrentFile | set statusline=Updating\ indexes... | endif
   let rubyExec = 'ruby Juggler::Completer.instance.update_indexes(only_current_file: ' . a:onlyCurrentFile . ')'
   if a:quiet
     execute 'silent! ' . rubyExec
@@ -77,8 +77,6 @@ function! s:UpdateIndexes(quiet, onlyCurrentFile)
     execute rubyExec
   endif
 
-  "TODO: is this needed?  or will cscope pick up changes to the file
-  "automatically?
   if g:juggler_useCscopeCompleter && g:juggler_manageCscope
     if cscope_connection()
       silent! cscope reset
@@ -86,7 +84,7 @@ function! s:UpdateIndexes(quiet, onlyCurrentFile)
       execute 'silent! cscope add ' . s:indexespath . '/cscope.out'
     endif
   endif
-  let &statusline = oldstatus
+  if !a:onlyCurrentFile | let &statusline = oldstatus | endif
   return ''
 endfunction
 
@@ -147,6 +145,12 @@ function juggler#AfterPopup()
     call feedkeys("\<C-p>\<Down>", 'n') "highlight first entry but leave originally typed text intact
   endif
   return '' "have to return empty string otherwise '0' will get inserted
+endfunction
+
+function! juggler#Find(defsrch)
+  let srchstr = input('Text to search for (start text with "/" to search for a regex): ', a:defsrch)
+  redraw
+  ruby Juggler::Completer.instance.find()
 endfunction
 
 function! s:GetCursorInfo()

@@ -49,3 +49,5 @@ endif
 if g:juggler_enableAtStartup
   call juggler#Enable()
 endif
+
+command! -nargs=? JugglerFind call juggler#Find('<args>')
