@@ -43,28 +43,31 @@ module Juggler
     end
 
     def find
-      srchstr = VIM::evaluate('srchstr').to_s
-      grep_cmd = 'ag --nogroup --nocolor --smart-case --hidden'
-      if srchstr.start_with?('/')
-        srchstr = srchstr[1..-1] #strip off beginning '/'
-        Juggler.logger.debug { "Searching for the regex: #{srchstr}" }
-      else
-        srchstr = srchstr[1..-1] if srchstr.start_with?('\/') #strip off beginning '\'
-        Juggler.logger.debug { "Searching for the text: #{srchstr}" }
-        grep_cmd += ' --literal'
+      Juggler.with_status('Searching...') do
+        srchstr = VIM::evaluate('srchstr').to_s
+        grep_cmd = 'ag --nogroup --nocolor --smart-case --hidden'
+        if srchstr.start_with?('/')
+          srchstr = srchstr[1..-1] #strip off beginning '/'
+        else
+          srchstr = srchstr[1..-1] if srchstr.start_with?('\/') #strip off beginning '\'
+          grep_cmd += ' --literal'
+        end
+        grep_cmd = "#{find_files_cmd} -exec #{grep_cmd} #{Shellwords.escape(srchstr)} {} +"
+
+        start = Time.now
+        #result = `#{grep_cmd}`
+        #Juggler.logger.debug { "Result: #{result}" }
+        #VIM::command("cgetexpr '#{Juggler.escape_vim_singlequote_string(result)}'")
+        VIM::command("cgetexpr system('#{Juggler.escape_vim_singlequote_string(grep_cmd)}')")
+        Juggler.logger.debug do
+          "Searching for the pattern: #{srchstr}" +
+          "Using grep command: #{grep_cmd}" +
+          "Text search took #{Time.now - start} seconds"
+        end
+
+        VIM::command('cwindow')
+        Juggler.refresh
       end
-      grep_cmd = "#{find_files_cmd} -exec #{grep_cmd} #{Shellwords.escape(srchstr)} {} +"
-      Juggler.logger.debug { "Using grep command: #{grep_cmd}" }
-
-      start = Time.now
-      #result = `#{grep_cmd}`
-      #Juggler.logger.debug { "Result: #{result}" }
-      #VIM::command("cgetexpr '#{Juggler.escape_vim_singlequote_string(result)}'")
-      VIM::command("cgetexpr system('#{Juggler.escape_vim_singlequote_string(grep_cmd)}')")
-      Juggler.logger.debug { "Text search took #{Time.now - start} seconds" }
-
-      VIM::command('cwindow')
-      Juggler.refresh
     end
 
     def update_indexes(only_current_file: 0)

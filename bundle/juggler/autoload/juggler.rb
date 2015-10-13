@@ -23,6 +23,12 @@ module Juggler
     VIM::command('redraw!|redrawstatus')
   end
 
+  def self.with_status(line)
+    VIM::command("let s:oldstatusline = &statusline | set statusline=#{line.to_s.gsub(' ', '\\ ')} | redrawstatus")
+    yield
+    VIM::command('let &statusline = s:oldstatusline | redrawstatus')
+  end
+
   def self.create_logger
     l = Logger.new(VimLoggerIO.new)
     l.formatter = proc { |severity, datetime, progname, msg|

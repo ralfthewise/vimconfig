@@ -68,7 +68,7 @@ function! s:OnBackspace(bsSeq)
 endfunction
 
 function! s:UpdateIndexes(quiet, onlyCurrentFile)
-  let oldstatus = &statusline
+  let s:oldstatusline = &statusline
   if !a:onlyCurrentFile | set statusline=Updating\ indexes... | endif
   let rubyExec = 'ruby Juggler::Completer.instance.update_indexes(only_current_file: ' . a:onlyCurrentFile . ')'
   if a:quiet
@@ -84,7 +84,7 @@ function! s:UpdateIndexes(quiet, onlyCurrentFile)
       execute 'silent! cscope add ' . s:indexespath . '/cscope.out'
     endif
   endif
-  if !a:onlyCurrentFile | let &statusline = oldstatus | endif
+  if !a:onlyCurrentFile | let &statusline = s:oldstatusline | endif
   return ''
 endfunction
 
