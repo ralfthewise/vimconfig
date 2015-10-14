@@ -129,8 +129,8 @@ module Juggler
 
     def generate_completions
       cursor_info = VIM::evaluate('s:cursorinfo')
-      Juggler.logger.debug("Generating completions for: #{cursor_info['token']}")
-      scorer = EntryScorer.new(cursor_info['token'])
+      Juggler.logger.debug { "Generating completions for: #{cursor_info['token']}" }
+      scorer = EntryScorer.new(cursor_info['token'], $curbuf.name, VIM::Buffer.current.line_number)
       entries = CompletionEntries.new
 
       #omni completions

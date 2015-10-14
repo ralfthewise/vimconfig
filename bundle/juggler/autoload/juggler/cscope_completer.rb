@@ -11,7 +11,7 @@ module Juggler
 
       base_regex = Regexp.new(Juggler.generate_scan_base_pattern(base), Regexp::IGNORECASE)
       @cscope_service.query(base).each do |cscope_entry|
-        entry = CompletionEntry.new(source: :cscope, index: cscope_entry[:index], line: cscope_entry[:line], kind: cscope_entry[:kind], signature: cscope_entry[:tag_line].strip)
+        entry = CompletionEntry.new(source: :cscope, index: cscope_entry[:index], line: cscope_entry[:line], file: cscope_entry[:file], kind: cscope_entry[:kind], signature: cscope_entry[:tag_line].strip)
         cscope_entry[:tag_line].scan(base_regex) do |tag|
           entry.tag = tag
         end

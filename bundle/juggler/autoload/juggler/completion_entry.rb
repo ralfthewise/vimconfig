@@ -12,6 +12,7 @@ module Juggler
 
       self.source = source
       self.tag = tag
+      self.line = line
       self.index = index
       self.pri = pri
       self.kind = kind
@@ -25,7 +26,7 @@ module Juggler
     end
 
     def to_s
-      return to_vim_dict
+      return {tag:tag,source:source,score:score,line:line,file:file}.to_s
     end
 
     protected

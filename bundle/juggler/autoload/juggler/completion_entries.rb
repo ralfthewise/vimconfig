@@ -13,7 +13,10 @@ module Juggler
     end
 
     def add(entry)
-      self.entries[entry.tag] = entry unless entry.tag.nil? || self.entries.include?(entry.tag)
+      return if entry.tag.nil?
+      existing = self.entries[entry.tag]
+      self.entries[entry.tag] = entry if existing.nil? || existing.score < entry.score
+      #self.entries[entry.tag] = entry unless entry.tag.nil? || self.entries.include?(entry.tag)
     end
 
     def process
@@ -24,13 +27,17 @@ module Juggler
         if !a.tag.nil? && !b.tag.nil?
           result = a.tag.length - b.tag.length if result == 0
         end
+        result = -1 if result < 0
+        result = 1 if result > 0
         result
       end
-      Juggler.logger.debug { "sorting completion entries took #{Time.now - start} seconds" }
+      Juggler.logger.debug { "Sorting completion entries took #{Time.now - start} seconds" }
 
-      vim_entries = vim_entries[0..(@@max_entries_to_return - 1)].map {|e| e.to_vim_dict}
+      vim_entries = vim_entries[0..(@@max_entries_to_return - 1)]
+      #Juggler.logger.debug { "Entries:" }
+      #vim_entries.each {|e| Juggler.logger.debug { "  #{e}" }}
+      vim_entries = vim_entries.map {|e| e.to_vim_dict}
 
-      #TODO: yield in batches
       yield(vim_entries.join(','))
     end
   end

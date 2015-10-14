@@ -17,7 +17,7 @@ module Juggler
         Juggler.clean_utf8(sp.read).split("\n").each_with_index do |line,index|
           if match = @@cscope_line_regexp.match(line)
             kind = (match[2] == '<unknown>' ? nil : match[2])
-            result << {index: index, file: match[1], kind: kind, line: match[3], tag_line: match[4]}
+            result << {index: index, file: match[1], kind: kind, line: match[3].to_i, tag_line: match[4]}
           end
         end
       end

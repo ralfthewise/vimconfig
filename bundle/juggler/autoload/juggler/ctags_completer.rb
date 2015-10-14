@@ -11,7 +11,9 @@ module Juggler
 
       ctag_output = VIM::evaluate("s:GetTags('\\c#{Juggler.escape_vim_singlequote_string(generate_ctag_pattern(base))}')")
       ctag_output.each_with_index do |ctag_entry, index|
-        entry = CompletionEntry.new(source: :ctags, index: index, kind: ctag_entry['kind'], tag: ctag_entry['name'], file: ctag_entry['filename'])
+        line_num = ctag_entry['line']
+        line_num = line_num.to_i unless line_num.nil?
+        entry = CompletionEntry.new(source: :ctags, index: index, kind: ctag_entry['kind'], tag: ctag_entry['name'], file: ctag_entry['filename'], line: line_num)
         entry.excmd = ctag_entry['cmd']
         yield(entry)
       end
