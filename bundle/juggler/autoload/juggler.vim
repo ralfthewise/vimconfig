@@ -1,10 +1,10 @@
 if !has('ruby')
-  echo "Error: Rubycomplete requires vim compiled with +ruby"
+  echo "Error: Juggler requires vim compiled with +ruby"
   finish
 endif
 
 if version < 700
-  echo "Error: Required vim >= 7.0"
+  echo "Error: Juggler requires vim >= 7.0"
   finish
 endif
 

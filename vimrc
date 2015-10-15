@@ -146,7 +146,7 @@ nmap <C-b> :cstag <C-R>=expand("<cword>")<CR><CR>
 
 "acp
 let g:juggler_enableAtStartup = 1
-let g:juggler_logLevel = 'debug'
+let g:juggler_logLevel = 'info'
 let g:juggler_useTagsCompleter = 1
 let g:juggler_useCscopeCompleter = 1
 let g:juggler_useOmniCompleter = 1

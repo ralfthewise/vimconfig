@@ -31,11 +31,14 @@ module Juggler
         result = 1 if result > 0
         result
       end
-      Juggler.logger.debug { "Sorting completion entries took #{Time.now - start} seconds" }
+      Juggler.logger.info { "Sorting completion entries took #{Time.now - start} seconds" }
 
       vim_entries = vim_entries[0..(@@max_entries_to_return - 1)]
-      #Juggler.logger.debug { "Entries:" }
-      #vim_entries.each {|e| Juggler.logger.debug { "  #{e}" }}
+      Juggler.logger.debug do
+        log = "Entries:"
+        vim_entries.each {|e| log += "\n  #{e}"}
+        log
+      end
       vim_entries = vim_entries.map {|e| e.to_vim_dict}
 
       yield(vim_entries.join(','))

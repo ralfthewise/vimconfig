@@ -15,6 +15,7 @@ module Juggler
     include Singleton
 
     def initialize
+      #TODO: load these on each completion
       @use_omni = VIM::evaluate('g:juggler_useOmniCompleter') == 1
       @use_tags = VIM::evaluate('g:juggler_useTagsCompleter') == 1
       @manage_tags = VIM::evaluate('g:juggler_manageTags') == 1
@@ -60,9 +61,9 @@ module Juggler
         #VIM::command("cgetexpr '#{Juggler.escape_vim_singlequote_string(result)}'")
         VIM::command("cgetexpr system('#{Juggler.escape_vim_singlequote_string(grep_cmd)}')")
         Juggler.logger.debug do
-          "Searching for the pattern: #{srchstr}" +
-          "Using grep command: #{grep_cmd}" +
-          "Text search took #{Time.now - start} seconds"
+          "Searching for the pattern: #{srchstr}\n" +
+          "  Using grep command: #{grep_cmd}\n" +
+          "  Text search took #{Time.now - start} seconds"
         end
 
         VIM::command('cwindow')
@@ -72,10 +73,6 @@ module Juggler
 
     def update_indexes(only_current_file: 0)
       if ((@use_tags && @manage_tags) || (@use_cscope && @manage_cscope))
-        #cwd = Shellwords.escape(VIM::evaluate('getcwd()'))
-        #path_excludes = VIM::evaluate('g:juggler_pathExcludes')
-        #Juggler.logger.debug { "Excluding the following while updating indexes: #{path_excludes}" }
-
         only_current_file = 0 if !File.exists?(File.join(@indexes_path, 'tags.files')) || !File.exists?(File.join(@indexes_path, 'cscope.files'))
         cd_cmd = "cd #{Shellwords.escape(@indexes_path)}"
         ctags_cmd = "echo #{Shellwords.escape($curbuf.name)} | ctags --append --fields=afmikKlnsStz --sort=foldcase -L - -f tags > /dev/null 2>&1"
@@ -83,8 +80,6 @@ module Juggler
         if only_current_file == 0
           ctags_cmd = "#{find_files_cmd(absolute_path: true)} -exec grep -Il . {} + > tags.files && ctags --fields=afmikKlnsStz --sort=foldcase -L tags.files -f tags > /dev/null 2>&1"
           cscope_cmd = "#{find_files_cmd(absolute_path: true, for_cscope: true)} -exec grep -Il . {} + > cscope.files && cscope -q -b -U > /dev/null 2>&1"
-          #find_files_ctags_cmd = "find #{cwd} -type f -not -path " + path_excludes.map {|e| Shellwords.escape(e)}.join(' -not -path ') + " -exec grep -Il . {} ';' > tags.files && cat tags.files"
-          #find_files_cscope_cmd = "find #{cwd} -type f -not -path " + (path_excludes + ['* *']).map {|e| Shellwords.escape(e)}.join(' -not -path ') + " -exec grep -Il . {} ';' | sed 's/^\\(.*[ \\t].*\\)$/\"\\1\"/' > cscope.files && cat cscope.files"
         end
 
         #tags
@@ -95,7 +90,7 @@ module Juggler
           Juggler.refresh
           start = Time.now
           if system(cmd)
-            Juggler.logger.debug { "Updating tags took #{Time.now - start} seconds" }
+            Juggler.logger.info { "Updating tags took #{Time.now - start} seconds" }
             Juggler.refresh
           else
             Juggler.logger.error { "Error updating tags with the following command: #{cmd}" }
@@ -110,7 +105,7 @@ module Juggler
           Juggler.refresh
           start = Time.now
           if system(cmd)
-            Juggler.logger.debug { "Updating cscope took #{Time.now - start} seconds" }
+            Juggler.logger.info { "Updating cscope took #{Time.now - start} seconds" }
             Juggler.refresh
           else
             Juggler.logger.error { "Error updating cscope with the following command: #{cmd}" }
@@ -129,7 +124,7 @@ module Juggler
 
     def generate_completions
       cursor_info = VIM::evaluate('s:cursorinfo')
-      Juggler.logger.debug { "Generating completions for: #{cursor_info['token']}" }
+      Juggler.logger.info { "Generating completions for: #{cursor_info['token']}" }
       scorer = EntryScorer.new(cursor_info['token'], $curbuf.name, VIM::Buffer.current.line_number)
       entries = CompletionEntries.new
 
@@ -142,7 +137,7 @@ module Juggler
           entries.add(entry)
           count += 1
         end
-        Juggler.logger.debug { "omni completions took #{Time.now - start} seconds and found #{count} entries" }
+        Juggler.logger.info { "omni completions took #{Time.now - start} seconds and found #{count} entries" }
       end
 
       #ctags completions
@@ -154,7 +149,7 @@ module Juggler
           entries.add(entry)
           count += 1
         end
-        Juggler.logger.debug { "ctags completions took #{Time.now - start} seconds and found #{count} entries" }
+        Juggler.logger.info { "ctags completions took #{Time.now - start} seconds and found #{count} entries" }
       end
 
       #cscope completions
@@ -166,7 +161,7 @@ module Juggler
           entries.add(entry)
           count += 1
         end
-        Juggler.logger.debug { "cscope completions took #{Time.now - start} seconds and found #{count} entries" }
+        Juggler.logger.info { "cscope completions took #{Time.now - start} seconds and found #{count} entries" }
       end
 
       #keywords completions
@@ -178,7 +173,7 @@ module Juggler
           entries.add(entry)
           count += 1
         end
-        Juggler.logger.debug { "keywords completions took #{Time.now - start} seconds and found #{count} entries" }
+        Juggler.logger.info { "keywords completions took #{Time.now - start} seconds and found #{count} entries" }
       end
 
       Juggler.logger.info { "#{entries.count} total entries found" }
