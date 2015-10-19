@@ -46,3 +46,9 @@
 [submodule "submodules/vim-jade"]
 	path = submodules/vim-jade
 	url = https://github.com/digitaltoad/vim-jade.git
+[submodule "submodules/vim-expand-region"]
+	path = submodules/vim-expand-region
+	url = https://github.com/terryma/vim-expand-region.git
+[submodule "submodules/vim-textobj-user"]
+	path = submodules/vim-textobj-user
+	url = https://github.com/kana/vim-textobj-user.git

@@ -242,3 +242,6 @@ ruby << RUBYEOF
   require File.join(plugin_path, 'juggler.rb')
 RUBYEOF
 endfunction
+
+"load additional functionality
+exec 'source ' . s:plugin_path . '/ruby.vim'

@@ -64,6 +64,9 @@ autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>:ccl<CR>
 set wildmenu "vim command completion
 set wildmode=longest:full,full "vim command completion
 
+"load internal matchit plugin/macro
+runtime macros/matchit.vim
+
 "auto highlight word under cursor after 500 ms of idle
 "augroup auto_highlight
 "  au!
@@ -156,6 +159,23 @@ let g:acp_completeoptPreview = 1
 
 "syntastic
 let g:syntastic_go_checkers = ['golint', 'govet']
+
+"vim-expand-region
+let g:expand_region_text_objects_ruby = {
+      \ 'iw' :0,
+      \ 'iW' :0,
+      \ 'i"' :0,
+      \ 'i''':0,
+      \ 'i]' :1,
+      \ 'ib' :1,
+      \ 'iB' :1,
+      \ 'ir' :1,
+      \ 'ar' :1,
+      \ }
+"call expand_region#custom_text_objects('ruby', {
+"      \ 'ir' :1,
+"      \ 'ar' :1,
+"      \ })
 
 "command-t
 "nnoremap <silent> <C-n> :CommandTTag<CR>
