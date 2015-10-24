@@ -7,7 +7,14 @@ module Juggler
   end
 
   def self.escape_vim_singlequote_string(str)
-    str.to_s.gsub("'","''")
+    return str.to_s.gsub("'","''")
+  end
+
+  def self.escape_vim_doublequote_string(str)
+    #replace \ with \\ and replace " with \"
+    str = str.to_s.gsub(/[\\"]/, {'\\' => '\\\\', '"' => '\\"'})
+    #replace all newline character sequences with \n
+    return str.gsub("\r\n", '\\n').gsub(/[\r\n]/, '\\n')
   end
 
   def self.generate_scan_base_pattern(base)

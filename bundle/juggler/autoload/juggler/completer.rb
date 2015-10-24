@@ -15,6 +15,7 @@ module Juggler
     include Singleton
 
     def initialize
+      @log_level = ENV['JUGGLER_LOG_LEVEL'] || VIM::evaluate('g:juggler_logLevel')
       #TODO: load these on each completion
       @use_omni = VIM::evaluate('g:juggler_useOmniCompleter') == 1
       @use_tags = VIM::evaluate('g:juggler_useTagsCompleter') == 1
@@ -46,24 +47,30 @@ module Juggler
     def find
       Juggler.with_status('Searching...') do
         srchstr = VIM::evaluate('srchstr').to_s
-        grep_cmd = 'ag --nogroup --nocolor --smart-case --hidden'
+        next if srchstr == ''
+        grep_cmd = 'ag --nogroup --nocolor --vimgrep --hidden'
+        strip_tabs_cmd = "sed 's/\\t/  /g'" #sometimes cexpr and cgetexpr have issues with tabs
         if srchstr.start_with?('/')
           srchstr = srchstr[1..-1] #strip off beginning '/'
+          grep_cmd += ' --case-sensitive'
         else
           srchstr = srchstr[1..-1] if srchstr.start_with?('\/') #strip off beginning '\'
-          grep_cmd += ' --literal'
+          grep_cmd += ' --smart-case --literal'
         end
         grep_cmd = "#{find_files_cmd} -exec #{grep_cmd} #{Shellwords.escape(srchstr)} {} +"
 
         start = Time.now
-        #result = `#{grep_cmd}`
-        #Juggler.logger.debug { "Result: #{result}" }
-        #VIM::command("cgetexpr '#{Juggler.escape_vim_singlequote_string(result)}'")
-        VIM::command("cgetexpr system('#{Juggler.escape_vim_singlequote_string(grep_cmd)}')")
-        Juggler.logger.debug do
-          "Searching for the pattern: #{srchstr}\n" +
-          "  Using grep command: #{grep_cmd}\n" +
-          "  Text search took #{Time.now - start} seconds"
+        if @log_level == 'debug'
+          result = `#{grep_cmd} | #{strip_tabs_cmd}`
+          Juggler.logger.debug do
+            "Searching for the pattern: #{srchstr}\n" +
+            "  Using grep command: #{grep_cmd}\n" +
+            "  Text search took #{Time.now - start} seconds\n" +
+            "  Result:\n#{result}"
+          end
+          VIM::command("cgetexpr \"#{Juggler.escape_vim_doublequote_string(result)}\"")
+        else
+          VIM::command("cgetexpr system('#{Juggler.escape_vim_singlequote_string(grep_cmd)} \\| #{Juggler.escape_vim_singlequote_string(strip_tabs_cmd)}')")
         end
 
         VIM::command('cwindow')
