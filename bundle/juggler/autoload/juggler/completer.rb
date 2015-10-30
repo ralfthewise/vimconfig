@@ -60,20 +60,17 @@ module Juggler
         grep_cmd = "#{find_files_cmd} -exec #{grep_cmd} #{Shellwords.escape(srchstr)} {} +"
 
         start = Time.now
-        if @log_level == 'debug'
-          result = `#{grep_cmd} | #{strip_tabs_cmd}`
-          Juggler.logger.debug do
-            "Searching for the pattern: #{srchstr}\n" +
-            "  Using grep command: #{grep_cmd}\n" +
-            "  Text search took #{Time.now - start} seconds\n" +
+        result = `#{grep_cmd} | #{strip_tabs_cmd}`
+        Juggler.logger.debug do
+          "Searching for the pattern: #{srchstr}\n" +
+          "  Using grep command: #{grep_cmd}\n" +
+          "  Text search took #{Time.now - start} seconds\n" +
             "  Result:\n#{result}"
-          end
-          VIM::command("cgetexpr \"#{Juggler.escape_vim_doublequote_string(result)}\"")
-        else
-          VIM::command("cgetexpr system('#{Juggler.escape_vim_singlequote_string(grep_cmd)} \\| #{Juggler.escape_vim_singlequote_string(strip_tabs_cmd)}')")
         end
+        VIM::command("cgetexpr split(\"#{Juggler.escape_vim_doublequote_string(result)}\", \"\\n\")")
+        #VIM::command("cgetexpr system('#{Juggler.escape_vim_singlequote_string(grep_cmd)} \\| #{Juggler.escape_vim_singlequote_string(strip_tabs_cmd)}')")
 
-        VIM::command('cwindow')
+        VIM::command('copen')
         Juggler.refresh
       end
     end
