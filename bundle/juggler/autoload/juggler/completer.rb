@@ -65,7 +65,7 @@ module Juggler
           "Searching for the pattern: #{srchstr}\n" +
           "  Using grep command: #{grep_cmd}\n" +
           "  Text search took #{Time.now - start} seconds\n" +
-            "  Result:\n#{result}"
+          "  Result:\n#{result}"
         end
         VIM::command("cgetexpr split(\"#{Juggler.escape_vim_doublequote_string(result)}\", \"\\n\")")
         #VIM::command("cgetexpr system('#{Juggler.escape_vim_singlequote_string(grep_cmd)} \\| #{Juggler.escape_vim_singlequote_string(strip_tabs_cmd)}')")

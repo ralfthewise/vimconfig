@@ -23,7 +23,7 @@ let g:juggler_defaultPathExcludes = [
   \'*/node_modules/*',
   \'*/bower_components/*',
 \]
-let g:juggler_additionalPathExcludes = []
+call s:defineOption('g:juggler_additionalPathExcludes', [])
 call s:defineOption('g:juggler_pathExcludes', g:juggler_defaultPathExcludes + g:juggler_additionalPathExcludes)
 
 call s:defineOption('g:juggler_enableAtStartup', 1)

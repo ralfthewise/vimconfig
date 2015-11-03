@@ -2,6 +2,7 @@ module Juggler
   class EntryScorer
     def initialize(search_text, current_file, current_line)
       @search_text = search_text
+      @search_regex = Regexp.new('\w*' + search_text.scan(/./).join('\w*') + '\w*', Regexp::IGNORECASE)
       @current_file = current_file
       @current_line = current_line
 
@@ -35,6 +36,11 @@ module Juggler
       when @search_text.casecmp(entry.tag) == 0 then score += @case_insensitive_match
       when @search_text[0] == entry.tag[0] then score += @exact_first_letter
       when @search_text[0].casecmp(entry.tag[0]) == 0 then score += @case_insensitive_first_letter
+      end
+
+      #fucking omni completion sometimes matches shit that isn't even what was typed in!
+      if entry.source == :omni && !(@search_regex =~ entry.tag)
+        score -= 1000000
       end
 
       #check for same file

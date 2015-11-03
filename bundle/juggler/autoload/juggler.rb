@@ -11,9 +11,12 @@ module Juggler
   end
 
   def self.escape_vim_doublequote_string(str)
-    #replace \ with \\ and replace " with \"
-    str = str.to_s.gsub(/[\\"]/, {'\\' => '\\\\', '"' => '\\"'})
-    #replace all newline character sequences with \n
+    #replace:
+    # \ with \\
+    # " with \"
+    # | with \|
+    str = str.to_s.gsub(/[\\"|]/, {'\\' => '\\\\', '"' => '\\"', '|' => '\\|'})
+    #replace all newline character sequences with \n - NOTE we are replacing it with the string "\\n", NOT the newline character
     return str.gsub("\r\n", '\\n').gsub(/[\r\n]/, '\\n')
   end
 
