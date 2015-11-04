@@ -41,7 +41,7 @@ module Juggler
       end
       vim_entries = vim_entries.map {|e| e.to_vim_dict}
 
-      yield(vim_entries.join(','))
+      yield('[' + vim_entries.join(',') + ']')
     end
   end
 end

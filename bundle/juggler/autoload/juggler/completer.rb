@@ -127,66 +127,49 @@ module Juggler
     end
 
     def generate_completions
+      completion_start = Time.now
       cursor_info = VIM::evaluate('s:cursorinfo')
       Juggler.logger.info { "Generating completions for: #{cursor_info['token']}" }
+
       scorer = EntryScorer.new(cursor_info['token'], $curbuf.name, VIM::Buffer.current.line_number)
       entries = CompletionEntries.new
+      completers = get_completers
+      file_existence = {'' => true}
 
-      #omni completions
-      if @use_omni
+      completers.each do |completion_type, completer|
         start = Time.now
         count = 0
-        @omni_completer.generate_completions(cursor_info['token']) do |entry|
-          entry.score = scorer.score(entry)
-          entries.add(entry)
-          count += 1
+        completer.generate_completions(cursor_info['token']) do |entry|
+          entry_file = entry.file.to_s
+          file_existence[entry_file] = File.exists?(entry_file) if file_existence[entry_file].nil?
+          if file_existence[entry_file]
+            entry.score = scorer.score(entry)
+            entries.add(entry)
+            count += 1
+          else
+            Juggler.logger.debug { "Skipping file because it doesn't exist: #{entry_file}" }
+          end
         end
-        Juggler.logger.info { "omni completions took #{Time.now - start} seconds and found #{count} entries" }
-      end
-
-      #ctags completions
-      if @use_tags
-        start = Time.now
-        count = 0
-        @ctags_completer.generate_completions(cursor_info['token']) do |entry|
-          entry.score = scorer.score(entry)
-          entries.add(entry)
-          count += 1
-        end
-        Juggler.logger.info { "ctags completions took #{Time.now - start} seconds and found #{count} entries" }
-      end
-
-      #cscope completions
-      if @use_cscope
-        start = Time.now
-        count = 0
-        @cscope_completer.generate_completions(cursor_info['token']) do |entry|
-          entry.score = scorer.score(entry)
-          entries.add(entry)
-          count += 1
-        end
-        Juggler.logger.info { "cscope completions took #{Time.now - start} seconds and found #{count} entries" }
-      end
-
-      #keywords completions
-      if @use_keyword
-        start = Time.now
-        count = 0
-        @keyword_completer.generate_completions(cursor_info['token']) do |entry|
-          entry.score = scorer.score(entry)
-          entries.add(entry)
-          count += 1
-        end
-        Juggler.logger.info { "keywords completions took #{Time.now - start} seconds and found #{count} entries" }
+        Juggler.logger.info { "#{completion_type} completions took #{Time.now - start} seconds and found #{count} entries" }
       end
 
       Juggler.logger.info { "#{entries.count} total entries found" }
       entries.process do |vim_arr|
-        VIM::command("call extend(s:juggler_completions, [#{vim_arr}])")
+        VIM::command("call extend(s:juggler_completions, #{vim_arr})")
       end
+      Juggler.logger.info { "Total time was #{Time.now - completion_start}" }
     end
 
     protected
+    def get_completers
+      completers = {}
+      completers[:omni] = @omni_completer if @use_omni
+      completers[:tags] = @ctags_completer if @use_tags
+      completers[:cscope] = @cscope_completer if @use_cscope
+      completers[:keyword] = @keyword_completer if @use_keyword
+      return completers
+    end
+
     def determine_project_dir
       cwd = VIM::evaluate('getcwd()')
       buf = File.absolute_path(VIM::evaluate('bufname("%")'))

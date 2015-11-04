@@ -13,7 +13,10 @@ module Juggler
       pattern = generate_cscope_pattern(pattern)
 
       result = []
-      IO.popen("cscope -dC -L -f'#{@cscope_db}' -6'#{pattern}'", 'w+') do |sp|
+      #TODO: detect when cscope has a file that no longer exists in it's database
+      #in that case it will print the following to stderr:
+      #  Cannot open file /foo.go
+      IO.popen("cscope -dC -L -f'#{@cscope_db}' -6'#{pattern}' 2> /dev/null", 'w+') do |sp|
         Juggler.clean_utf8(sp.read).split("\n").each_with_index do |line,index|
           if match = @@cscope_line_regexp.match(line)
             kind = (match[2] == '<unknown>' ? nil : match[2])
@@ -38,6 +41,7 @@ module Juggler
 
     #cscope egrep is pretty bad - very few character classes
     def generate_cscope_pattern(base)
+      base.downcase! #in order to do case insensitive matching cscope requires lower case
       return "^(.* )?#{base}" if base.length <= 2
       return "^(.* )?#{base}"
       #return '^(.* )?p[a-zA-Z0-9]*a'
