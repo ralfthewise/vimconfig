@@ -6,20 +6,22 @@ module Juggler
       @current_file = current_file
       @current_line = current_line
 
-      @proximity_to_current_line_threshold = 5 #must be within this number of lines to get the proximity weight
+      @proximity_to_current_line_threshold = 8 #must be within this number of lines to get the proximity weight
 
       #weight how match properties are treated - higher means more important
       @exact_match = 1000
       @case_insensitive_match = 100
-      @same_file = 2
+      @starts_with = 12
+      @case_insensitive_starts_with = 11
       @exact_first_letter = 10
       @case_insensitive_first_letter = 4
       @important_letter_weight = 1
       @extension_matches_filetype = 2
-      @proximity_to_current_line = 5
+      @same_file = 3
+      @proximity_to_current_line = 8
       @entry_source_weights = {
-        keyword: 0,
-        omni: 3, #omni can't include file/line info, so this helps balance that lack
+        keyword: 1, #keywords is slightly better than ctags/cscope since it operates on the (potentially not yet saved) buffer
+        omni: 2, #omni can't include file/line info, so this helps balance that lack
         ctags: 0,
         cscope: 0
       }
@@ -34,6 +36,8 @@ module Juggler
       case
       when entry.tag == @search_text then score += @exact_match
       when @search_text.casecmp(entry.tag) == 0 then score += @case_insensitive_match
+      when entry.tag.start_with?(@search_text) then score += @starts_with
+      when entry.tag.downcase.start_with?(@search_text.downcase) then score += @case_insensitive_starts_with
       when @search_text[0] == entry.tag[0] then score += @exact_first_letter
       when @search_text[0].casecmp(entry.tag[0]) == 0 then score += @case_insensitive_first_letter
       end

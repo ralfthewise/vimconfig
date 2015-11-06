@@ -150,7 +150,10 @@ endfunction
 function! juggler#Find(defsrch)
   let srchstr = input('Text to search for (start text with "/" to search for a regex): ', a:defsrch)
   redraw
+  let save_errorformat = &errorformat
+  set errorformat=%f:%l:%c:%m
   ruby Juggler::Completer.instance.find()
+  let &errorformat = save_errorformat
 endfunction
 
 function! s:GetCursorInfo()

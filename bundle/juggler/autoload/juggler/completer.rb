@@ -129,9 +129,10 @@ module Juggler
     def generate_completions
       completion_start = Time.now
       cursor_info = VIM::evaluate('s:cursorinfo')
-      Juggler.logger.info { "Generating completions for: #{cursor_info['token']}" }
+      token = cursor_info['token']
+      Juggler.logger.info { "Generating completions for: #{token}" }
 
-      scorer = EntryScorer.new(cursor_info['token'], $curbuf.name, VIM::Buffer.current.line_number)
+      scorer = EntryScorer.new(token, $curbuf.name, VIM::Buffer.current.line_number)
       entries = CompletionEntries.new
       completers = get_completers
       file_existence = {'' => true}
@@ -139,15 +140,17 @@ module Juggler
       completers.each do |completion_type, completer|
         start = Time.now
         count = 0
-        completer.generate_completions(cursor_info['token']) do |entry|
-          entry_file = entry.file.to_s
-          file_existence[entry_file] = File.exists?(entry_file) if file_existence[entry_file].nil?
-          if file_existence[entry_file]
-            entry.score = scorer.score(entry)
-            entries.add(entry)
-            count += 1
-          else
-            Juggler.logger.debug { "Skipping file because it doesn't exist: #{entry_file}" }
+        completer.generate_completions(token) do |entry|
+          if entry.tag != token #don't bother including exact matches
+            entry_file = entry.file.to_s
+            file_existence[entry_file] = File.exists?(entry_file) if file_existence[entry_file].nil?
+            if file_existence[entry_file]
+              entry.score = scorer.score(entry)
+              entries.add(entry)
+              count += 1
+            else
+              Juggler.logger.debug { "Skipping file because it doesn't exist: #{entry_file}" }
+            end
           end
         end
         Juggler.logger.info { "#{completion_type} completions took #{Time.now - start} seconds and found #{count} entries" }
