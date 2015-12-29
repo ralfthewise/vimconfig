@@ -7,7 +7,7 @@ module Juggler
   end
 
   def self.escape_vim_singlequote_string(str)
-    return str.to_s.gsub("'","''")
+    return str.to_s.gsub(/[\0']/, {"\0" => '', "'" => "''"})
   end
 
   def self.escape_vim_doublequote_string(str)

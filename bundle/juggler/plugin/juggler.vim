@@ -27,6 +27,7 @@ call s:defineOption('g:juggler_additionalPathExcludes', [])
 call s:defineOption('g:juggler_pathExcludes', g:juggler_defaultPathExcludes + g:juggler_additionalPathExcludes)
 
 call s:defineOption('g:juggler_enableAtStartup', 1)
+call s:defineOption('g:juggler_setupMaps', 1)
 call s:defineOption('g:juggler_logLevel', 'error')
 call s:defineOption('g:juggler_fixupPopupMenu', 1)
 call s:defineOption('g:juggler_parseCurrentPosRegex', '\([\.:]*\)\(\w*\)$')
@@ -49,5 +50,3 @@ endif
 if g:juggler_enableAtStartup
   call juggler#Enable()
 endif
-
-command! -nargs=? JugglerFind call juggler#Find('<args>')

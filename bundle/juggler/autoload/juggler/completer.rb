@@ -61,13 +61,19 @@ module Juggler
 
         start = Time.now
         result = `#{grep_cmd} | #{strip_tabs_cmd}`
+        result = result.gsub("\r\n", "\n").gsub("\r", "\n")
+        result = Juggler.clean_utf8(result).split("\n")
         Juggler.logger.debug do
           "Searching for the pattern: #{srchstr}\n" +
           "  Using grep command: #{grep_cmd}\n" +
           "  Text search took #{Time.now - start} seconds\n" +
-          "  Result:\n#{result}"
+          "  Num results: #{result.length}\n" +
+          "  Result:\n#{result.join("\n")}"
         end
-        VIM::command("cgetexpr split(\"#{Juggler.escape_vim_doublequote_string(result)}\", \"\\n\")")
+        result = result.map {|entry| "\"#{Juggler.escape_vim_doublequote_string(entry.strip[0..191])}\""}.join(',')
+        VIM::command("cgetexpr [#{result}]")
+
+        #VIM::command("cgetexpr split(\"#{Juggler.escape_vim_doublequote_string(result)}\", \"\\n\")")
         #VIM::command("cgetexpr system('#{Juggler.escape_vim_singlequote_string(grep_cmd)} \\| #{Juggler.escape_vim_singlequote_string(strip_tabs_cmd)}')")
 
         VIM::command('copen')

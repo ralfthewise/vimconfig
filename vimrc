@@ -133,26 +133,22 @@ if executable('ag')
   " Use ag over grep
   set grepprg=ag\ --nogroup\ --nocolor\ --smart-case
 endif
-" Finding text in files
-"command -nargs=+ -bar FindInFiles silent! grep! <args>|cwindow|redraw!
-"nmap <F3> :JugglerFind<CR>
-nmap <F3> :JugglerFind <C-R>=expand("<cword>")<CR><CR>
 
 "code navigation
 "find where method under cursor is called
-nmap <F7> :cs find s <C-R>=expand("<cword>")<CR><CR>:copen<CR>
+"nmap <F7> :cs find s <C-R>=expand("<cword>")<CR><CR>:copen<CR>
 "jump to definition of method under cursor
 "g<C-]> is part of the tags feature of vim - equivalent of :tjump <symbol
 "under cursor> - means jump to definition or popup menu if more than 1 def
 "nnoremap <C-b> g<C-]>
-nmap <C-b> :cstag <C-R>=expand("<cword>")<CR><CR>
+"nmap <C-b> :cstag <C-R>=expand("<cword>")<CR><CR>
 
 "acp
 let g:juggler_enableAtStartup = 1
 let g:juggler_logLevel = 'debug'
 let g:juggler_useTagsCompleter = 1
 let g:juggler_useCscopeCompleter = 1
-let g:juggler_useOmniCompleter = 1
+let g:juggler_useOmniCompleter = 0
 let g:juggler_additionalPathExcludes = ['*/test-ui/reports/*']
 let g:acp_enableAtStartup = 0
 let g:acp_completeoptPreview = 1

@@ -58,6 +58,8 @@ function juggler#Enable()
   "set these initially so we can always count on them being set
   let s:cursorinfo = {'linenum': -1, 'cursorindex': -1}
   let s:usercompleted = 0
+
+  call s:SetupCommands()
 endfunction
 
 function! s:OnBackspace(bsSeq)
@@ -147,13 +149,25 @@ function juggler#AfterPopup()
   return '' "have to return empty string otherwise '0' will get inserted
 endfunction
 
-function! juggler#Find(defsrch)
-  let srchstr = input('Text to search for (start text with "/" to search for a regex): ', a:defsrch)
+function! s:Search(defsrch)
+  let resolvedsrch = (a:defsrch == '' ? expand('<cword>') : a:defsrch)
+  let srchstr = input('Text to search for (start text with "/" to search for a regex): ', resolvedsrch)
   redraw
   let save_errorformat = &errorformat
   set errorformat=%f:%l:%c:%m
   ruby Juggler::Completer.instance.find()
   let &errorformat = save_errorformat
+endfunction
+
+function! s:GoToDefinition(defterm)
+  let resolvedterm = (a:defterm == '' ? expand('<cword>') : a:defterm)
+  exe 'cstag ' . resolvedterm
+endfunction
+
+function! s:ShowReferences(defterm)
+  let resolvedterm = (a:defterm == '' ? expand('<cword>') : a:defterm)
+  exe 'cs find s ' . resolvedterm
+  copen
 endfunction
 
 function! s:GetCursorInfo()
@@ -244,6 +258,23 @@ ruby << RUBYEOF
   plugin_path = VIM::evaluate('s:plugin_path')
   require File.join(plugin_path, 'juggler.rb')
 RUBYEOF
+endfunction
+
+function! s:SetupCommands()
+  command! -n=0 JugglerHelp :help JugglerCommands
+  command! -nargs=? JugglerSearch call s:Search('<args>')
+  command! -nargs=? JugglerJumpDef call s:GoToDefinition('<args>')
+  command! -nargs=? JugglerShowRefs call s:ShowReferences('<args>')
+  if g:juggler_setupMaps
+    call s:SetupMaps()
+  endif
+endfunction
+
+function! s:SetupMaps()
+  nmap <F1> :JugglerHelp<CR>
+  nmap <F3> :JugglerSearch<CR>
+  nmap <C-B> :JugglerJumpDef<CR>
+  nmap <F7> :JugglerShowRefs<CR>
 endfunction
 
 "load additional functionality

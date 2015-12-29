@@ -1,0 +1,52 @@
+*juggler.txt*   A code editing plugin
+
+
+                   ____  ________________    __________ ~
+                  / / / / / ____/ ____/ /   / ____/ __ \~
+             __  / / / / / / __/ / __/ /   / __/ / /_/ /~
+            / /_/ / /_/ / /_/ / /_/ / /___/ /___/ _, _/ ~
+            \____/\____/\____/\____/_____/_____/_/ |_|  ~
+
+
+                              Reference Manual~
+
+
+
+
+==============================================================================
+CONTENTS                                                    *Juggler-contents*
+
+    1.Intro..........................................................|Juggler|
+    2.Commands/Maps..........................................|JugglerCommands|
+
+==============================================================================
+1. Intro                                                             *Juggler*
+
+The Juggler plugin makes software development using Vim much easier. It aims
+to strike the right balance between a minimal, lightweight text editor (what
+I consider vanilla Vim to be out of the box with no customization) and a
+full-featured integrated development environment.  It includes such features
+as code-completion, jump-to-definition, find-references, and enhanced search
+and replace functionality, among others.
+
+==============================================================================
+2. Commands/Maps                                             *JugglerCommands*
+
+:JugglerHelp                                                    *:JugglerHelp*
+    Default map: <F1>
+    Open the Juggler help.
+
+:JugglerSearch [<search-text>]                                *:JugglerSearch*
+    Default map: <F3>
+    Searches your project for specific text or a regex. If <search-text> is
+    provided it will use that, otherwise it will use the word under The
+    cursor. Tries to use "ng" if available, then "ack", and finally just
+    plain old grep.
+
+:JugglerJumpDef                                              *:JugglerJumpDef*
+    Default map: <C-B>
+    Jumps to the definition of the object under the cursor.
+
+:JugglerShowRefs                                            *:JugglerShowRefs*
+    Default map: <F7>
+    Display references to the object under the cursor.
