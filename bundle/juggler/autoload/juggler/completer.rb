@@ -94,7 +94,7 @@ module Juggler
 
         #tags
         if (@use_tags && @manage_tags)
-          #TODO: remove tags for current file before running ctags so that just updating for the current file works correctly
+          remove_tags_for_file($curbuf.name) if only_current_file == 1
           cmd = "#{cd_cmd} && #{ctags_cmd}"
           Juggler.logger.debug { "Updating tags with the following command: #{cmd}" }
           Juggler.refresh
@@ -220,6 +220,19 @@ module Juggler
       else
         return "find #{path_spec} -type f -not -path " + path_excludes.map {|e| Shellwords.escape(e)}.join(' -not -path ')
       end
+    end
+
+    def remove_tags_for_file(file)
+      Juggler.logger.debug { "Removing tags for file: #{file}" }
+      tag_file = File.join(@indexes_path, 'tags')
+      tmp_file = File.join(@indexes_path, 'tags.tmp')
+      File.open(tmp_file, 'w') do |f|
+        IO.foreach(tag_file) do |line|
+          f.write(line) if line[0] == '!' || line.split("\t")[1] != file
+        end
+      end
+
+      FileUtils.mv(tmp_file, tag_file)
     end
   end
 end
