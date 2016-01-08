@@ -53,3 +53,14 @@ To update plugins do:
 Updating plugin documentation:
 
     open vim and do :Helptags
+
+Removing a plugin (http://stackoverflow.com/a/1260982):
+
+    Delete the relevant section from the .gitmodules file.
+    Stage the .gitmodules changes: git add .gitmodules
+    Delete the relevant section from .git/config.
+    Run git rm --cached path_to_submodule (no trailing slash).
+    Run git rm bundle/<symbolic link to submodule>
+    Run rm -rf .git/modules/path_to_submodule
+    Commit: git commit -m "Removed submodule <name>"
+    Delete the now untracked submodule files: rm -rf path_to_submodule
