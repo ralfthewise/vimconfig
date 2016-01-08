@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# this could probably be replaced with just:
+#   git submodule update --remote --merge
+
 ROOT="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "${ROOT}"
 
