@@ -3,11 +3,37 @@
 ":retab
 
 "should come first since it changes other options
-set nocompatible "use vim defaults, not vi defaults
+set nocompatible "use vim defaults, not vi defaults, required for vundle but also is just plain good
+filetype off "required for vundle
 
-"initialize pathogen (manage vim scripts in their own directory)
-call pathogen#infect()
-call pathogen#helptags()
+"set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+Plugin 'vim-scripts/genutils'
+Plugin 'vim-scripts/AutoComplPop'
+Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'scrooloose/nerdcommenter'
+Plugin 'scrooloose/nerdtree'
+Plugin 'scrooloose/syntastic'
+Plugin 'majutsushi/tagbar'
+Plugin 'vim-scripts/taglist.vim'
+Plugin 'MattesGroeger/vim-bookmarks'
+Plugin 'thisivan/vim-bufexplorer'
+Plugin 'kchmck/vim-coffee-script'
+Plugin 'Lokaltog/vim-easymotion'
+Plugin 'terryma/vim-expand-region'
+Plugin 'fatih/vim-go'
+Plugin 'digitaltoad/vim-jade'
+Plugin 'tpope/vim-rails'
+Plugin 'kana/vim-textobj-user'
+
+call vundle#end()
+filetype plugin indent on " required for vundle
+
+"load juggler plugin
+set rtp+=~/.vim/bundle/juggler
+helptags ~/.vim/bundle/juggler/doc
 
 "whitespace - has to come before other ColorScheme commands
 autocmd ColorScheme * highlight ExtraWhitespace ctermbg=darkred guibg=darkred "color of bad whitespace
@@ -124,7 +150,7 @@ vnoremap <Space> zf
 "augroup vimrc
 "  au BufReadPre * setlocal foldmethod=syntax
 "augroup END
-autocmd BufReadPost * :CollapseAll
+"autocmd BufReadPost * :CollapseAll
 "let SimpleFold_use_subfolds = 0
 
 " Searching in files
@@ -338,10 +364,10 @@ autocmd FileType ruby,eruby let g:rubycomplete_classes_in_global = 1
 autocmd FileType ruby set iskeyword=@,48-57,_,?,!,192-255
 
 "vim
-autocmd FileType vim call Collapse_SetRegexs('^\s*function!\?', '^\s*endfunction\s*$', '^\s*"')
+"autocmd FileType vim call Collapse_SetRegexs('^\s*function!\?', '^\s*endfunction\s*$', '^\s*"')
 
 "python
-autocmd FileType python call Collapse_SetRegexs('^\s*def\s', '', '^\s*#')
+"autocmd FileType python call Collapse_SetRegexs('^\s*def\s', '', '^\s*#')
 autocmd FileType python setl ts=4 sts=4 sw=4 et
 "function s:add_global_python_cscope()
 "  if filereadable($HOME . "/.python.cscope") && !cscope_connection(2, $HOME . "/.python.cscope")

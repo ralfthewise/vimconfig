@@ -3,17 +3,12 @@
 DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "${DIR}"
 
-git submodule init
-git submodule update
+echo "  mkdir -p ~/.vim ~/.vimbackup ~/.vimswp ~/.vimundo"
+mkdir -p ~/.vim  ~/.vimbackup ~/.vimswp ~/.vimundo
 
-##build command-t
-#echo 'Building command-t.  Make sure you are building it against the version of ruby vim was built with (vim --version)...'
-#cd submodules/command-t/ruby/command-t
-#make clean
-#rm Makefile
-#ruby extconf.rb
-#make
-#cd ../../../..
+if [ ! -d ~/.vim/bundle/Vundle.vim ]; then
+  git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+fi
 
 #check for needed commands
 command -v coffee >/dev/null 2>&1
@@ -49,14 +44,16 @@ echo ""
 echo ""
 echo "Updating your vim environment to use this configuration..."
 
-echo "  mkdir -p ~/.vimbackup ~/.vimswp ~/.vimundo"
-mkdir -p ~/.vimbackup ~/.vimswp ~/.vimundo
 echo "  rm -f ~/.vimrc.bak; mv ~/.vimrc ~/.vimrc.bak; ln -s \"${DIR}/vimrc\" ~/.vimrc"
 rm -f ~/.vimrc.bak; mv ~/.vimrc ~/.vimrc.bak; ln -s "${DIR}/vimrc" ~/.vimrc
-echo "  rm -f ~/.vim.bak; mv ~/.vim ~/.vim.bak; ln -s \"${DIR}\" ~/.vim"
-rm -f ~/.vim.bak; mv ~/.vim ~/.vim.bak; ln -s "${DIR}" ~/.vim
+echo "  rm -f ~/.vim/colors.bak; mv ~/.vim/colors ~/.vim/colors.bak; ln -s \"${DIR}/colors\" ~/.vim/colors"
+rm -f ~/.vim/colors.bak; mv ~/.vim/colors ~/.vim/colors.bak; ln -s "${DIR}/colors" ~/.vim/colors
 echo "  rm -f ~/.ctags.bak; mv ~/.ctags ~/.ctags.bak; ln -s \"${DIR}/ctags\" ~/.ctags"
 rm -f ~/.ctags.bak; mv ~/.ctags ~/.ctags.bak; ln -s "${DIR}/ctags" ~/.ctags
+
+
+vim +PluginInstall +qall
+vim -c "helptags ${HOME}/.vim/bundle/Vundle.vim/doc|q"
 
 echo ""
 echo "Installation complete."
