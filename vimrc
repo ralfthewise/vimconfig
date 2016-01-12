@@ -10,6 +10,7 @@ filetype off "required for vundle
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
+Plugin 'VundleVim/Vundle.vim'
 Plugin 'vim-scripts/genutils'
 Plugin 'vim-scripts/AutoComplPop'
 Plugin 'ctrlpvim/ctrlp.vim'
