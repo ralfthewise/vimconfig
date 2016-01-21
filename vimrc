@@ -91,6 +91,7 @@ set ruler "show line,column,% of file in bottom line
 autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>:ccl<CR>
 set wildmenu "vim command completion
 set wildmode=longest:full,full "vim command completion
+set nostartofline "don't position cursor at start of line when switching buffers (as well as other situations)
 
 "load internal matchit plugin/macro
 runtime macros/matchit.vim
@@ -127,13 +128,11 @@ vmap X "+x
 "search for word under cursor
 nnoremap <F6> :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 
-"jump to the last position
+"jump to the last position (:help last-position-jump)
+autocmd BufReadPost * if line("'\"") <= line("$") | exe "normal! g`\"" | endif
+"or this if you want to restore folds
 "autocmd BufWinLeave * mkview
-"autocmd BufWinEnter * silent loadview
-"autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
-"autocmd BufWritePost,BufLeave,WinLeave ?* if expand('%') != '' && &buftype !~ 'nofile' | mkview | endif
-"autocmd BufWinEnter * if expand('%') != '[BufExplorer]' | silent loadview | endif
-"autocmd BufWinEnter * if confirm(expand('%'), "&Yes\n&No", 2, "Question") == 1 | silent loadview | endif
+"autocmd BufWinEnter * if &modifiable | silent loadview | endif
 
 "force unix line endings
 "autocmd BufWinEnter * set fileformat=unix
