@@ -81,6 +81,17 @@ module Juggler
       end
     end
 
+    def show_references
+      Juggler.with_status('Finding references...') do
+        term = VIM::evaluate('resolvedterm').to_s
+        next if term == ''
+        Juggler.logger.debug { "Searching for references of: #{term}" }
+        @cscope_service.query(term, CscopeQuery::Symbol).each do |cscope_entry|
+          Juggler.logger.debug { "Found reference: #{cscope_entry}" }
+        end
+      end
+    end
+
     def update_indexes(only_current_file: 0)
       if ((@use_tags && @manage_tags) || (@use_cscope && @manage_cscope))
         only_current_file = 0 if !File.exists?(File.join(@indexes_path, 'tags.files')) || !File.exists?(File.join(@indexes_path, 'cscope.files'))
@@ -151,7 +162,7 @@ module Juggler
             entry_file = entry.file.to_s
             file_existence[entry_file] = File.exists?(entry_file) if file_existence[entry_file].nil?
             if file_existence[entry_file]
-              entry.score = scorer.score(entry)
+              entry.score_data = scorer.score(entry)
               entries.add(entry)
               count += 1
             else

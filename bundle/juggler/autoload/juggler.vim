@@ -166,6 +166,7 @@ endfunction
 
 function! s:ShowReferences(defterm)
   let resolvedterm = (a:defterm == '' ? expand('<cword>') : a:defterm)
+  ruby Juggler::Completer.instance.show_references()
   exe 'cs find s ' . resolvedterm
   copen
 endfunction
