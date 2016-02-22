@@ -86,9 +86,18 @@ module Juggler
         term = VIM::evaluate('resolvedterm').to_s
         next if term == ''
         Juggler.logger.debug { "Searching for references of: #{term}" }
-        @cscope_service.query(term, CscopeQuery::Symbol).each do |cscope_entry|
-          Juggler.logger.debug { "Found reference: #{cscope_entry}" }
+        result = @cscope_service.query(term, CscopeQuery::Symbol)
+        if Juggler.logger.debug?
+          result.each do |cscope_entry|
+            Juggler.logger.debug { "Found reference: #{cscope_entry}" }
+          end
         end
+        result = result.map do |entry|
+          qfix_entry = "#{entry[:file]}:#{entry[:line]}: <#{entry[:kind]}> #{entry[:tag_line]}"
+          "\"#{Juggler.escape_vim_doublequote_string(qfix_entry.strip[0..191])}\""
+        end
+        VIM::command("cgetexpr [#{result.join(',')}]")
+        VIM::command('copen')
       end
     end
 

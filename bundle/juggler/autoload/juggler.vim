@@ -166,9 +166,16 @@ endfunction
 
 function! s:ShowReferences(defterm)
   let resolvedterm = (a:defterm == '' ? expand('<cword>') : a:defterm)
+
+  "normally we would just do 'cs find s ...' but unfortunately that always
+  "jumps to the first match
+  "exe 'cs find s ' . resolvedterm
+  "copen
+
+  let save_errorformat = &errorformat
+  set errorformat=%f:%l:%m
   ruby Juggler::Completer.instance.show_references()
-  exe 'cs find s ' . resolvedterm
-  copen
+  let &errorformat = save_errorformat
 endfunction
 
 function! s:GetCursorInfo()

@@ -21,7 +21,8 @@ module Juggler
     end
 
     def query(pattern, query_type = CscopeQuery::Egrep)
-      pattern = generate_cscope_pattern(pattern)
+      #TODO: be smarter about when to generate a cscope pattern here
+      pattern = generate_cscope_pattern(pattern) if query_type == CscopeQuery::Egrep
 
       result = []
       #TODO: detect when cscope has a file that no longer exists in it's database
