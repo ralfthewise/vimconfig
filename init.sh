@@ -8,6 +8,7 @@ mkdir -p ~/.vim  ~/.vimbackup ~/.vimswp ~/.vimundo
 
 if [ ! -d ~/.vim/bundle/Vundle.vim ]; then
   git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+  ln -s "${DIR}/bundle/juggler" ~/.vim/bundle/juggler
 fi
 
 #check for needed commands
