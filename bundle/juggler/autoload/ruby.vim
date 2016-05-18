@@ -1,3 +1,6 @@
+" language support depends on vim-textobj-user
+if !exists('*textobj#user#plugin') | finish | endif
+
 "add ruby text objects so vim-expand-region works on ruby files
 "blatantly taken from https://github.com/vim-ruby/vim-ruby
 
