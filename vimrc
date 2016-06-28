@@ -385,7 +385,8 @@ autocmd FileType python set omnifunc=pythoncomplete#Complete
 "autocmd FileType coffee set tags=coffee.tags
 
 "json
-autocmd FileType json autocmd BufWritePre <buffer> %!python -m json.tool
+"autocmd FileType json autocmd BufWritePre <buffer> %!python -m json.tool
+autocmd FileType json autocmd BufWritePre <buffer> %!python -c 'import sys,collections,json;print json.dumps(json.loads(sys.stdin.read(),object_pairs_hook=collections.OrderedDict),sort_keys=False,indent=2,separators=(",", ": "))'
 
 "c/c++
 autocmd FileType c setl ts=2 sts=2 sw=2 et
