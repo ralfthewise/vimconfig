@@ -4,6 +4,7 @@ require 'shellwords'
 require 'digest/sha1'
 require_relative 'cscope_service'
 require_relative 'omni_completer'
+require_relative 'omni_trigger_completer'
 require_relative 'ctags_completer'
 require_relative 'cscope_completer'
 require_relative 'keyword_completer'
@@ -18,6 +19,7 @@ module Juggler
       @log_level = ENV['JUGGLER_LOG_LEVEL'] || VIM::evaluate('g:juggler_logLevel')
       #TODO: load these on each completion
       @use_omni = VIM::evaluate('g:juggler_useOmniCompleter') == 1
+      @use_omni_trigger = VIM::evaluate('g:juggler_useOmniTrigger') == 1
       @use_tags = VIM::evaluate('g:juggler_useTagsCompleter') == 1
       @manage_tags = VIM::evaluate('g:juggler_manageTags') == 1
       @use_cscope = VIM::evaluate('g:juggler_useCscopeCompleter') == 1
@@ -147,6 +149,7 @@ module Juggler
 
     def init_completers
       @omni_completer = OmniCompleter.new if @use_omni
+      @omni_trigger_completer = OmniTriggerCompleter.new if @use_omni_trigger
       @ctags_completer = CtagsCompleter.new if @use_tags
       @cscope_completer = CscopeCompleter.new(@cscope_service) if @use_cscope
       @keyword_completer = KeywordCompleter.new if @use_keyword
@@ -160,7 +163,7 @@ module Juggler
 
       scorer = EntryScorer.new(token, $curbuf.name, VIM::Buffer.current.line_number)
       entries = CompletionEntries.new
-      completers = get_completers
+      completers = get_completers(cursor_info)
       file_existence = {'' => true}
 
       completers.each do |completion_type, completer|
@@ -190,7 +193,9 @@ module Juggler
     end
 
     protected
-    def get_completers
+    def get_completers(cursor_info)
+      return {omni_trigger: @omni_trigger_completer} if cursor_info['type'] == 'omnitrigger'
+
       completers = {}
       completers[:omni] = @omni_completer if @use_omni
       completers[:tags] = @ctags_completer if @use_tags

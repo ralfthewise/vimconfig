@@ -30,10 +30,28 @@ call s:defineOption('g:juggler_enableAtStartup', 1)
 call s:defineOption('g:juggler_setupMaps', 1)
 call s:defineOption('g:juggler_logLevel', 'error')
 call s:defineOption('g:juggler_fixupPopupMenu', 1)
-call s:defineOption('g:juggler_parseCurrentPosRegex', '\([\.:]*\)\(\w*\)$')
+
+"Will trigger completion if the text before the cursor matches the regex
+"below.  If the first match length > 0 and the second match (the token)
+"length == 0 it will only trigger an omni completion (no point in doing
+"any other type of completion when the token is length 0).  It will only
+"trigger the other completions when the second match (the token) length >
+"g:juggler_minTokenLength.  Obviously omni completion is never triggered if
+"g:juggler_useOmniCompleter is falsey.
+call s:defineOption('g:juggler_triggerTokenRegex', '\(\w*\)$')
 call s:defineOption('g:juggler_minTokenLength', 2)
 
+"Use omni completion when doing token completion
 call s:defineOption('g:juggler_useOmniCompleter', 0)
+"Allow omni completion to be triggered by its own regex (eg after typing '.'
+"or '::')
+call s:defineOption('g:juggler_useOmniTrigger', 1)
+"Regex that will trigger just omni completion
+call s:defineOption('g:juggler_triggerOmniRegex', '\(\.\)\(\w*\)$')
+"If doing omni trigger completion, should we cache the results and use them
+"for successive token completions
+call s:defineOption('g:juggler_useOmniTriggerCache', 1)
+
 call s:defineOption('g:juggler_useTagsCompleter', 1)
 call s:defineOption('g:juggler_manageTags', 1)
 call s:defineOption('g:juggler_useCscopeCompleter', 1)

@@ -110,7 +110,12 @@ function! juggler#Complete(findstart, base)
     endif
 
     "make sure omnifunc gets called if there is one
-    if g:juggler_useOmniCompleter && &omnifunc != ""
+    if &omnifunc != "" && (g:juggler_useOmniCompleter || g:juggler_useOmniTrigger)
+      "first save the current position and then move to start of token
+      let save_cursor = getcurpos()
+      call setpos('.', [save_cursor[0], save_cursor[1], save_cursor[2] - len(s:cursorinfo.token), save_cursor[3], save_cursor[4]])
+
+      "call omnifunc
       call call(&omnifunc, [a:findstart, a:base])
       "TODO: should we return the result if it's valid?  And what
       "should we do if result differs from s:cursorinfo.matchstart?
@@ -118,6 +123,9 @@ function! juggler#Complete(findstart, base)
       "if result
       "  return result
       "endif
+
+      "restore original position
+      call setpos('.', save_cursor)
     endif
 
     return s:cursorinfo.matchstart
@@ -192,9 +200,17 @@ function! s:GetCursorInfo()
   endif
 
   let prefix = strpart(line, 0, cursorindex)
-  let matches = matchlist(prefix, g:juggler_parseCurrentPosRegex)
-  if len(matches) > 0 && (len(matches[1]) > 0 || len(matches[2]) >= g:juggler_minTokenLength)
-    return {'match': 1, 'linenum': posinfo[1], 'cursorindex': cursorindex, 'prefix': matches[1], 'token': matches[2], 'matchstart': cursorindex - len(matches[2])}
+  "check for trigger token completion
+  let matches = matchlist(prefix, g:juggler_triggerTokenRegex)
+  if len(matches) > 1 && len(matches[1]) >= g:juggler_minTokenLength
+    return {'match': 1, 'type': 'token', 'linenum': posinfo[1], 'cursorindex': cursorindex, 'token': matches[1], 'matchstart': cursorindex - len(matches[1])}
+  endif
+  "check for trigger omni completion
+  if g:juggler_useOmniTrigger && &omnifunc != ""
+    let matches = matchlist(prefix, g:juggler_triggerOmniRegex)
+    if len(matches) > 2
+      return {'match': 1, 'type': 'omnitrigger', 'linenum': posinfo[1], 'cursorindex': cursorindex, 'token': matches[2], 'matchstart': cursorindex - len(matches[2]), 'trigger': matches[1]}
+    endif
   endif
 
   return {'match': 0}
