@@ -402,6 +402,7 @@ autocmd FileType c set omnifunc=ccomplete#Complete
 "filetype plugin indent on
 "syntax on
 let g:go_fmt_command = "goimports"
+let g:go_list_type = "quickfix"
 autocmd FileType go highlight clear ExtraWhitespace
 autocmd FileType go setl ts=2 sts=2 sw=2 noexpandtab
 "autocmd FileType go set tags=.go.tags,~/.go.tags
