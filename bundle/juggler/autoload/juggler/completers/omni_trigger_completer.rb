@@ -1,6 +1,6 @@
 require_relative 'omni_completer'
 
-module Juggler
+module Juggler::Completers
   class OmniTriggerCompleter < OmniCompleter
     def generate_completions(base)
       base_regex = Regexp.new(generate_match_pattern(base), Regexp::IGNORECASE)

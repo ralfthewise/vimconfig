@@ -1,6 +1,6 @@
-require_relative 'completion_entry'
+require_relative '../completion_entry'
 
-module Juggler
+module Juggler::Completers
   class KeywordCompleter
     #example lines:
     #app/search-scoop/services/card-display-state.coffee
@@ -18,7 +18,7 @@ module Juggler
           index = match[1].to_i
           line_num = match[2].to_i
           match[3].scan(base_regex) do |tag|
-            entry = CompletionEntry.new(source: :keyword, index: index, file: file, line: line_num, tag: tag)
+            entry = Juggler::CompletionEntry.new(source: :keyword, index: index, file: file, line: line_num, tag: tag)
             yield(entry)
           end
         else

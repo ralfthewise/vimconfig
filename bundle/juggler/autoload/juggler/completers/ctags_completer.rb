@@ -1,6 +1,6 @@
-require_relative 'completion_entry'
+require_relative '../completion_entry'
 
-module Juggler
+module Juggler::Completers
   class CtagsCompleter
     #example result from taglist():
     #
@@ -13,7 +13,7 @@ module Juggler
       ctag_output.each_with_index do |ctag_entry, index|
         line_num = ctag_entry['line']
         line_num = line_num.to_i unless line_num.nil?
-        entry = CompletionEntry.new(source: :ctags, index: index, kind: ctag_entry['kind'], tag: ctag_entry['name'], file: ctag_entry['filename'], line: line_num)
+        entry = Juggler::CompletionEntry.new(source: :ctags, index: index, kind: ctag_entry['kind'], tag: ctag_entry['name'], file: ctag_entry['filename'], line: line_num)
         entry.excmd = ctag_entry['cmd']
         yield(entry)
       end

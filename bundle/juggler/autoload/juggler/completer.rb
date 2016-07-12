@@ -3,13 +3,13 @@ require 'singleton'
 require 'shellwords'
 require 'digest/sha1'
 require_relative 'cscope_service'
-require_relative 'omni_completer'
-require_relative 'omni_trigger_completer'
-require_relative 'ctags_completer'
-require_relative 'cscope_completer'
-require_relative 'keyword_completer'
 require_relative 'entry_scorer'
 require_relative 'completion_entries'
+require_relative 'completers/omni_completer'
+require_relative 'completers/omni_trigger_completer'
+require_relative 'completers/ctags_completer'
+require_relative 'completers/cscope_completer'
+require_relative 'completers/keyword_completer'
 
 module Juggler
   class Completer
@@ -148,11 +148,11 @@ module Juggler
     end
 
     def init_completers
-      @omni_completer = OmniCompleter.new if @use_omni
-      @omni_trigger_completer = OmniTriggerCompleter.new if @use_omni_trigger
-      @ctags_completer = CtagsCompleter.new if @use_tags
-      @cscope_completer = CscopeCompleter.new(@cscope_service) if @use_cscope
-      @keyword_completer = KeywordCompleter.new if @use_keyword
+      @omni_completer = Completers::OmniCompleter.new if @use_omni
+      @omni_trigger_completer = Completers::OmniTriggerCompleter.new if @use_omni_trigger
+      @ctags_completer = Completers::CtagsCompleter.new if @use_tags
+      @cscope_completer = Completers::CscopeCompleter.new(@cscope_service) if @use_cscope
+      @keyword_completer = Completers::KeywordCompleter.new if @use_keyword
     end
 
     def generate_completions
