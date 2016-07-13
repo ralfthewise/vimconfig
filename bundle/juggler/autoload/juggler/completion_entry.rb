@@ -21,6 +21,13 @@ module Juggler
       self.info = info
     end
 
+    def duplicate
+      dup = self.class.new(source: source, tag: tag, line: line, index: index, pri: pri, kind: kind, file: file, signature: signature, info: info)
+      dup.score_data = score_data.clone unless score_data.nil?
+      dup.excmd = excmd
+      return dup
+    end
+
     def to_vim_dict
       #extra spaces here help visually separate term from description in popup menu
       return "{'word':'%s','menu':'  %s','kind':'  %s','info':'%s'}" % [tag, generate_menu_info, kind, generate_preview_info].map{|x| Juggler.escape_vim_singlequote_string(x)}

@@ -116,7 +116,7 @@ function! juggler#Complete(findstart, base)
       call setpos('.', [save_cursor[0], save_cursor[1], save_cursor[2] - len(s:cursorinfo.token), save_cursor[3], save_cursor[4]])
 
       "call omnifunc
-      call call(&omnifunc, [a:findstart, a:base])
+      call call(&omnifunc, [1, a:base])
       "TODO: should we return the result if it's valid?  And what
       "should we do if result differs from s:cursorinfo.matchstart?
       "let result = call(&omnifunc, [a:findstart, a:base])

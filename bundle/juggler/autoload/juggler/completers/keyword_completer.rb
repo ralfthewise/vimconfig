@@ -7,7 +7,7 @@ module Juggler::Completers
     # 17:   31 type PublicIncident struct {
     @@keyword_regexp = /^\s*(\d+):\s+(\d+)\s+(.+)$/
 
-    def generate_completions(base)
+    def generate_completions(base, cursor_info)
       return if base.nil? || base.empty?
 
       file = nil

@@ -6,7 +6,7 @@ module Juggler::Completers
     #
     #  [{'cmd': '/^  appendValAtPath = (dataModel, modelPath, modelVal, archetypeProperties) ->$/', 'static': 0, 'name': 'appendValAtPath', 'line': '6', 'language': 'coffee', 'kind': 'function', 'filename': './app/components/radar-forms/services/form-data-translator.coffee'}]
 
-    def generate_completions(base)
+    def generate_completions(base, cursor_info)
       return if base.nil? || base.empty?
 
       ctag_output = VIM::evaluate("s:GetTags('\\c#{Juggler.escape_vim_singlequote_string(generate_ctag_pattern(base))}')")

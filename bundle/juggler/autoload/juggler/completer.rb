@@ -20,6 +20,7 @@ module Juggler
       #TODO: load these on each completion
       @use_omni = VIM::evaluate('g:juggler_useOmniCompleter') == 1
       @use_omni_trigger = VIM::evaluate('g:juggler_useOmniTrigger') == 1
+      @use_omni_trigger_cache = VIM::evaluate('g:juggler_useOmniTriggerCache') == 1
       @use_tags = VIM::evaluate('g:juggler_useTagsCompleter') == 1
       @manage_tags = VIM::evaluate('g:juggler_manageTags') == 1
       @use_cscope = VIM::evaluate('g:juggler_useCscopeCompleter') == 1
@@ -149,55 +150,60 @@ module Juggler
 
     def init_completers
       @omni_completer = Completers::OmniCompleter.new if @use_omni
-      @omni_trigger_completer = Completers::OmniTriggerCompleter.new if @use_omni_trigger
+      @omni_trigger_completer = Completers::OmniTriggerCompleter.new(@use_omni_trigger_cache) if @use_omni_trigger
       @ctags_completer = Completers::CtagsCompleter.new if @use_tags
       @cscope_completer = Completers::CscopeCompleter.new(@cscope_service) if @use_cscope
       @keyword_completer = Completers::KeywordCompleter.new if @use_keyword
     end
 
     def generate_completions
-      completion_start = Time.now
-      cursor_info = VIM::evaluate('s:cursorinfo')
-      token = cursor_info['token']
-      Juggler.logger.info { "Generating completions for: #{token}" }
+      begin
+        completion_start = Time.now
+        cursor_info = VIM::evaluate('s:cursorinfo')
+        token = cursor_info['token']
+        Juggler.logger.info { "Generating completions for: #{token}" }
 
-      scorer = EntryScorer.new(token, $curbuf.name, VIM::Buffer.current.line_number)
-      entries = CompletionEntries.new
-      completers = get_completers(cursor_info)
-      file_existence = {'' => true}
+        scorer = EntryScorer.new(token, $curbuf.name, VIM::Buffer.current.line_number)
+        entries = CompletionEntries.new
+        completers = get_completers(cursor_info)
+        file_existence = {'' => true}
 
-      completers.each do |completion_type, completer|
-        start = Time.now
-        count = 0
-        completer.generate_completions(token) do |entry|
-          if entry.tag != token #don't bother including exact matches
-            entry_file = entry.file.to_s
-            file_existence[entry_file] = File.exists?(entry_file) if file_existence[entry_file].nil?
-            if file_existence[entry_file]
-              entry.score_data = scorer.score(entry)
-              entries.add(entry)
-              count += 1
-            else
-              Juggler.logger.debug { "Skipping file because it doesn't exist: #{entry_file}" }
+        completers.each do |completion_type, completer|
+          start = Time.now
+          count = 0
+          completer.generate_completions(token, cursor_info) do |entry|
+            if entry.tag != token #don't bother including exact matches
+              entry_file = entry.file.to_s
+              file_existence[entry_file] = File.exists?(entry_file) if file_existence[entry_file].nil?
+              if file_existence[entry_file]
+                entry.score_data = scorer.score(entry)
+                entries.add(entry)
+                count += 1
+              else
+                Juggler.logger.debug { "Skipping file because it doesn't exist: #{entry_file}" }
+              end
             end
           end
+          Juggler.logger.info { "#{completion_type} completions took #{Time.now - start} seconds and found #{count} entries" }
         end
-        Juggler.logger.info { "#{completion_type} completions took #{Time.now - start} seconds and found #{count} entries" }
-      end
 
-      Juggler.logger.info { "#{entries.count} total entries found" }
-      entries.process do |vim_arr|
-        VIM::command("call extend(s:juggler_completions, #{vim_arr})")
+        Juggler.logger.info { "#{entries.count} total entries found" }
+        entries.process do |vim_arr|
+          VIM::command("call extend(s:juggler_completions, #{vim_arr})")
+        end
+        Juggler.logger.info { "Total time was #{Time.now - completion_start}" }
+      rescue Exception => e
+        Juggler.logger.error { "Exception while generating completions: #{e}\n#{e.backtrace.join("\n")}" }
       end
-      Juggler.logger.info { "Total time was #{Time.now - completion_start}" }
     end
 
     protected
     def get_completers(cursor_info)
-      return {omni_trigger: @omni_trigger_completer} if cursor_info['type'] == 'omnitrigger'
+      return {omni_trigger: @omni_trigger_completer} if @use_omni_trigger && cursor_info['type'] == 'omnitrigger'
 
       completers = {}
       completers[:omni] = @omni_completer if @use_omni
+      completers[:omnitrigger] = @omni_trigger_completer if @use_omni_trigger
       completers[:tags] = @ctags_completer if @use_tags
       completers[:cscope] = @cscope_completer if @use_cscope
       completers[:keyword] = @keyword_completer if @use_keyword

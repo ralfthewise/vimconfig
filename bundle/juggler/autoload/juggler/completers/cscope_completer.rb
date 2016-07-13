@@ -6,7 +6,7 @@ module Juggler::Completers
       @cscope_service = cscope_service
     end
 
-    def generate_completions(base)
+    def generate_completions(base, cursor_info)
       return if base.nil? || base.empty?
 
       #BUG this regex below doesn't grab the right tag from the cscope results

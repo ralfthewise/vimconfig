@@ -25,6 +25,7 @@ module Juggler
       @entry_source_weights = {
         keyword: 1, #keywords is slightly better than ctags/cscope since it operates on the (potentially not yet saved) buffer
         omni: 2, #omni can't include file/line info, so this helps balance that lack
+        omnitrigger: 2,
         ctags: 0,
         cscope: 0
       }

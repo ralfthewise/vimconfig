@@ -15,7 +15,10 @@ module Juggler
     def add(entry)
       return if entry.tag.nil?
       existing = self.entries[entry.tag]
-      self.entries[entry.tag] = entry if existing.nil? || existing.score_data[:score] < entry.score_data[:score]
+      if existing.nil? || existing.score_data[:score] < entry.score_data[:score]
+        self.entries[entry.tag] = entry
+        entry.signature = existing.signature if (!existing.nil? && (entry.signature.nil? || entry.signature.blank?))
+      end
       #if existing.nil?
       #  self.entries[entry.tag] = entry
       #else
