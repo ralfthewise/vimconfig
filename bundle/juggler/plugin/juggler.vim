@@ -12,9 +12,9 @@ endfunction
 let g:juggler_defaultPathExcludes = [
   \'*/cscope.*',
   \'*/tags',
-  \'*.git*',
-  \'*.hg*',
-  \'*.svn*',
+  \'*.git/*',
+  \'*.hg/*',
+  \'*.svn/*',
   \'*/log/*',
   \'*/tmp/*',
   \'*/dist/*',
@@ -32,12 +32,7 @@ call s:defineOption('g:juggler_logLevel', 'error')
 call s:defineOption('g:juggler_fixupPopupMenu', 1)
 
 "Will trigger completion if the text before the cursor matches the regex
-"below.  If the first match length > 0 and the second match (the token)
-"length == 0 it will only trigger an omni completion (no point in doing
-"any other type of completion when the token is length 0).  It will only
-"trigger the other completions when the second match (the token) length >
-"g:juggler_minTokenLength.  Obviously omni completion is never triggered if
-"g:juggler_useOmniCompleter is falsey.
+"below and the matched text is >= the min token length.
 call s:defineOption('g:juggler_triggerTokenRegex', '\(\w*\)$')
 call s:defineOption('g:juggler_minTokenLength', 2)
 
@@ -47,7 +42,7 @@ call s:defineOption('g:juggler_useOmniCompleter', 0)
 "or '::')
 call s:defineOption('g:juggler_useOmniTrigger', 1)
 "Regex that will trigger just omni completion
-call s:defineOption('g:juggler_triggerOmniRegex', '\(\.\)\(\w*\)$')
+call s:defineOption('g:juggler_triggerOmniRegex', '\(\%(->\|\.\|::\|<\)\)\(\w*\)$')
 "If doing omni trigger completion, should we cache the results and use them
 "for successive token completions
 call s:defineOption('g:juggler_useOmniTriggerCache', 1)
@@ -57,6 +52,8 @@ call s:defineOption('g:juggler_manageTags', 1)
 call s:defineOption('g:juggler_useCscopeCompleter', 1)
 call s:defineOption('g:juggler_manageCscope', 1)
 call s:defineOption('g:juggler_useKeywordCompleter', 1)
+
+call s:defineOption('g:juggler_replaceCtrlpCommand', 1)
 
 if g:juggler_fixupPopupMenu
   inoremap <silent> <expr> <C-j> (pumvisible() ? "\<Down>" : "\<C-j>")

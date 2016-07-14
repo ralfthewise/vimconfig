@@ -12,7 +12,7 @@ call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'vim-scripts/genutils'
-Plugin 'vim-scripts/AutoComplPop'
+"Plugin 'vim-scripts/AutoComplPop'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'scrooloose/nerdtree'
@@ -75,7 +75,7 @@ set nohlsearch "don't highlight additional matches
 set hidden "hide buffers rather than closing them when switching away from them
 set history=1000 "remember more commands and search history
 set undolevels=1000 "use many muchos levels of undo
-set wildignore=vendor/bundle/**,tmp/**,*.gif,*.png,*.jpg,*.swp,*.bak,*.pyc,*.class,*.o,*.obj "when displaying/completing files/directories, ignore these patterns
+set wildignore=*/dist/*,*/vendor/*,*/tmp/*,*.gif,*.png,*.jpg,*.swp,*.bak,*.pyc,*.class,*.o,*.obj "when displaying/completing files/directories, ignore these patterns
 set title "change the terminal's title
 "set visualbell "flash screen instead of beeping
 set noerrorbells "don't beep for error MESSAGES (errors still always beep)
@@ -177,11 +177,13 @@ let g:juggler_useTagsCompleter = 1
 let g:juggler_useCscopeCompleter = 1
 let g:juggler_useOmniCompleter = 0
 let g:juggler_additionalPathExcludes = ['*/test-ui/reports/*']
-let g:acp_enableAtStartup = 0
-let g:acp_completeoptPreview = 1
+"let g:acp_enableAtStartup = 0
+"let g:acp_completeoptPreview = 1
 
 "syntastic
 let g:syntastic_go_checkers = ['golint', 'govet']
+"let g:syntastic_mode_map = { 'mode': 'passive' }
+"let g:syntastic_check_on_open = 1
 
 "vim-expand-region
 let g:expand_region_text_objects_ruby = {
@@ -212,6 +214,7 @@ let g:ctrlp_map = '<C-@>'
 let g:ctrlp_extensions = ['tag']
 "let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|app\/components\/|Godeps\/|log\/)'
 let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|Godeps\/|log\/)'
+let g:ctrlp_show_hidden = 1
 "let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
 let g:ctrlpmatcher_debug = 0
 nnoremap <silent> <C-t> :CtrlPTag<CR>
@@ -403,6 +406,7 @@ autocmd FileType c set omnifunc=ccomplete#Complete
 "syntax on
 let g:go_fmt_command = "goimports"
 let g:go_list_type = "quickfix"
+let g:go_auto_type_info = 1
 autocmd FileType go highlight clear ExtraWhitespace
 autocmd FileType go setl ts=2 sts=2 sw=2 noexpandtab
 "autocmd FileType go set tags=.go.tags,~/.go.tags

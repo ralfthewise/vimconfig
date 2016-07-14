@@ -55,6 +55,10 @@ function juggler#Enable()
     endif
   endif
 
+  if g:juggler_replaceCtrlpCommand
+    ruby Juggler::Completer.instance.replace_ctrlp_user_command
+  endif
+
   "set these initially so we can always count on them being set
   let s:cursorinfo = {'linenum': -1, 'cursorindex': -1}
   let s:usercompleted = 0

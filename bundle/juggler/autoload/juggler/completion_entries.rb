@@ -17,7 +17,7 @@ module Juggler
       existing = self.entries[entry.tag]
       if existing.nil? || existing.score_data[:score] < entry.score_data[:score]
         self.entries[entry.tag] = entry
-        entry.signature = existing.signature if (!existing.nil? && (entry.signature.nil? || entry.signature.blank?))
+        entry.signature = existing.signature if (!existing.nil? && (entry.signature.nil? || entry.signature.empty?))
       end
       #if existing.nil?
       #  self.entries[entry.tag] = entry

@@ -47,6 +47,10 @@ module Juggler
       end
     end
 
+    def replace_ctrlp_user_command
+      VIM::command("let g:ctrlp_user_command = '#{Juggler::escape_vim_singlequote_string(find_files_cmd(for_path: '%s'))}'")
+    end
+
     def find
       Juggler.with_status('Searching...') do
         srchstr = VIM::evaluate('srchstr').to_s
@@ -161,7 +165,7 @@ module Juggler
         completion_start = Time.now
         cursor_info = VIM::evaluate('s:cursorinfo')
         token = cursor_info['token']
-        Juggler.logger.info { "Generating completions for: #{token}" }
+        Juggler.logger.info { "Generating completions for: #{token} (#{cursor_info})" }
 
         scorer = EntryScorer.new(token, $curbuf.name, VIM::Buffer.current.line_number)
         entries = CompletionEntries.new
@@ -238,9 +242,12 @@ module Juggler
       return true
     end
 
-    def find_files_cmd(absolute_path: false, for_cscope: false)
-      #path_spec = absolute_path ? Shellwords.escape(VIM::evaluate('getcwd()')) : '*'
-      path_spec = absolute_path ? Shellwords.escape(VIM::evaluate('getcwd()')) : '.'
+    def find_files_cmd(for_path: nil, absolute_path: false, for_cscope: false)
+      path_spec = for_path
+      if path_spec.nil?
+        #path_spec = absolute_path ? Shellwords.escape(VIM::evaluate('getcwd()')) : '*'
+        path_spec = absolute_path ? Shellwords.escape(VIM::evaluate('getcwd()')) : '.'
+      end
       path_excludes = VIM::evaluate('g:juggler_pathExcludes')
 
       if for_cscope
