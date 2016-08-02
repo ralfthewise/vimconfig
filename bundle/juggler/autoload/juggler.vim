@@ -199,9 +199,6 @@ function! s:GetCursorInfo()
   let posinfo = getpos('.')
   let cursorindex = posinfo[2] - 1
   let cursorchar = line[cursorindex]
-  if cursorindex < len(line) && cursorchar =~ '\w'
-    return {'match': 0}
-  endif
 
   let prefix = strpart(line, 0, cursorindex)
   "check for trigger token completion

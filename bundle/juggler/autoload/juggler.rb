@@ -7,6 +7,9 @@ module Juggler
   end
 
   def self.escape_vim_singlequote_string(str)
+    #replace:
+    # \0 with (nothing/empty string)
+    # ' with ''
     return str.to_s.gsub(/[\0']/, {"\0" => '', "'" => "''"})
   end
 
@@ -35,8 +38,11 @@ module Juggler
 
   def self.with_status(line)
     VIM::command("let s:oldstatusline = &statusline | set statusline=#{line.to_s.gsub(' ', '\\ ')} | redrawstatus")
-    yield
-    VIM::command('let &statusline = s:oldstatusline | redrawstatus')
+    begin
+      yield
+    ensure
+      VIM::command('let &statusline = s:oldstatusline | redrawstatus')
+    end
   end
 
   def self.create_logger
