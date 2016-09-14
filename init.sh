@@ -49,6 +49,8 @@ echo "  rm -f ~/.vimrc.bak; mv ~/.vimrc ~/.vimrc.bak; ln -s \"${DIR}/vimrc\" ~/.
 rm -f ~/.vimrc.bak; mv ~/.vimrc ~/.vimrc.bak; ln -s "${DIR}/vimrc" ~/.vimrc
 echo "  rm -f ~/.vim/colors.bak; mv ~/.vim/colors ~/.vim/colors.bak; ln -s \"${DIR}/colors\" ~/.vim/colors"
 rm -f ~/.vim/colors.bak; mv ~/.vim/colors ~/.vim/colors.bak; ln -s "${DIR}/colors" ~/.vim/colors
+echo "  rm -f ~/.vim/after.bak; mv ~/.vim/after ~/.vim/after.bak; ln -s \"${DIR}/after\" ~/.vim/after"
+rm -f ~/.vim/after.bak; mv ~/.vim/after ~/.vim/after.bak; ln -s "${DIR}/after" ~/.vim/after
 echo "  rm -f ~/.ctags.bak; mv ~/.ctags ~/.ctags.bak; ln -s \"${DIR}/ctags\" ~/.ctags"
 rm -f ~/.ctags.bak; mv ~/.ctags ~/.ctags.bak; ln -s "${DIR}/ctags" ~/.ctags
 
