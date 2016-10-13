@@ -29,6 +29,7 @@ Plugin 'fatih/vim-go'
 Plugin 'digitaltoad/vim-jade'
 Plugin 'tpope/vim-rails'
 Plugin 'kana/vim-textobj-user'
+Plugin 'leafgarland/typescript-vim'
 
 call vundle#end()
 filetype plugin indent on " required for vundle
@@ -243,41 +244,54 @@ let g:tagbar_sort = 1
 let g:tagbar_compact = 1
 nnoremap <silent> <F5> :TagbarToggle<CR>
 let g:tagbar_type_coffee = {
-    \ 'ctagstype' : 'coffee',
-    \ 'kinds'     : [
-        \ 'c:classes',
-        \ 'm:methods',
-        \ 'f:functions',
-        \ 'v:variables',
-        \ 'f:fields',
-    \ ]
+  \ 'ctagstype' : 'coffee',
+  \ 'kinds'     : [
+    \ 'c:classes',
+    \ 'm:methods',
+    \ 'f:functions',
+    \ 'v:variables',
+    \ 'f:fields',
+  \ ]
+\ }
+let g:tagbar_type_typescript = {
+  \ 'ctagstype': 'typescript',
+  \ 'kinds': [
+    \ 'c:classes',
+    \ 'n:modules',
+    \ 'f:functions',
+    \ 'v:variables',
+    \ 'v:varlambdas',
+    \ 'm:members',
+    \ 'i:interfaces',
+    \ 'e:enums',
+  \ ]
 \ }
 let g:tagbar_type_go = {
-    \ 'ctagstype' : 'go',
-    \ 'kinds'     : [
-        \ 'p:package',
-        \ 'i:imports:1',
-        \ 'c:constants',
-        \ 'v:variables',
-        \ 't:types',
-        \ 'n:interfaces',
-        \ 'w:fields',
-        \ 'e:embedded',
-        \ 'm:methods',
-        \ 'r:constructor',
-        \ 'f:functions'
-    \ ],
-    \ 'sro' : '.',
-    \ 'kind2scope' : {
-        \ 't' : 'ctype',
-        \ 'n' : 'ntype'
-    \ },
-    \ 'scope2kind' : {
-        \ 'ctype' : 't',
-        \ 'ntype' : 'n'
-    \ },
-    \ 'ctagsbin'  : 'gotags',
-    \ 'ctagsargs' : '-sort -silent'
+  \ 'ctagstype' : 'go',
+  \ 'kinds'     : [
+    \ 'p:package',
+    \ 'i:imports:1',
+    \ 'c:constants',
+    \ 'v:variables',
+    \ 't:types',
+    \ 'n:interfaces',
+    \ 'w:fields',
+    \ 'e:embedded',
+    \ 'm:methods',
+    \ 'r:constructor',
+    \ 'f:functions'
+  \ ],
+  \ 'sro' : '.',
+  \ 'kind2scope' : {
+    \ 't' : 'ctype',
+    \ 'n' : 'ntype'
+  \ },
+  \ 'scope2kind' : {
+    \ 'ctype' : 't',
+    \ 'ntype' : 'n'
+  \ },
+  \ 'ctagsbin'  : 'gotags',
+  \ 'ctagsargs' : '-sort -silent'
 \ }
 
 "showmarks
@@ -406,8 +420,10 @@ autocmd FileType c set omnifunc=ccomplete#Complete
 "syntax on
 let g:go_fmt_command = "goimports"
 let g:go_list_type = "quickfix"
-let g:go_auto_type_info = 1
+"let g:go_auto_type_info = 1
 let g:go_auto_sameids = 1
+highlight goSameId term=bold cterm=bold ctermbg=white ctermfg=black guibg=white guifg=black
+"highlight link goSameId IncSearch
 autocmd FileType go highlight clear ExtraWhitespace
 autocmd FileType go setl ts=2 sts=2 sw=2 noexpandtab
 "autocmd FileType go set tags=.go.tags,~/.go.tags
