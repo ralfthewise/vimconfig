@@ -97,6 +97,8 @@ set nostartofline "don't position cursor at start of line when switching buffers
 "load internal matchit plugin/macro
 runtime macros/matchit.vim
 
+"WARN - this methods sucks - it breaks incremental search because the auto
+"highlight below resets the incremental search
 "auto highlight word under cursor after 500 ms of idle
 "augroup auto_highlight
 "  au!
@@ -421,10 +423,12 @@ autocmd FileType c set omnifunc=ccomplete#Complete
 let g:go_fmt_command = "goimports"
 let g:go_list_type = "quickfix"
 "let g:go_auto_type_info = 1
-let g:go_auto_sameids = 1
+"let g:go_auto_sameids = 1
 highlight goSameId term=bold cterm=bold ctermbg=white ctermfg=black guibg=white guifg=black
 "highlight link goSameId IncSearch
 autocmd FileType go highlight clear ExtraWhitespace
+"autocmd FileType go match none
 autocmd FileType go setl ts=2 sts=2 sw=2 noexpandtab
+"autocmd FileType go silent exe "GoGuruScope " . go#package#ImportPath(expand('%:p:h')) . "..."
 "autocmd FileType go set tags=.go.tags,~/.go.tags
 "autocmd FileType go set tags=.go.tags
