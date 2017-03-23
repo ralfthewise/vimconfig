@@ -316,6 +316,7 @@ nnoremap <silent> <C-h> :BufExplorer<CR>j
 let g:NERDTreeQuitOnOpen = 1
 let g:NERDChristmasTree = 1
 let g:NERDTreeWinSize = 48
+let g:NERDTreeShowHidden = 1
 nnoremap <silent> <F4> :NERDTreeFind<CR>
 
 "NERDCommenter
