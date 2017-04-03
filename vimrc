@@ -6,33 +6,37 @@
 set nocompatible "use vim defaults, not vi defaults, required for vundle but also is just plain good
 filetype off "required for vundle
 
-"set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+"set the runtime path to include dein and initialize
+set rtp+=~/.vim/bundle/dein.vim
+if dein#load_state('~/.vim/bundle')
+  call dein#begin('~/.vim/bundle')
 
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'vim-scripts/genutils'
-"Plugin 'vim-scripts/AutoComplPop'
-Plugin 'ctrlpvim/ctrlp.vim'
-Plugin 'scrooloose/nerdcommenter'
-Plugin 'scrooloose/nerdtree'
-Plugin 'scrooloose/syntastic'
-Plugin 'majutsushi/tagbar'
-Plugin 'vim-scripts/taglist.vim'
-Plugin 'MattesGroeger/vim-bookmarks'
-Plugin 'thisivan/vim-bufexplorer'
-Plugin 'tpope/vim-fugitive'
-Plugin 'kchmck/vim-coffee-script'
-Plugin 'Lokaltog/vim-easymotion'
-Plugin 'terryma/vim-expand-region'
-Plugin 'fatih/vim-go'
-Plugin 'digitaltoad/vim-jade'
-Plugin 'tpope/vim-rails'
-Plugin 'kana/vim-textobj-user'
-Plugin 'leafgarland/typescript-vim'
+  call dein#add('~/.vim/bundle/dein.vim')
+  call dein#add('vim-scripts/genutils')
+  "call dein#add('vim-scripts/AutoComplPop')
+  call dein#add('ctrlpvim/ctrlp.vim')
+  call dein#add('scrooloose/nerdcommenter')
+  call dein#add('scrooloose/nerdtree')
+  call dein#add('scrooloose/syntastic')
+  call dein#add('majutsushi/tagbar')
+  call dein#add('vim-scripts/taglist.vim')
+  call dein#add('MattesGroeger/vim-bookmarks')
+  call dein#add('thisivan/vim-bufexplorer')
+  call dein#add('tpope/vim-fugitive')
+  call dein#add('kchmck/vim-coffee-script')
+  call dein#add('Lokaltog/vim-easymotion')
+  call dein#add('terryma/vim-expand-region')
+  call dein#add('fatih/vim-go')
+  call dein#add('digitaltoad/vim-jade')
+  call dein#add('tpope/vim-rails')
+  call dein#add('kana/vim-textobj-user')
+  call dein#add('leafgarland/typescript-vim')
 
-call vundle#end()
-filetype plugin indent on " required for vundle
+
+  call dein#end()
+  call dein#save_state()
+endif
+filetype plugin indent on " required for dein
 
 "load juggler plugin
 set rtp+=~/.vim/bundle/juggler
