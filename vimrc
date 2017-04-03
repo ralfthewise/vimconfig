@@ -31,6 +31,7 @@ if dein#load_state('~/.vim/bundle')
   call dein#add('tpope/vim-rails')
   call dein#add('kana/vim-textobj-user')
   call dein#add('leafgarland/typescript-vim')
+  call dein#add('tpope/vim-markdown')
 
 
   call dein#end()
@@ -312,6 +313,10 @@ let g:tagbar_type_go = {
 let g:bookmark_save_per_working_dir = 1
 let g:bookmark_auto_save = 1
 let g:bookmark_auto_close = 1
+
+"markdown
+autocmd BufNewFile,BufReadPost *.md set filetype=markdown
+let g:markdown_fenced_languages = ['javascript', 'go', 'ruby']
 
 "BufferExplorer
 nnoremap <silent> <C-h> :BufExplorer<CR>j
