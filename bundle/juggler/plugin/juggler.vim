@@ -25,6 +25,7 @@ let g:juggler_defaultPathExcludes = [
   \'*/platforms/*',
   \'*/plugins/*',
   \'*/www/*',
+  \'*/venv/*',
 \]
 call s:defineOption('g:juggler_additionalPathExcludes', [])
 call s:defineOption('g:juggler_pathExcludes', g:juggler_defaultPathExcludes + g:juggler_additionalPathExcludes)
