@@ -326,6 +326,8 @@ let g:NERDTreeQuitOnOpen = 1
 let g:NERDChristmasTree = 1
 let g:NERDTreeWinSize = 48
 let g:NERDTreeShowHidden = 1
+let g:NERDTreeCascadeSingleChildDir = 0
+let g:NERDTreeAutoDeleteBuffer = 1
 nnoremap <silent> <F4> :NERDTreeFind<CR>
 
 "NERDCommenter
