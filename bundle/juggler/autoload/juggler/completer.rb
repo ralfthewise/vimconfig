@@ -266,7 +266,7 @@ module Juggler
       tmp_file = File.join(@indexes_path, 'tags.tmp')
       File.open(tmp_file, 'w') do |f|
         IO.foreach(tag_file) do |line|
-          f.write(line) if line[0] == '!' || line.split("\t")[1] != file
+          f.write(line) if line[0] == '!' || (line.valid_encoding? && line.split("\t")[1] != file)
         end
       end
 

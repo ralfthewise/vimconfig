@@ -6,33 +6,38 @@
 set nocompatible "use vim defaults, not vi defaults, required for vundle but also is just plain good
 filetype off "required for vundle
 
-"set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+"set the runtime path to include dein and initialize
+set rtp+=~/.vim/bundle/dein.vim
+if dein#load_state('~/.vim/bundle')
+  call dein#begin('~/.vim/bundle')
 
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'vim-scripts/genutils'
-"Plugin 'vim-scripts/AutoComplPop'
-Plugin 'ctrlpvim/ctrlp.vim'
-Plugin 'scrooloose/nerdcommenter'
-Plugin 'scrooloose/nerdtree'
-Plugin 'scrooloose/syntastic'
-Plugin 'majutsushi/tagbar'
-Plugin 'vim-scripts/taglist.vim'
-Plugin 'MattesGroeger/vim-bookmarks'
-Plugin 'thisivan/vim-bufexplorer'
-Plugin 'tpope/vim-fugitive'
-Plugin 'kchmck/vim-coffee-script'
-Plugin 'Lokaltog/vim-easymotion'
-Plugin 'terryma/vim-expand-region'
-Plugin 'fatih/vim-go'
-Plugin 'digitaltoad/vim-jade'
-Plugin 'tpope/vim-rails'
-Plugin 'kana/vim-textobj-user'
-Plugin 'leafgarland/typescript-vim'
+  call dein#add('~/.vim/bundle/dein.vim')
+  call dein#add('vim-scripts/genutils')
+  "call dein#add('vim-scripts/AutoComplPop')
+  call dein#add('ctrlpvim/ctrlp.vim')
+  call dein#add('scrooloose/nerdcommenter')
+  call dein#add('scrooloose/nerdtree')
+  call dein#add('scrooloose/syntastic')
+  call dein#add('majutsushi/tagbar')
+  call dein#add('vim-scripts/taglist.vim')
+  call dein#add('MattesGroeger/vim-bookmarks')
+  call dein#add('thisivan/vim-bufexplorer')
+  call dein#add('tpope/vim-fugitive')
+  call dein#add('kchmck/vim-coffee-script')
+  call dein#add('Lokaltog/vim-easymotion')
+  call dein#add('terryma/vim-expand-region')
+  call dein#add('fatih/vim-go')
+  call dein#add('digitaltoad/vim-jade')
+  call dein#add('tpope/vim-rails')
+  call dein#add('kana/vim-textobj-user')
+  call dein#add('leafgarland/typescript-vim')
+  call dein#add('tpope/vim-markdown')
 
-call vundle#end()
-filetype plugin indent on " required for vundle
+
+  call dein#end()
+  call dein#save_state()
+endif
+filetype plugin indent on " required for dein
 
 "load juggler plugin
 set rtp+=~/.vim/bundle/juggler
@@ -97,6 +102,8 @@ set nostartofline "don't position cursor at start of line when switching buffers
 "load internal matchit plugin/macro
 runtime macros/matchit.vim
 
+"WARN - this methods sucks - it breaks incremental search because the auto
+"highlight below resets the incremental search
 "auto highlight word under cursor after 500 ms of idle
 "augroup auto_highlight
 "  au!
@@ -307,6 +314,10 @@ let g:bookmark_save_per_working_dir = 1
 let g:bookmark_auto_save = 1
 let g:bookmark_auto_close = 1
 
+"markdown
+autocmd BufNewFile,BufReadPost *.md set filetype=markdown
+let g:markdown_fenced_languages = ['javascript', 'go', 'ruby']
+
 "BufferExplorer
 nnoremap <silent> <C-h> :BufExplorer<CR>j
 
@@ -314,6 +325,9 @@ nnoremap <silent> <C-h> :BufExplorer<CR>j
 let g:NERDTreeQuitOnOpen = 1
 let g:NERDChristmasTree = 1
 let g:NERDTreeWinSize = 48
+let g:NERDTreeShowHidden = 1
+let g:NERDTreeCascadeSingleChildDir = 0
+let g:NERDTreeAutoDeleteBuffer = 1
 nnoremap <silent> <F4> :NERDTreeFind<CR>
 
 "NERDCommenter
@@ -425,6 +439,8 @@ let g:go_list_type = "quickfix"
 highlight goSameId term=bold cterm=bold ctermbg=white ctermfg=black guibg=white guifg=black
 "highlight link goSameId IncSearch
 autocmd FileType go highlight clear ExtraWhitespace
+"autocmd FileType go match none
 autocmd FileType go setl ts=2 sts=2 sw=2 noexpandtab
+"autocmd FileType go silent exe "GoGuruScope " . go#package#ImportPath(expand('%:p:h')) . "..."
 "autocmd FileType go set tags=.go.tags,~/.go.tags
 "autocmd FileType go set tags=.go.tags

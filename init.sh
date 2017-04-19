@@ -6,8 +6,8 @@ cd "${DIR}"
 echo "  mkdir -p ~/.vim ~/.vimbackup ~/.vimswp ~/.vimundo"
 mkdir -p ~/.vim  ~/.vimbackup ~/.vimswp ~/.vimundo
 
-if [ ! -d ~/.vim/bundle/Vundle.vim ]; then
-  git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+if [ ! -d ~/.vim/bundle/dein.vim ]; then
+  git clone https://github.com/Shougo/dein.vim.git ~/.vim/bundle/dein.vim
   ln -s "${DIR}/bundle/juggler" ~/.vim/bundle/juggler
 fi
 
@@ -49,14 +49,14 @@ echo "  rm -f ~/.vimrc.bak; mv ~/.vimrc ~/.vimrc.bak; ln -s \"${DIR}/vimrc\" ~/.
 rm -f ~/.vimrc.bak; mv ~/.vimrc ~/.vimrc.bak; ln -s "${DIR}/vimrc" ~/.vimrc
 echo "  rm -f ~/.vim/colors.bak; mv ~/.vim/colors ~/.vim/colors.bak; ln -s \"${DIR}/colors\" ~/.vim/colors"
 rm -f ~/.vim/colors.bak; mv ~/.vim/colors ~/.vim/colors.bak; ln -s "${DIR}/colors" ~/.vim/colors
+echo "  rm -f ~/.vim/ftplugin.bak; mv ~/.vim/ftplugin ~/.vim/ftplugin.bak; ln -s \"${DIR}/ftplugin\" ~/.vim/ftplugin"
+rm -f ~/.vim/ftplugin.bak; mv ~/.vim/ftplugin ~/.vim/ftplugin.bak; ln -s "${DIR}/ftplugin" ~/.vim/ftplugin
 echo "  rm -f ~/.vim/after.bak; mv ~/.vim/after ~/.vim/after.bak; ln -s \"${DIR}/after\" ~/.vim/after"
 rm -f ~/.vim/after.bak; mv ~/.vim/after ~/.vim/after.bak; ln -s "${DIR}/after" ~/.vim/after
 echo "  rm -f ~/.ctags.bak; mv ~/.ctags ~/.ctags.bak; ln -s \"${DIR}/ctags\" ~/.ctags"
 rm -f ~/.ctags.bak; mv ~/.ctags ~/.ctags.bak; ln -s "${DIR}/ctags" ~/.ctags
 
-
-vim +PluginInstall +qall
-vim -c "helptags ${HOME}/.vim/bundle/Vundle.vim/doc|q"
+vim -c '+call dein#install()' '+qall'
 
 echo ""
 echo "Installation complete."

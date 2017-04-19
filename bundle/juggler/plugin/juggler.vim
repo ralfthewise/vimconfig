@@ -22,6 +22,10 @@ let g:juggler_defaultPathExcludes = [
   \'*/Godeps/*',
   \'*/node_modules/*',
   \'*/bower_components/*',
+  \'*/platforms/*',
+  \'*/plugins/*',
+  \'*/www/*',
+  \'*/venv/*',
 \]
 call s:defineOption('g:juggler_additionalPathExcludes', [])
 call s:defineOption('g:juggler_pathExcludes', g:juggler_defaultPathExcludes + g:juggler_additionalPathExcludes)
