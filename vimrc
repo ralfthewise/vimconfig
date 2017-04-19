@@ -421,7 +421,7 @@ autocmd FileType c set omnifunc=ccomplete#Complete
 let g:go_fmt_command = "goimports"
 let g:go_list_type = "quickfix"
 "let g:go_auto_type_info = 1
-let g:go_auto_sameids = 1
+"let g:go_auto_sameids = 1
 highlight goSameId term=bold cterm=bold ctermbg=white ctermfg=black guibg=white guifg=black
 "highlight link goSameId IncSearch
 autocmd FileType go highlight clear ExtraWhitespace
