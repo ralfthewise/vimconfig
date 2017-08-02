@@ -32,6 +32,8 @@ if dein#load_state('~/.vim/bundle')
   call dein#add('kana/vim-textobj-user')
   call dein#add('leafgarland/typescript-vim')
   call dein#add('tpope/vim-markdown')
+  call dein#add('vim-airline/vim-airline')
+  call dein#add('airblade/vim-gitgutter')
 
 
   call dein#end()
@@ -141,6 +143,9 @@ autocmd BufReadPost * if line("'\"") <= line("$") | exe "normal! g`\"" | endif
 "or this if you want to restore folds
 "autocmd BufWinLeave * mkview
 "autocmd BufWinEnter * if &modifiable | silent loadview | endif
+
+"force the preview window to be on the bottom of the screen
+autocmd WinEnter * if &previewwindow && winnr() == 1 | wincmd J | endif
 
 "force unix line endings
 "autocmd BufWinEnter * set fileformat=unix
@@ -376,9 +381,9 @@ omap <leader>b :call EasyMotion#WB(0, 1)<CR>
 nmap <leader>b :call EasyMotion#WB(0, 1)<CR>
 
 "filetypes
-au BufRead,BufNewFile *.jst.ejs set filetype=html
-au BufRead,BufNewFile *.jst.str set filetype=html
-au BufRead,BufNewFile *.hbs set filetype=html
+autocmd BufRead,BufNewFile *.jst.ejs set filetype=html
+autocmd BufRead,BufNewFile *.jst.str set filetype=html
+autocmd BufRead,BufNewFile *.hbs set filetype=html
 
 "language specific stuff
 "ruby
