@@ -34,6 +34,7 @@ if dein#load_state('~/.vim/bundle')
   call dein#add('tpope/vim-markdown')
   call dein#add('vim-airline/vim-airline')
   call dein#add('airblade/vim-gitgutter')
+  call dein#add('leafgarland/typescript-vim')
 
 
   call dein#end()
