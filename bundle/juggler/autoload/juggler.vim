@@ -33,7 +33,7 @@ function juggler#Enable()
 
   let s:indexesused = (s:indexespath != '')
   if s:indexesused
-    nmap <silent> <F12> :call <SID>UpdateIndexes(0, 0)<CR>
+    "nmap <silent> <F12> :call <SID>UpdateIndexes(0, 0)<CR>
     augroup Juggler
       autocmd BufWritePost * call s:UpdateIndexes(0, 1)
     augroup END

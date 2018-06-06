@@ -6,9 +6,8 @@ cd "${DIR}"
 echo "  mkdir -p ~/.vim ~/.vimbackup ~/.vimswp ~/.vimundo"
 mkdir -p ~/.vim  ~/.vimbackup ~/.vimswp ~/.vimundo
 
-if [ ! -d ~/.vim/bundle/dein.vim ]; then
-  git clone https://github.com/Shougo/dein.vim.git ~/.vim/bundle/dein.vim
-  ln -s "${DIR}/bundle/juggler" ~/.vim/bundle/juggler
+if [ ! -f ~/.vim/autoload/plug.vim ]; then
+  curl -sfLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 fi
 
 #check for needed commands
@@ -56,7 +55,7 @@ rm -f ~/.vim/after.bak; mv ~/.vim/after ~/.vim/after.bak; ln -s "${DIR}/after" ~
 echo "  rm -f ~/.ctags.bak; mv ~/.ctags ~/.ctags.bak; ln -s \"${DIR}/ctags\" ~/.ctags"
 rm -f ~/.ctags.bak; mv ~/.ctags ~/.ctags.bak; ln -s "${DIR}/ctags" ~/.ctags
 
-vim -c '+call dein#install()' '+qall'
+vim -c 'PlugInstall' -c 'qall'
 
 echo ""
 echo "Installation complete."

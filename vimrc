@@ -3,48 +3,42 @@
 ":retab
 
 "should come first since it changes other options
-set nocompatible "use vim defaults, not vi defaults, required for vundle but also is just plain good
-filetype off "required for vundle
+set nocompatible "use vim defaults, not vi defaults
 
-"set the runtime path to include dein and initialize
-set rtp+=~/.vim/bundle/dein.vim
-if dein#load_state('~/.vim/bundle')
-  call dein#begin('~/.vim/bundle')
+"if empty(glob('~/.vim/autoload/plug.vim'))
+"  silent !curl -sfLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+"  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+"endif
 
-  call dein#add('~/.vim/bundle/dein.vim')
-  call dein#add('vim-scripts/genutils')
-  "call dein#add('vim-scripts/AutoComplPop')
-  call dein#add('ctrlpvim/ctrlp.vim')
-  call dein#add('scrooloose/nerdcommenter')
-  call dein#add('scrooloose/nerdtree')
-  call dein#add('scrooloose/syntastic')
-  call dein#add('majutsushi/tagbar')
-  call dein#add('vim-scripts/taglist.vim')
-  call dein#add('MattesGroeger/vim-bookmarks')
-  call dein#add('thisivan/vim-bufexplorer')
-  call dein#add('tpope/vim-fugitive')
-  call dein#add('kchmck/vim-coffee-script')
-  call dein#add('Lokaltog/vim-easymotion')
-  call dein#add('terryma/vim-expand-region')
-  call dein#add('fatih/vim-go')
-  call dein#add('digitaltoad/vim-jade')
-  call dein#add('tpope/vim-rails')
-  call dein#add('kana/vim-textobj-user')
-  call dein#add('leafgarland/typescript-vim')
-  call dein#add('tpope/vim-markdown')
-  call dein#add('vim-airline/vim-airline')
-  call dein#add('airblade/vim-gitgutter')
-  call dein#add('leafgarland/typescript-vim')
-
-
-  call dein#end()
-  call dein#save_state()
-endif
-filetype plugin indent on " required for dein
-
-"load juggler plugin
-set rtp+=~/.vim/bundle/juggler
-helptags ~/.vim/bundle/juggler/doc
+call plug#begin()
+Plug 'vim-scripts/genutils'
+"Plug 'vim-scripts/AutoComplPop'
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'scrooloose/nerdcommenter'
+Plug 'scrooloose/nerdtree'
+Plug 'scrooloose/syntastic'
+Plug 'majutsushi/tagbar'
+Plug 'vim-scripts/taglist.vim'
+Plug 'MattesGroeger/vim-bookmarks'
+Plug 'thisivan/vim-bufexplorer'
+Plug 'tpope/vim-fugitive'
+Plug 'kchmck/vim-coffee-script'
+Plug 'Lokaltog/vim-easymotion'
+Plug 'terryma/vim-expand-region'
+Plug 'fatih/vim-go'
+Plug 'digitaltoad/vim-jade'
+Plug 'tpope/vim-rails'
+Plug 'kana/vim-textobj-user'
+Plug 'leafgarland/typescript-vim'
+Plug 'prettier/vim-prettier', {'do': 'npm install', 'for': ['javascript', 'typescript', 'css', 'less', 'scss'] }
+Plug 'tpope/vim-markdown'
+Plug 'vim-airline/vim-airline'
+Plug 'airblade/vim-gitgutter'
+"Plug 'skywind3000/quickmenu.vim'
+Plug 'Shougo/denite.nvim'
+Plug '~/dev/vimconfig/bundle/juggler'
+call plug#end()
+call plug#helptags()
 
 "whitespace - has to come before other ColorScheme commands
 autocmd ColorScheme * highlight ExtraWhitespace ctermbg=darkred guibg=darkred "color of bad whitespace
@@ -104,6 +98,15 @@ set nostartofline "don't position cursor at start of line when switching buffers
 
 "load internal matchit plugin/macro
 runtime macros/matchit.vim
+"
+"make getting rid of trailing whitespace easier
+function TrimWhitespace()
+  let l:save = winsaveview()
+  %s/\s\+$//e
+  call winrestview(l:save)
+endfunction
+command TrimWhitespace call TrimWhitespace()
+nnoremap <leader>tw :call TrimWhitespace()<CR>
 
 "WARN - this methods sucks - it breaks incremental search because the auto
 "highlight below resets the incremental search
@@ -380,6 +383,10 @@ nmap <leader>w :call EasyMotion#WB(0, 0)<CR>
 vmap <leader>b :<C-U>call EasyMotion#WB(1, 1)<CR>
 omap <leader>b :call EasyMotion#WB(0, 1)<CR>
 nmap <leader>b :call EasyMotion#WB(0, 1)<CR>
+
+"Prettier - formatter for js, ts, css, scss, less
+let g:prettier#autoformat = 0
+autocmd BufWritePre *.js,*.ts,*.css,*.scss,*.less PrettierAsync
 
 "filetypes
 autocmd BufRead,BufNewFile *.jst.ejs set filetype=html
