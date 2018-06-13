@@ -290,6 +290,7 @@ function! s:SetupCommands()
   command! -nargs=? JugglerSearch call s:Search('<args>')
   command! -nargs=? JugglerJumpDef call s:GoToDefinition('<args>')
   command! -nargs=? JugglerShowRefs call s:ShowReferences('<args>')
+  command! -n=0 JugglerUpdateIndexes call s:UpdateIndexes(0, 0)
   if g:juggler_setupMaps
     call s:SetupMaps()
   endif
