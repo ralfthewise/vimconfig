@@ -20,6 +20,8 @@ let g:juggler_defaultPathExcludes = [
   \'*/dist/*',
   \'*/vendor/*',
   \'*/Godeps/*',
+  \'*/yarn.lock',
+  \'*/package-lock.json',
   \'*/node_modules/*',
   \'*/bower_components/*',
   \'*/platforms/*',
