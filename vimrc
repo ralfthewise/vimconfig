@@ -31,6 +31,7 @@ Plug 'tpope/vim-rails'
 Plug 'kana/vim-textobj-user'
 Plug 'leafgarland/typescript-vim'
 Plug 'prettier/vim-prettier', {'do': 'npm install', 'for': ['javascript', 'typescript', 'css', 'less', 'scss'] }
+Plug 'ruby-formatter/rufo-vim'
 Plug 'tpope/vim-markdown'
 Plug 'vim-airline/vim-airline'
 Plug 'airblade/vim-gitgutter'
@@ -193,6 +194,7 @@ let g:juggler_logLevel = 'debug'
 let g:juggler_useTagsCompleter = 1
 let g:juggler_useCscopeCompleter = 1
 let g:juggler_useOmniCompleter = 0
+let g:juggler_useOmniTrigger = 0
 let g:juggler_additionalPathExcludes = ['*/test-ui/reports/*']
 "let g:acp_enableAtStartup = 0
 "let g:acp_completeoptPreview = 1
@@ -384,9 +386,50 @@ vmap <leader>b :<C-U>call EasyMotion#WB(1, 1)<CR>
 omap <leader>b :call EasyMotion#WB(0, 1)<CR>
 nmap <leader>b :call EasyMotion#WB(0, 1)<CR>
 
-"Prettier - formatter for js, ts, css, scss, less
+"quickmenu
+"let g:quickmenu_options = "LH"
+"call g:quickmenu#reset()
+"noremap <silent><F12> :call quickmenu#toggle(0)<cr>
+
+"call g:quickmenu#append('# Develop', '')
+"call g:quickmenu#append('item 1.1', 'echo "1.1 is selected"', 'select item 1.1')
+"call g:quickmenu#append('item 1.2', 'echo "1.2 is selected"', 'select item 1.2')
+"call g:quickmenu#append('item 1.3', 'echo "1.3 is selected"', 'select item 1.3')
+
+"call g:quickmenu#append('# Misc', '')
+"call g:quickmenu#append('item 2.1', 'echo "2.1 is selected"', 'select item 2.1')
+"call g:quickmenu#append('item 2.2', 'echo "2.2 is selected"', 'select item 2.2')
+"call g:quickmenu#append('item 2.3', 'echo "2.3 is selected"', 'select item 2.3')
+"call g:quickmenu#append('item 2.4', 'echo "2.4 is selected"', 'select item 2.4')
+
+""denite
+"let s:menus = {}
+
+"let s:menus.zsh = {
+"      \ 'description': 'Edit your import zsh configuration'
+"      \ }
+"let s:menus.zsh.file_candidates = [
+"      \ ['zshrc', '~/.config/zsh/.zshrc'],
+"      \ ['zshenv', '~/.zshenv'],
+"      \ ]
+
+"let s:menus.my_commands = {
+"      \ 'description': 'Example commands'
+"      \ }
+"let s:menus.my_commands.command_candidates = [
+"      \ ['Split the window', 'vnew'],
+"      \ ['Open zsh menu', 'Denite menu:zsh'],
+"      \ ]
+"call denite#custom#var('menu', 'menus', s:menus)
+
+"Prettier - formatter for js, ts, css, scss, less, etc
 let g:prettier#autoformat = 0
-autocmd BufWritePre *.js,*.ts,*.css,*.scss,*.less PrettierAsync
+autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue PrettierAsync
+let g:prettier#config#print_width = 120
+let g:prettier#config#semi = 'false'
+
+" Enable rufo (RUby FOrmat)
+let g:rufo_auto_formatting = 1
 
 "filetypes
 autocmd BufRead,BufNewFile *.jst.ejs set filetype=html
@@ -403,10 +446,10 @@ autocmd BufRead,BufNewFile *.hbs set filetype=html
 "autocmd FileType ruby,eruby call s:add_global_ruby_cscope()
 "autocmd FileType ruby,eruby set omnifunc=rubycomplete#Complete
 "autocmd FileType ruby,eruby set tags=ruby.tags
-autocmd FileType ruby,eruby let g:rubycomplete_buffer_loading = 1
-autocmd FileType ruby,eruby let g:rubycomplete_rails = 1
-autocmd FileType ruby,eruby let g:rubycomplete_classes_in_global = 1
-autocmd FileType ruby set iskeyword=@,48-57,_,?,!,192-255
+autocmd FileType ruby,eruby let g:rubycomplete_buffer_loading = 1 "load/evaluate code in order to provide completions
+autocmd FileType ruby,eruby let g:rubycomplete_rails = 1 "work with rails
+autocmd FileType ruby,eruby let g:rubycomplete_classes_in_global = 1 "add classes from buffer to completions when editing outside of a class definition
+autocmd FileType ruby,eruby set iskeyword=@,48-57,_,?,!,192-255 "consider question/exclamation marks to be part of a vim word
 
 "vim
 "autocmd FileType vim call Collapse_SetRegexs('^\s*function!\?', '^\s*endfunction\s*$', '^\s*"')

@@ -12,6 +12,7 @@ endfunction
 let g:juggler_defaultPathExcludes = [
   \'*/cscope.*',
   \'*/tags',
+  \'*.idea/*',
   \'*.git/*',
   \'*.hg/*',
   \'*.svn/*',
