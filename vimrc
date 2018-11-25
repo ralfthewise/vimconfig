@@ -33,6 +33,7 @@ Plug 'leafgarland/typescript-vim'
 Plug 'prettier/vim-prettier', {'do': 'npm install', 'for': ['javascript', 'typescript', 'css', 'less', 'scss'] }
 Plug 'ruby-formatter/rufo-vim'
 Plug 'tpope/vim-markdown'
+Plug 'hashivim/vim-terraform'
 Plug 'vim-airline/vim-airline'
 Plug 'airblade/vim-gitgutter'
 "Plug 'skywind3000/quickmenu.vim'
@@ -194,7 +195,7 @@ let g:juggler_logLevel = 'debug'
 let g:juggler_useTagsCompleter = 1
 let g:juggler_useCscopeCompleter = 1
 let g:juggler_useOmniCompleter = 0
-let g:juggler_useOmniTrigger = 1
+let g:juggler_useOmniTrigger = 0
 let g:juggler_additionalPathExcludes = ['*/test-ui/reports/*']
 "let g:acp_enableAtStartup = 0
 "let g:acp_completeoptPreview = 1
