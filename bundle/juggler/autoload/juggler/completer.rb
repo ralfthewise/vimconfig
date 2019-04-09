@@ -64,7 +64,7 @@ module Juggler
           srchstr = srchstr[1..-1] if srchstr.start_with?('\/') #strip off beginning '\'
           grep_cmd += ' --smart-case --literal'
         end
-        grep_cmd = "#{find_files_cmd} -exec #{grep_cmd} #{Shellwords.escape(srchstr)} {} +"
+        grep_cmd = "#{find_files_cmd} -exec #{grep_cmd} -- #{Shellwords.escape(srchstr)} {} +"
 
         start = Time.now
         result = `#{grep_cmd} | #{strip_tabs_cmd}`
