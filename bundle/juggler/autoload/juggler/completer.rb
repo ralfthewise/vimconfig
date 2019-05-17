@@ -201,6 +201,15 @@ module Juggler
       end
     end
 
+    def sum_block
+      block = VIM::evaluate('s:juggler_sum_block').to_s
+      #Juggler.logger.info { "Sum block on:\n#{block}" }
+      items = block.split(/\s/).reject {|e| e.to_s.empty?}.map do |e|
+        !!(e =~ /\A[-+]?\d+\z/) ? e.to_i : e.to_f
+      end
+      VIM::command("let s:juggler_sum_block = '#{items.reduce(:+)}'")
+    end
+
     protected
     def get_completers(cursor_info)
       return {omni_trigger: @omni_trigger_completer} if @use_omni_trigger && cursor_info['type'] == 'omnitrigger'

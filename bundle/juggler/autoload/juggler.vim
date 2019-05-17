@@ -278,6 +278,21 @@ function! s:CscopeTags(pat)
   exe 'cs find e ' . a:pat
 endfunction
 
+function! s:SumBlock() range
+  try
+    let a_save = @a
+    "first copy selection to a register
+    silent! normal! gv"ay
+
+    "call our sum function and then echo the result
+    let s:juggler_sum_block = @a
+    ruby Juggler::Completer.instance.sum_block
+    echo s:juggler_sum_block
+  finally
+    let @a = a_save
+  endtry
+endfunction
+
 function! s:LoadRuby()
 ruby << RUBYEOF
   plugin_path = VIM::evaluate('s:plugin_path')
@@ -291,6 +306,7 @@ function! s:SetupCommands()
   command! -nargs=? JugglerJumpDef call s:GoToDefinition('<args>')
   command! -nargs=? JugglerShowRefs call s:ShowReferences('<args>')
   command! -n=0 JugglerUpdateIndexes call s:UpdateIndexes(0, 0)
+  command! -range -n=0 JugglerSumBlock call s:SumBlock()
   if g:juggler_setupMaps
     call s:SetupMaps()
   endif
