@@ -16,12 +16,14 @@ Plug 'vim-scripts/genutils'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'scrooloose/nerdtree'
-Plug 'scrooloose/syntastic'
+"Plug 'scrooloose/syntastic'
+Plug 'dense-analysis/ale'
 Plug 'majutsushi/tagbar'
 Plug 'vim-scripts/taglist.vim'
 Plug 'MattesGroeger/vim-bookmarks'
 Plug 'thisivan/vim-bufexplorer'
 Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-surround'
 Plug 'kchmck/vim-coffee-script'
 Plug 'Lokaltog/vim-easymotion'
 Plug 'terryma/vim-expand-region'
@@ -31,8 +33,10 @@ Plug 'tpope/vim-rails'
 Plug 'kana/vim-textobj-user'
 Plug 'leafgarland/typescript-vim'
 Plug 'prettier/vim-prettier', {'do': 'npm install', 'for': ['javascript', 'typescript', 'css', 'less', 'scss'] }
-Plug 'ruby-formatter/rufo-vim'
+"Plug 'ruby-formatter/rufo-vim'
 Plug 'tpope/vim-markdown'
+Plug 'iamcco/markdown-preview.nvim', {'do': 'cd app & yarn install'}
+Plug 'dkarter/bullets.vim'
 Plug 'hashivim/vim-terraform'
 Plug 'vim-airline/vim-airline'
 Plug 'airblade/vim-gitgutter'
@@ -80,7 +84,7 @@ set nohlsearch "don't highlight additional matches
 set hidden "hide buffers rather than closing them when switching away from them
 set history=1000 "remember more commands and search history
 set undolevels=1000 "use many muchos levels of undo
-set wildignore=*/dist/*,*/vendor/*,*/tmp/*,*.gif,*.png,*.jpg,*.swp,*.bak,*.pyc,*.class,*.o,*.obj "when displaying/completing files/directories, ignore these patterns
+set wildignore=*/dist/*,*/vendor/*,*.gif,*.png,*.jpg,*.swp,*.bak,*.pyc,*.class,*.o,*.obj "when displaying/completing files/directories, ignore these patterns
 set title "change the terminal's title
 "set visualbell "flash screen instead of beeping
 set noerrorbells "don't beep for error MESSAGES (errors still always beep)
@@ -109,6 +113,18 @@ function TrimWhitespace()
 endfunction
 command TrimWhitespace call TrimWhitespace()
 nnoremap <leader>tw :call TrimWhitespace()<CR>
+
+let g:ale_linters = {'ruby': ['rubocop']}
+let g:ale_fixers = {'ruby': ['rubocop']}
+let g:ale_set_signs = 0 " Don't use the sign column/gutter for ALE
+let g:ale_lint_on_text_changed = 'normal' " Lint always in Normal Mode
+let g:ale_lint_on_insert_leave = 1 " Lint when leaving Insert Mode but don't lint when in Insert Mode
+" Yellowish
+highlight ALEInfo ctermbg=58 guibg=#5f5f00
+" Dark red
+highlight ALEWarning ctermbg=52 guibg=#5f0000
+" Lighter red
+highlight ALEError ctermbg=88 guibg=#870000
 
 "WARN - this methods sucks - it breaks incremental search because the auto
 "highlight below resets the incremental search
@@ -192,10 +208,11 @@ endif
 "acp
 let g:juggler_enableAtStartup = 1
 let g:juggler_logLevel = 'debug'
-let g:juggler_useTagsCompleter = 1
-let g:juggler_useCscopeCompleter = 1
+let g:juggler_useTagsCompleter = 0
+let g:juggler_useCscopeCompleter = 0
 let g:juggler_useOmniCompleter = 0
 let g:juggler_useOmniTrigger = 0
+let g:juggler_useKeywordCompleter = 0
 let g:juggler_additionalPathExcludes = ['*/test-ui/reports/*']
 "let g:acp_enableAtStartup = 0
 "let g:acp_completeoptPreview = 1
@@ -425,7 +442,8 @@ nmap <leader>b :call EasyMotion#WB(0, 1)<CR>
 
 "Prettier - formatter for js, ts, css, scss, less, etc
 let g:prettier#autoformat = 0
-autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue PrettierAsync
+"autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue PrettierAsync
+autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.vue PrettierAsync
 let g:prettier#config#print_width = 120
 let g:prettier#config#semi = 'false'
 
