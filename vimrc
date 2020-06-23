@@ -360,6 +360,7 @@ let g:NERDTreeAutoDeleteBuffer = 1
 nnoremap <silent> <F4> :NERDTreeFind<CR>
 
 "NERDCommenter
+let g:NERDSpaceDelims = 1
 "have to do these two to prevent the plugin from overriding our '<leader>cc'
 "mappings below
 nmap <leader>c6 <plug>NERDCommenterComment
