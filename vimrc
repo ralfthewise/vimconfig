@@ -46,6 +46,12 @@ Plug '~/dev/vimconfig/bundle/juggler'
 call plug#end()
 call plug#helptags()
 
+" prevent garbage characters - I don't really understand this.
+" see https://stackoverflow.com/questions/62148994/strange-character-since-last-update-42m-in-vim
+" see alse :help modifyOtherKeys
+let &t_TI = ""
+let &t_TE = ""
+
 "whitespace - has to come before other ColorScheme commands
 autocmd ColorScheme * highlight ExtraWhitespace ctermbg=darkred guibg=darkred "color of bad whitespace
 autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$\|\t/ "insert mode don't match trailing whitespace
@@ -114,8 +120,9 @@ endfunction
 command TrimWhitespace call TrimWhitespace()
 nnoremap <leader>tw :call TrimWhitespace()<CR>
 
-let g:ale_linters = {'ruby': ['rubocop']}
+let g:ale_linters = {'ruby': ['rubocop'], 'javascript': ['eslint']}
 let g:ale_fixers = {'ruby': ['rubocop']}
+let g:ale_ruby_rubocop_executable = 'bundle'
 let g:ale_set_signs = 0 " Don't use the sign column/gutter for ALE
 let g:ale_lint_on_text_changed = 'normal' " Lint always in Normal Mode
 let g:ale_lint_on_insert_leave = 1 " Lint when leaving Insert Mode but don't lint when in Insert Mode
