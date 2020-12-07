@@ -20,6 +20,7 @@ let g:juggler_defaultPathExcludes = [
   \'*/tmp/*',
   \'*/dist/*',
   \'*/vendor/*',
+  \'*/coverage/*',
   \'*/Godeps/*',
   \'*/yarn.lock',
   \'*/package-lock.json',
