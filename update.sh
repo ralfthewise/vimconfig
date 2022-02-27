@@ -1,4 +1,4 @@
 #!/bin/bash
 
-# this assumes you already have Vundle installed
-vim +PluginUpdate +qall
+# this assumes you already have vim.plug installed
+vim +PlugUpdate +qall

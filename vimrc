@@ -120,6 +120,8 @@ endfunction
 command TrimWhitespace call TrimWhitespace()
 nnoremap <leader>tw :call TrimWhitespace()<CR>
 
+au BufNewFile,BufRead *.js.erb set filetype=javascript
+au BufNewFile,BufRead *.coffee.erb set filetype=coffee
 let g:ale_linters = {'ruby': ['rubocop'], 'javascript': ['eslint']}
 let g:ale_fixers = {'ruby': ['rubocop']}
 let g:ale_ruby_rubocop_executable = 'bundle'
@@ -220,7 +222,7 @@ let g:juggler_useCscopeCompleter = 0
 let g:juggler_useOmniCompleter = 0
 let g:juggler_useOmniTrigger = 0
 let g:juggler_useKeywordCompleter = 0
-let g:juggler_additionalPathExcludes = ['*/test-ui/reports/*']
+let g:juggler_additionalPathExcludes = ['*/test-ui/reports/*', '*/coverage/*']
 "let g:acp_enableAtStartup = 0
 "let g:acp_completeoptPreview = 1
 
@@ -257,7 +259,7 @@ let g:ctrlp_map = '<C-@>'
 "let g:ctrlp_cmd = 'CtrlPMixed' "careful here, when searching MRU it is across all sessions/historical MRUs
 let g:ctrlp_extensions = ['tag']
 "let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|app\/components\/|Godeps\/|log\/)'
-let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|Godeps\/|log\/)'
+let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|Godeps\/|coverage\/|log\/)'
 let g:ctrlp_show_hidden = 1
 "let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
 let g:ctrlpmatcher_debug = 0
