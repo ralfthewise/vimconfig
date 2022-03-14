@@ -122,12 +122,18 @@ nnoremap <leader>tw :call TrimWhitespace()<CR>
 
 au BufNewFile,BufRead *.js.erb set filetype=javascript
 au BufNewFile,BufRead *.coffee.erb set filetype=coffee
+" let g:ale_linters = {'ruby': ['rubocop', 'solargraph'], 'javascript': ['eslint']}
 let g:ale_linters = {'ruby': ['rubocop'], 'javascript': ['eslint']}
 let g:ale_fixers = {'ruby': ['rubocop']}
 let g:ale_ruby_rubocop_executable = 'bundle'
+let g:ale_ruby_solargraph_executable = 'bundle'
+let g:ale_ruby_solargraph_options = ' stdio'
 let g:ale_set_signs = 0 " Don't use the sign column/gutter for ALE
 let g:ale_lint_on_text_changed = 'normal' " Lint always in Normal Mode
 let g:ale_lint_on_insert_leave = 1 " Lint when leaving Insert Mode but don't lint when in Insert Mode
+let g:ale_completion_enabled = 1 " Enable completions
+" let g:ale_set_loclist = 0 " Don't use loclist
+" let g:ale_set_quickfix = 1 " Use quickfix instead
 " Yellowish
 highlight ALEInfo ctermbg=58 guibg=#5f5f00
 " Dark red
@@ -218,7 +224,7 @@ endif
 let g:juggler_enableAtStartup = 1
 let g:juggler_logLevel = 'debug'
 let g:juggler_useTagsCompleter = 0
-let g:juggler_useCscopeCompleter = 0
+let g:juggler_useCscopeCompleter = 1
 let g:juggler_useOmniCompleter = 0
 let g:juggler_useOmniTrigger = 0
 let g:juggler_useKeywordCompleter = 0

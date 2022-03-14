@@ -78,6 +78,8 @@ module Juggler
           "  Result:\n#{result.join("\n")}"
         end
         result = result.map {|entry| "\"#{Juggler.escape_vim_doublequote_string(entry.strip[0..191])}\""}.join(',')
+        # TODO: consider this instead?
+        #   call setqflist([{'filename':'foo','lnum':23,'col':4,'text':'some helpful text'},{'filename':'blah/blab.txt','lnum':23,'col':43,'text':'other text'}], 'r')
         VIM::command("cgetexpr [#{result}]")
 
         #VIM::command("cgetexpr split(\"#{Juggler.escape_vim_doublequote_string(result)}\", \"\\n\")")
