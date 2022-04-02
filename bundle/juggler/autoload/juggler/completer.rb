@@ -10,6 +10,7 @@ require_relative 'completers/omni_trigger_completer'
 require_relative 'completers/ctags_completer'
 require_relative 'completers/cscope_completer'
 require_relative 'completers/keyword_completer'
+require_relative 'completers/lsp_completer'
 
 module Juggler
   class Completer
@@ -26,6 +27,7 @@ module Juggler
       @use_cscope = VIM::evaluate('g:juggler_useCscopeCompleter') == 1
       @manage_cscope = VIM::evaluate('g:juggler_manageCscope') == 1
       @use_keyword = VIM::evaluate('g:juggler_useKeywordCompleter') == 1
+      @use_lsp = VIM::evaluate('g:juggler_useLSPCompleter') == 1
 
       init_indexes
       init_completers
@@ -94,8 +96,16 @@ module Juggler
       Juggler.with_status('Finding references...') do
         term = VIM::evaluate('resolvedterm').to_s
         next if term == ''
+
         Juggler.logger.debug { "Searching for references of: #{term}" }
-        result = @cscope_service.query(term, CscopeQuery::Symbol)
+        result = []
+        _buf, lnum, col, _off = VIM::evaluate('getpos(".")')
+        plugins.each do |p|
+          plugin_results = p.show_references(eval_current_path, lnum - 1, col - 1)
+          Juggler.logger.debug { "Plugin results: #{p.show_references(eval_current_path, lnum - 1, col - 1)}" }
+          result += plugin_results
+        end
+        result += @cscope_service.query(term, CscopeQuery::Symbol)
         if Juggler.logger.debug?
           result.each do |cscope_entry|
             Juggler.logger.debug { "Found reference: #{cscope_entry}" }
@@ -160,6 +170,7 @@ module Juggler
       @ctags_completer = Completers::CtagsCompleter.new if @use_tags
       @cscope_completer = Completers::CscopeCompleter.new(@cscope_service) if @use_cscope
       @keyword_completer = Completers::KeywordCompleter.new if @use_keyword
+      @lsp_completer = Completers::LspCompleter.new(root_path: '.', cmd: "bash -l -c #{Shellwords.escape('bundle exec solargraph socket')}", host: '127.0.0.1', logger: Juggler.logger) if @use_lsp
     end
 
     def generate_completions
@@ -212,7 +223,28 @@ module Juggler
       VIM::command("let s:juggler_sum_block = '#{items.reduce(:+)}'")
     end
 
+    def file_opened_hook
+      absolute_path = eval_current_path
+      return unless File.file?(absolute_path)
+
+      Juggler.logger.info { "File loaded: #{absolute_path}" }
+      plugins.each {|p| p.file_opened(absolute_path)}
+    end
+
+    def file_saved_hook
+      absolute_path = eval_current_path
+      Juggler.logger.info { "File saved: #{absolute_path}" }
+    end
+
     protected
+    def plugins
+      [@lsp_completer]
+    end
+
+    def eval_current_path
+      File.expand_path(VIM::evaluate('expand("%:p")'))
+    end
+
     def get_completers(cursor_info)
       return {omni_trigger: @omni_trigger_completer} if @use_omni_trigger && cursor_info['type'] == 'omnitrigger'
 

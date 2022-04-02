@@ -60,6 +60,7 @@ call s:defineOption('g:juggler_manageTags', 1)
 call s:defineOption('g:juggler_useCscopeCompleter', 1)
 call s:defineOption('g:juggler_manageCscope', 1)
 call s:defineOption('g:juggler_useKeywordCompleter', 1)
+call s:defineOption('g:juggler_useLSPCompleter', 1)
 
 call s:defineOption('g:juggler_replaceCtrlpCommand', 1)
 

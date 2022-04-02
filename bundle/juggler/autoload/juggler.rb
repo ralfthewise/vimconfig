@@ -46,9 +46,9 @@ module Juggler
   end
 
   def self.create_logger
-    l = Logger.new(VimLoggerIO.new)
+    l = (ENV['JUGGLER_LOG_FILE'] ? Logger.new(ENV['JUGGLER_LOG_FILE']) : Logger.new(VimLoggerIO.new))
     l.formatter = proc { |severity, datetime, progname, msg|
-      "JUGGLER #{datetime.strftime('%T.%L')} #{severity} - #{msg.to_s}"
+      "JUGGLER #{datetime.strftime('%T.%L')} ##{Thread.current.object_id} #{severity} - #{msg.to_s}\n"
     }
     case (ENV['JUGGLER_LOG_LEVEL'] || VIM::evaluate('g:juggler_logLevel'))
     when 'warn' then l.level = Logger::WARN

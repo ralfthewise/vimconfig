@@ -64,6 +64,7 @@ function juggler#Enable()
   let s:usercompleted = 0
 
   call s:SetupCommands()
+  call s:SetupAutoCommands()
 endfunction
 
 function! s:OnBackspace(bsSeq)
@@ -317,6 +318,13 @@ function! s:SetupMaps()
   nmap <F3> :JugglerSearch<CR>
   nmap <C-B> :JugglerJumpDef<CR>
   nmap <F7> :JugglerShowRefs<CR>
+endfunction
+
+function! s:SetupAutoCommands()
+  augroup Juggler
+    autocmd BufReadPost * ruby Juggler::Completer.instance.file_opened_hook
+    autocmd BufWritePost * ruby Juggler::Completer.instance.file_saved_hook
+  augroup END
 endfunction
 
 "load additional functionality
