@@ -5,12 +5,14 @@ require 'digest/sha1'
 require_relative 'cscope_service'
 require_relative 'entry_scorer'
 require_relative 'completion_entries'
-require_relative 'completers/omni_completer'
-require_relative 'completers/omni_trigger_completer'
-require_relative 'completers/ctags_completer'
-require_relative 'completers/cscope_completer'
-require_relative 'completers/keyword_completer'
-require_relative 'completers/lsp_completer'
+require_relative 'plugins'
+require_relative 'plugins/base'
+require_relative 'plugins/omni_completer'
+require_relative 'plugins/caching_omni_completer'
+require_relative 'plugins/ctags'
+require_relative 'plugins/cscope'
+require_relative 'plugins/keywords'
+require_relative 'plugins/lsp'
 
 module Juggler
   class Completer
@@ -28,6 +30,7 @@ module Juggler
       @manage_cscope = VIM::evaluate('g:juggler_manageCscope') == 1
       @use_keyword = VIM::evaluate('g:juggler_useKeywordCompleter') == 1
       @use_lsp = VIM::evaluate('g:juggler_useLSPCompleter') == 1
+      @language_plugins_config = VIM::evaluate('g:juggler_language_plugins')
 
       init_indexes
       init_completers
@@ -47,6 +50,10 @@ module Juggler
         VIM::command("let s:indexespath = '#{Juggler.escape_vim_singlequote_string(@indexes_path)}'")
         @cscope_service = CscopeService.new(File.join(@indexes_path, 'cscope.out')) if (@use_cscope && @manage_cscope)
       end
+    end
+
+    def indexes_path
+      @indexes_path
     end
 
     def replace_ctrlp_user_command
@@ -165,12 +172,12 @@ module Juggler
     end
 
     def init_completers
-      @omni_completer = Completers::OmniCompleter.new if @use_omni
-      @omni_trigger_completer = Completers::OmniTriggerCompleter.new(@use_omni_trigger_cache) if @use_omni_trigger
-      @ctags_completer = Completers::CtagsCompleter.new if @use_tags
-      @cscope_completer = Completers::CscopeCompleter.new(@cscope_service) if @use_cscope
-      @keyword_completer = Completers::KeywordCompleter.new if @use_keyword
-      @lsp_completer = Completers::LspCompleter.new(root_path: '.', cmd: "bash -l -c #{Shellwords.escape('bundle exec solargraph socket')}", host: '127.0.0.1', logger: Juggler.logger) if @use_lsp
+      # @omni_completer = Plugins::OmniCompleter.new if @use_omni
+      # @omni_trigger_completer = Plugins::CachingOmniCompleter.new(@use_omni_trigger_cache) if @use_omni_trigger
+      # @ctags_completer = Plugins::Ctags.new if @use_tags
+      # @cscope_completer = Plugins::Cscope.new(@cscope_service) if @use_cscope
+      # @keyword_completer = Plugins::Keywords.new if @use_keyword
+      # @lsp_completer = Plugins::Lsp.new(root_path: '.', cmd: "bash -l -c #{Shellwords.escape('bundle exec solargraph socket')}", host: '127.0.0.1', logger: Juggler.logger) if @use_lsp
     end
 
     def generate_completions
@@ -185,10 +192,10 @@ module Juggler
         completers = get_completers(cursor_info)
         file_existence = {'' => true}
 
-        completers.each do |completion_type, completer|
+        plugins.each do |plugin|
           start = Time.now
           count = 0
-          completer.generate_completions(token, cursor_info) do |entry|
+          plugin.generate_completions(token, cursor_info) do |entry|
             if entry.tag != token #don't bother including exact matches
               entry_file = entry.file.to_s
               file_existence[entry_file] = File.exists?(entry_file) if file_existence[entry_file].nil?
@@ -201,8 +208,27 @@ module Juggler
               end
             end
           end
-          Juggler.logger.info { "#{completion_type} completions took #{Time.now - start} seconds and found #{count} entries" }
+          Juggler.logger.info { "#{plugin.class.to_s} completions took #{Time.now - start} seconds and found #{count} entries" }
         end
+
+        # completers.each do |completion_type, completer|
+        #   start = Time.now
+        #   count = 0
+        #   completer.generate_completions(token, cursor_info) do |entry|
+        #     if entry.tag != token #don't bother including exact matches
+        #       entry_file = entry.file.to_s
+        #       file_existence[entry_file] = File.exists?(entry_file) if file_existence[entry_file].nil?
+        #       if file_existence[entry_file]
+        #         entry.score_data = scorer.score(entry)
+        #         entries.add(entry)
+        #         count += 1
+        #       else
+        #         Juggler.logger.debug { "Skipping file because it doesn't exist: #{entry_file}" }
+        #       end
+        #     end
+        #   end
+        #   Juggler.logger.info { "#{completion_type} completions took #{Time.now - start} seconds and found #{count} entries" }
+        # end
 
         Juggler.logger.info { "#{entries.count} total entries found" }
         entries.process do |vim_arr|
@@ -237,8 +263,49 @@ module Juggler
     end
 
     protected
+
+    # Gets the plugins for the current filetype
     def plugins
-      [@lsp_completer]
+      Juggler.logger.debug { "Config: #{@language_plugins_config}" }
+      plugins_for_filetype(VIM::evaluate('&filetype'))
+    end
+
+    def plugins_for_filetype(filetype)
+      @plugins ||= {}
+      return @plugins[filetype] if @plugins.key?(filetype)
+
+      # If there's no specific config for this filetype, just use the wildcard one
+      if !@language_plugins_config.key?(filetype)
+        @plugins[filetype] = plugins_for_filetype('*')
+        return @plugins[filetype]
+      end
+
+      @plugins[filetype] = []
+      @language_plugins_config[filetype].to_a.each do |plugin_config|
+        if plugin_config.is_a?(String)
+          if plugin_config == '*'
+            raise "Can't have nested wildcard '*' configs" if filetype == '*'
+
+            @plugins[filetype] += plugins_for_filetype('*')
+          else
+            @plugins[filetype] << Juggler::Plugins.load_plugin(plugin_config, default_plugin_options)
+          end
+        else
+          plugin_config.each do |plugin_name, options|
+            @plugins[filetype] << Juggler::Plugins.load_plugin(plugin_name, default_plugin_options.merge(options))
+          end
+        end
+      end
+
+      Juggler.logger.debug { "Plugins for '#{filetype}': #{@plugins[filetype]}" }
+      @plugins[filetype]
+    end
+
+    def default_plugin_options
+      @default_plugin_options ||= {
+        project_dir: determine_project_dir,
+        logger: Juggler.logger,
+      }
     end
 
     def eval_current_path

@@ -1,7 +1,7 @@
 require_relative '../completion_entry'
 
-module Juggler::Completers
-  class CtagsCompleter
+module Juggler::Plugins
+  class Ctags < Base
     #example result from taglist():
     #
     #  [{'cmd': '/^  appendValAtPath = (dataModel, modelPath, modelVal, archetypeProperties) ->$/', 'static': 0, 'name': 'appendValAtPath', 'line': '6', 'language': 'coffee', 'kind': 'function', 'filename': './app/components/radar-forms/services/form-data-translator.coffee'}]

@@ -1,7 +1,7 @@
 require_relative '../completion_entry'
 
-module Juggler::Completers
-  class KeywordCompleter
+module Juggler::Plugins
+  class Keywords < Base
     #example lines:
     #app/search-scoop/services/card-display-state.coffee
     # 17:   31 type PublicIncident struct {
@@ -12,7 +12,10 @@ module Juggler::Completers
 
       file = nil
       base_regex = Regexp.new(generate_keyword_match_pattern(base), Regexp::IGNORECASE)
-      keyword_output = VIM::evaluate("s:GetKeywords('#{Juggler.escape_vim_singlequote_string(generate_keyword_search_pattern(base))}')")
+      pattern = Juggler.escape_vim_singlequote_string(generate_keyword_search_pattern(base))
+      Juggler.logger.debug { "Performing keywords search for: #{pattern}" }
+      keyword_output = VIM::evaluate("s:GetKeywords('#{pattern}')")
+      Juggler.logger.debug { "Keywords search output: #{keyword_output}" }
       keyword_output.split("\n").each do |line|
         if match = @@keyword_regexp.match(line)
           index = match[1].to_i

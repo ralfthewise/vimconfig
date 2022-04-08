@@ -255,14 +255,19 @@ function! s:GetKeywords(pat)
 endfunction
 
 function! s:KeywordTags(pat)
-  "exe 'ilist! ' . a:pat
+  exe 'ilist! ' . a:pat
 
-  let buf = bufnr('')
-  let save_eventignore = &eventignore
-  set eventignore=all
-  exe 'bufdo ilist! ' . a:pat
-  let &eventignore = save_eventignore
-  exe 'b ' . buf
+  " We used to be able to search all open buffers, but this is no longer
+  " allowed - see https://github.com/vim/vim/issues/6017
+  " We could consider just doing it all in ruby and caching all open buffers
+  " there.
+
+  " let buf = bufnr('')
+  " let save_eventignore = &eventignore
+  " set eventignore=all
+  " exe 'bufdo ilist! ' . a:pat
+  " let &eventignore = save_eventignore
+  " exe 'b ' . buf
 endfunction
 
 function! s:GetCscope(pat)

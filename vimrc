@@ -229,6 +229,13 @@ let g:juggler_useOmniCompleter = 0
 let g:juggler_useOmniTrigger = 0
 let g:juggler_useKeywordCompleter = 0
 let g:juggler_additionalPathExcludes = ['*/test-ui/reports/*', '*/coverage/*']
+" let g:juggler_language_plugins = {
+"       \ '*': ['ctags', 'cscope', 'keywords'],
+"       \ 'ruby': [{'lsp': {'cmd': 'bundle exec solargraph socket', 'host': '127.0.0.1'}}, '*']
+"       \ }
+let g:juggler_language_plugins = {
+      \ '*': ['ctags', 'cscope', 'keywords'],
+      \ }
 "let g:acp_enableAtStartup = 0
 "let g:acp_completeoptPreview = 1
 

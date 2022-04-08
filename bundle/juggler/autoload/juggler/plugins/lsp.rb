@@ -6,10 +6,12 @@ require 'open3'
 require 'shellwords'
 require 'pathname'
 require_relative '../completion_entry'
-require_relative 'base_completer'
+require_relative 'base'
 
-module Juggler::Completers
-  class LspCompleter < BaseCompleter
+module Juggler::Plugins
+  class Lsp < Base
+    @shared_across_filetypes = false
+
     MSG_INITIALIZE = {
       textDocument: {
         synchronization: {
@@ -25,10 +27,10 @@ module Juggler::Completers
       }
     }.freeze
 
-    def initialize(root_path:, cmd: nil, host: nil, port: 7658, logger: Logger.new($stdout, level: Logger::INFO))
+    def initialize(project_dir:, cmd: nil, host: nil, port: 7658, logger: Logger.new($stdout, level: Logger::INFO))
       raise 'At least one of `cmd` or `host` must be specified' if cmd.nil? && host.nil?
 
-      @root_path = Pathname.new(File.expand_path(root_path))
+      @root_path = Pathname.new(File.expand_path(project_dir))
       @logger = logger
 
       @msg_id = 0

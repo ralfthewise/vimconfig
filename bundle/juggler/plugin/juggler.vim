@@ -55,6 +55,8 @@ call s:defineOption('g:juggler_triggerOmniRegex', '\(\%(->\|\.\|::\|<\)\)\(\w*\)
 "for successive token completions
 call s:defineOption('g:juggler_useOmniTriggerCache', 1)
 
+call s:defineOption('g:juggler_language_plugins', {})
+
 call s:defineOption('g:juggler_useTagsCompleter', 1)
 call s:defineOption('g:juggler_manageTags', 1)
 call s:defineOption('g:juggler_useCscopeCompleter', 1)

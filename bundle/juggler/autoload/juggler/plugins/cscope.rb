@@ -1,9 +1,9 @@
 require_relative '../completion_entry'
 
-module Juggler::Completers
-  class CscopeCompleter
-    def initialize(cscope_service)
-      @cscope_service = cscope_service
+module Juggler::Plugins
+  class Cscope < Base
+    def initialize(options)
+      @cscope_service = Juggler::CscopeService.new(File.join(Juggler::Completer.instance.indexes_path, 'cscope.out'))
     end
 
     def generate_completions(base, cursor_info)

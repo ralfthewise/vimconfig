@@ -1,8 +1,8 @@
 require_relative 'omni_completer'
 
-module Juggler::Completers
-  class OmniTriggerCompleter < OmniCompleter
-    def initialize(use_omni_trigger_cache)
+module Juggler::Plugins
+  class CachingOmniCompleter < OmniCompleter
+    def initialize(options, use_omni_trigger_cache = true)
       @use_omni_trigger_cache = use_omni_trigger_cache
       @last_linenum = -1
       @last_matchstart = -1
