@@ -30,6 +30,9 @@ module Juggler::Plugins
     def initialize(project_dir:, cmd: nil, host: nil, port: 7658, logger: Logger.new($stdout, level: Logger::INFO))
       raise 'At least one of `cmd` or `host` must be specified' if cmd.nil? && host.nil?
 
+      # If a Gemfile exists in our current dir consider that to be the project dir
+      project_dir = Dir.getwd if File.file?(File.join(Dir.getwd, 'Gemfile')) || File.file?(File.join(Dir.getwd, '.solargraph.yml'))
+
       @root_path = Pathname.new(File.expand_path(project_dir))
       @logger = logger
 
@@ -62,14 +65,15 @@ module Juggler::Plugins
 
     def launch(parent_thread, cmd, host, port)
       if !cmd.nil?
-        # sanitized_cmd = "env -i - HOME=#{Shellwords.escape(ENV['HOME'])} bash -l -c #{Shellwords.escape('bundle exec solargraph stdio')}"
-        sanitized_cmd = "env -i - HOME=#{Shellwords.escape(ENV['HOME'])} #{cmd}"
+        sanitized_cmd = "env -i - HOME=#{Shellwords.escape(ENV['HOME'])} bash -l -c #{Shellwords.escape(cmd)}"
+        # sanitized_cmd = "env -i - HOME=#{Shellwords.escape(ENV['HOME'])} #{cmd}"
+        # @logger.info { "Launching LSP server in #{File.expand_path(Dir.getwd)}: #{sanitize_cmd}" }
         @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(sanitized_cmd)
         @stderr_thr = Thread.new { read_and_log('STDERR', @stderr) }
         @send_socket = @stdin
         @receive_socket = @stdout
         @child_pid = @wait_thr[:pid]
-        @logger.info { "LSP server started (PID: #{@child_pid}) with cmd: #{sanitized_cmd}" }
+        @logger.info { "LSP server started (PID: #{@child_pid}) in #{File.expand_path(Dir.getwd)}: #{sanitized_cmd}" }
       end
 
       parent_thread.wakeup
@@ -162,11 +166,11 @@ module Juggler::Plugins
       receive_msg
     end
 
-    def show_references(path, line, col)
+    def show_references(path, line, col, _term)
       # [{"uri"=>"file:///home/tim/dev/vimconfig/bundle/juggler/autoload/test.rb", "range"=>{"start"=>{"line"=>16, "character"=>11}, "end"=>{"line"=>16, "character"=>26}}}, ...]
       result = find_references(path, line, col)
       result.map do |entry|
-        path = Pathname.new(entry['uri'][7..-1]).relative_path_from(@root_path)
+        path = Pathname.new(entry['uri'][7..-1]).relative_path_from(Dir.getwd)
         {file: path.to_s, line: entry['range']['start']['line'] + 1}
       end
     end

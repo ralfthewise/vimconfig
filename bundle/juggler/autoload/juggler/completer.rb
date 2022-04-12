@@ -106,19 +106,13 @@ module Juggler
 
         Juggler.logger.debug { "Searching for references of: #{term}" }
         result = []
-        _buf, lnum, col, _off = VIM::evaluate('getpos(".")')
+        _bufnum, lnum, col, _off = VIM::evaluate('getpos(".")')
         plugins.each do |p|
-          plugin_results = p.show_references(eval_current_path, lnum - 1, col - 1)
-          Juggler.logger.debug { "Plugin results: #{p.show_references(eval_current_path, lnum - 1, col - 1)}" }
-          result += plugin_results
+          plugin_results = p.show_references(eval_current_path, lnum - 1, col - 1, term)
+          Juggler.logger.debug { "Plugin results (#{p.class.to_s}): #{plugin_results}" }
+          result += plugin_results.to_a
         end
-        result += @cscope_service.query(term, CscopeQuery::Symbol)
-        if Juggler.logger.debug?
-          result.each do |cscope_entry|
-            Juggler.logger.debug { "Found reference: #{cscope_entry}" }
-          end
-        end
-        result = result.map do |entry|
+        result.map! do |entry|
           qfix_entry = "#{entry[:file]}:#{entry[:line]}: <#{entry[:kind]}> #{entry[:tag_line]}"
           "\"#{Juggler.escape_vim_doublequote_string(qfix_entry.strip[0..191])}\""
         end

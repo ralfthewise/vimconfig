@@ -10,6 +10,6 @@ module Juggler::Plugins
     def initialize(options); end
 
     def file_opened(absolute_path); end
-    def show_references(path, line, col); end
+    def show_references(path, line, col, term); end
   end
 end

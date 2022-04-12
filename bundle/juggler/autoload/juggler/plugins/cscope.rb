@@ -6,6 +6,10 @@ module Juggler::Plugins
       @cscope_service = Juggler::CscopeService.new(File.join(Juggler::Completer.instance.indexes_path, 'cscope.out'))
     end
 
+    def show_references(_path, _line, _col, term)
+      @cscope_service.query(term, Juggler::CscopeQuery::Symbol)
+    end
+
     def generate_completions(base, cursor_info)
       return if base.nil? || base.empty?
 
