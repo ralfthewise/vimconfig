@@ -27,8 +27,10 @@ module Juggler::Plugins
       }
     }.freeze
 
-    def initialize(project_dir:, current_file:, cmd: nil, host: nil, port: 7658, logger: Logger.new($stdout, level: Logger::INFO))
-      raise 'At least one of `cmd` or `host` must be specified' if cmd.nil? && host.nil?
+    def initialize(project_dir:, current_file:, cmd: nil, host: nil, port: 7658, **opts)
+      super
+
+      raise "#{self.class} - At least one of `cmd` or `host` must be specified" if cmd.nil? && host.nil?
 
       # TODO: this is very ruby specific, needs to be moved somewhere else
       # If a Gemfile exists in our current dir consider that to be the project dir
@@ -38,7 +40,6 @@ module Juggler::Plugins
 
       @sent_file_versions = Hash.new(0)
       @root_path = Pathname.new(File.expand_path(project_dir))
-      @logger = logger
 
       @msg_id = 0
       @version_id = 0
@@ -55,7 +56,7 @@ module Juggler::Plugins
 
     def wait_until_initialized
       if @initialized_mutex.locked? && !@initialized_mutex.owned?
-        @logger.info { 'Waiting for LSP connection to be initialized' }
+        logger.info { 'Waiting for LSP connection to be initialized' }
         @initialized_mutex.lock
         @initialized_mutex.unlock
       end
@@ -63,7 +64,7 @@ module Juggler::Plugins
 
     def read_and_log(tag, pipe)
       while(line = pipe.gets) do
-        @logger.info { "LSP Server #{tag}: #{line}" }
+        logger.info { "LSP Server #{tag}: #{line}" }
       end
     end
 
@@ -71,13 +72,13 @@ module Juggler::Plugins
       if !cmd.nil?
         sanitized_cmd = "env -i - HOME=#{Shellwords.escape(ENV['HOME'])} bash -l -c #{Shellwords.escape(cmd)}"
         # sanitized_cmd = "env -i - HOME=#{Shellwords.escape(ENV['HOME'])} #{cmd}"
-        # @logger.info { "Launching LSP server in #{File.expand_path(Dir.getwd)}: #{sanitize_cmd}" }
+        # logger.info { "Launching LSP server in #{File.expand_path(Dir.getwd)}: #{sanitize_cmd}" }
         @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(sanitized_cmd)
         @stderr_thr = Thread.new { read_and_log('STDERR', @stderr) }
         @send_socket = @stdin
         @receive_socket = @stdout
         @child_pid = @wait_thr[:pid]
-        @logger.info { "LSP server started (PID: #{@child_pid}) in #{File.expand_path(Dir.getwd)}: #{sanitized_cmd}" }
+        logger.info { "LSP server started (PID: #{@child_pid}) in #{File.expand_path(Dir.getwd)}: #{sanitized_cmd}" }
       end
 
       parent_thread.wakeup
@@ -89,10 +90,10 @@ module Juggler::Plugins
             s = TCPSocket.open(host, 7658)
             @send_socket = s
             @receive_socket = s
-            @logger.info { "Connected to LSP server at tcp://#{host}:#{port}" }
+            logger.info { "Connected to LSP server at tcp://#{host}:#{port}" }
             break
           rescue Errno::ECONNREFUSED
-            @logger.info { "LSP server refused connection at tcp://#{host}:#{port}" }
+            logger.info { "LSP server refused connection at tcp://#{host}:#{port}" }
             sleep(0.5)
           end
         end
@@ -110,7 +111,7 @@ module Juggler::Plugins
       receive_msg
       send_msg('initialized', {})
       receive_msg
-      @logger.info { 'LSP connection initialized' }
+      logger.info { 'LSP connection initialized' }
       @initialized_mutex.unlock
     end
 
@@ -226,7 +227,7 @@ module Juggler::Plugins
       wait_until_initialized
       wrapped = ->(s, size) { "Content-Length: #{size}\r\n\r\n#{s}" }
       msg = JSON.pretty_generate({jsonrpc: '2.0', id: (@msg_id += 1), method: method, params: params})
-      @logger.debug { "Sending message:\n#{wrapped.call(Juggler::Utils::Colorize.yellow(msg), msg.size)}" }
+      logger.debug { "Sending message:\n#{wrapped.call(Juggler::Utils::Colorize.yellow(msg), msg.size)}" }
       @send_socket.write(wrapped.call(msg, msg.size))
     end
 
@@ -245,7 +246,7 @@ module Juggler::Plugins
 
       json = @receive_socket.read(content_length)
       msg = JSON.parse(json)
-      @logger.debug { "Received message:\n#{headers}#{Juggler::Utils::Colorize.yellow(JSON.pretty_generate(msg))}" }
+      logger.debug { "Received message:\n#{headers}#{Juggler::Utils::Colorize.yellow(JSON.pretty_generate(msg))}" }
       msg['result']
     end
   end

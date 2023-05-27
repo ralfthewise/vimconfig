@@ -306,6 +306,7 @@ module Juggler
         end
       end
 
+      Juggler.logger.debug { "Plugins for filetype `#{filetype}`:\n  #{@plugins[filetype].map(&:for_display).join("\n  ")}" }
       @plugins[filetype]
     end
 

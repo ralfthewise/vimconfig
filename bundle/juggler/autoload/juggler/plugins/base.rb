@@ -7,12 +7,33 @@ module Juggler::Plugins
       attr_reader :shared_across_filetypes
     end
 
-    def initialize(options); end
+    attr_accessor :logger, :options
+
+    def initialize(logger: Logger.new($stdout, level: Logger::INFO), **options)
+      @logger = logger.clone
+
+      if @logger.formatter
+        original_formatter = @logger.formatter.dup
+        @logger.formatter = proc { |severity, datetime, progname, msg|
+          original_formatter.call(severity, datetime, progname, "#{self.class} - #{msg.to_s}") # Include the class name in log output
+        }
+      else
+        @logger.formatter = proc { |severity, datetime, progname, msg|
+          "#{self.class} - #{msg.to_s}"
+        }
+      end
+
+      @options = options
+    end
 
     def file_opened(absolute_path); end
     def buffer_changed_hook(absolute_path); end
     def buffer_left_hook(absolute_path); end
     def show_references(path, line, col, term); end
     def grep(srchstr); end
+
+    def for_display
+      "#{Juggler::Utils::Colorize.bold(self.class)}: #{@options}"
+    end
   end
 end
