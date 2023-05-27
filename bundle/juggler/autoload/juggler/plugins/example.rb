@@ -18,6 +18,10 @@ module Juggler::Plugins
       logger.info { "grep: #{srchstr}" }
     end
 
+    def generate_completions(base, cursor_info)
+      logger.info { "generate_completions:\n  base: #{base}\n  cursor_info: #{cursor_info}" }
+    end
+
     # Hooks
     def buffer_changed_hook(absolute_path)
       logger.info { "buffer_changed_hook: #{absolute_path}" }

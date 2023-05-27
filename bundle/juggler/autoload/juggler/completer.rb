@@ -340,7 +340,6 @@ module Juggler
       buf_wd = File.expand_path('..', buf)
       result = Juggler.walk_tree_looking_for_files(cwd)
       result = Juggler.walk_tree_looking_for_files(buf_wd) if result.nil?
-      Dir.chdir(cwd)
       return result
     end
 

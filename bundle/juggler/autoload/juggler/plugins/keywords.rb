@@ -13,9 +13,10 @@ module Juggler::Plugins
       file = nil
       base_regex = Regexp.new(generate_keyword_match_pattern(base), Regexp::IGNORECASE)
       pattern = Juggler.escape_vim_singlequote_string(generate_keyword_search_pattern(base))
-      Juggler.logger.debug { "Performing keywords search for: #{pattern}" }
+      logger.debug { "Performing keywords search for: #{pattern}" }
+      logger.debug { "Current dir is: #{Dir.getwd}" }
       keyword_output = VIM::evaluate("s:GetKeywords('#{pattern}')")
-      Juggler.logger.debug { "Keywords search output: #{keyword_output}" }
+      logger.debug { "Keywords search output: #{keyword_output}" }
       keyword_output.split("\n").each do |line|
         if match = @@keyword_regexp.match(line)
           index = match[1].to_i

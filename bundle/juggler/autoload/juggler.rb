@@ -76,11 +76,10 @@ module Juggler
   def self.walk_tree_looking_for_files(cwd, glob: ['.git'])
     #walk up the tree until we find files that match the passed in `glob`
     while valid_project_dir?(cwd)
-      Dir.chdir(cwd)
-      if Dir.glob(glob).length > 0
+      if Dir.glob(glob, base: cwd).length > 0
         return cwd
       end
-      cwd = File.expand_path('..')
+      cwd = File.expand_path('..', cwd)
     end
     return nil
   end

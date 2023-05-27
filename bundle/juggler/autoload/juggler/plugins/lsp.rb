@@ -72,13 +72,15 @@ module Juggler::Plugins
       if !cmd.nil?
         sanitized_cmd = "env -i - HOME=#{Shellwords.escape(ENV['HOME'])} bash -l -c #{Shellwords.escape(cmd)}"
         # sanitized_cmd = "env -i - HOME=#{Shellwords.escape(ENV['HOME'])} #{cmd}"
-        # logger.info { "Launching LSP server in #{File.expand_path(Dir.getwd)}: #{sanitize_cmd}" }
-        @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(sanitized_cmd)
+        Dir.chdir(@root_path) do
+          logger.info { "Launching LSP server in #{File.expand_path(Dir.getwd)}: #{sanitized_cmd}" }
+          @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(sanitized_cmd)
+        end
         @stderr_thr = Thread.new { read_and_log('STDERR', @stderr) }
         @send_socket = @stdin
         @receive_socket = @stdout
         @child_pid = @wait_thr[:pid]
-        logger.info { "LSP server started (PID: #{@child_pid}) in #{File.expand_path(Dir.getwd)}: #{sanitized_cmd}" }
+        logger.info { "LSP server started (PID: #{@child_pid})" }
       end
 
       parent_thread.wakeup

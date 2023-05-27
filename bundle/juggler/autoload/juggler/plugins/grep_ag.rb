@@ -14,7 +14,7 @@ module Juggler::Plugins
 
       start = Time.now
       result = `#{grep_cmd} | #{strip_tabs_cmd}`
-      Juggler.logger.debug { "#{self.class.to_s} grep took #{Time.now - start} seconds: #{grep_cmd}\n  Result:\n#{result}" }
+      logger.debug { "#{self.class.to_s} grep took #{Time.now - start} seconds: #{grep_cmd}\n  Result:\n#{result}" }
       result = result.gsub("\r\n", "\n").gsub("\r", "\n")
       Juggler.clean_utf8(result).split("\n")
     end
