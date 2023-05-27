@@ -230,7 +230,7 @@ let g:juggler_useOmniTrigger = 0
 let g:juggler_useKeywordCompleter = 0
 let g:juggler_additionalPathExcludes = ['*/test-ui/reports/*', '*/coverage/*']
 let g:juggler_language_plugins = {
-      \ '*': ['ctags', 'cscope', 'keywords'],
+      \ '*': ['ctags', 'cscope', 'keywords', 'grep_ag'],
       \ 'ruby': [{'lsp': {'cmd': 'bundle exec solargraph stdio'}}, '*']
       \ }
 " let g:juggler_language_plugins = {

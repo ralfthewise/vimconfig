@@ -1,5 +1,11 @@
-require 'logger'
-require_relative 'juggler/completer'
+require 'rubygems'
+ENV['BUNDLE_GEMFILE'] = File.join(File.dirname(__FILE__), 'Gemfile') # location of `Gemfile`
+require 'bundler/setup'
+require 'zeitwerk'
+
+loader = Zeitwerk::Loader.new
+loader.push_dir(__dir__)
+loader.setup
 
 module Juggler
   def self.clean_utf8(str)
@@ -21,6 +27,10 @@ module Juggler
     str = str.to_s.gsub(/[\\"|]/, {'\\' => '\\\\', '"' => '\\"', '|' => '\\|'})
     #replace all newline character sequences with \n - NOTE we are replacing it with the string "\\n", NOT the newline character
     return str.gsub("\r\n", '\\n').gsub(/[\r\n]/, '\\n')
+  end
+
+  def self.file_contents(absolute_path)
+    Juggler::Completer.instance.file_contents.contents_of(absolute_path)
   end
 
   def self.generate_scan_base_pattern(base)
@@ -46,7 +56,11 @@ module Juggler
   end
 
   def self.create_logger
-    l = (ENV['JUGGLER_LOG_FILE'] ? Logger.new(ENV['JUGGLER_LOG_FILE']) : Logger.new(VimLoggerIO.new))
+    l = if ENV['JUGGLER_LOG_INLINE']
+          Logger.new(VimLoggerIO.new)
+        else
+          (ENV['JUGGLER_LOG_FILE'] ? Logger.new(ENV['JUGGLER_LOG_FILE']) : Logger.new('/tmp/juggler.log'))
+        end
     l.formatter = proc { |severity, datetime, progname, msg|
       "JUGGLER #{datetime.strftime('%T.%L')} ##{Thread.current.object_id} #{severity} - #{msg.to_s}\n"
     }
@@ -57,6 +71,24 @@ module Juggler
     else l.level = Logger::ERROR
     end
     return l
+  end
+
+  def self.walk_tree_looking_for_files(cwd, glob: ['.git'])
+    #walk up the tree until we find files that match the passed in `glob`
+    while valid_project_dir?(cwd)
+      Dir.chdir(cwd)
+      if Dir.glob(glob).length > 0
+        return cwd
+      end
+      cwd = File.expand_path('..')
+    end
+    return nil
+  end
+
+  def self.valid_project_dir?(d)
+    return false if d == Dir.home
+    return false if d == '/'
+    return true
   end
 end
 

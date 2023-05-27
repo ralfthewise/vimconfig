@@ -27,12 +27,16 @@ module Juggler::Plugins
       }
     }.freeze
 
-    def initialize(project_dir:, cmd: nil, host: nil, port: 7658, logger: Logger.new($stdout, level: Logger::INFO))
+    def initialize(project_dir:, current_file:, cmd: nil, host: nil, port: 7658, logger: Logger.new($stdout, level: Logger::INFO))
       raise 'At least one of `cmd` or `host` must be specified' if cmd.nil? && host.nil?
 
+      # TODO: this is very ruby specific, needs to be moved somewhere else
       # If a Gemfile exists in our current dir consider that to be the project dir
-      project_dir = Dir.getwd if File.file?(File.join(Dir.getwd, 'Gemfile')) || File.file?(File.join(Dir.getwd, '.solargraph.yml'))
+      # project_dir = Dir.getwd if File.file?(File.join(Dir.getwd, 'Gemfile')) || File.file?(File.join(Dir.getwd, '.solargraph.yml'))
+      glob = ['Gemfile', 'Gemfile.lock', '.solargraph.yml'] # Files to look for
+      project_dir = Juggler.walk_tree_looking_for_files(File.expand_path('..', current_file), glob: glob) || project_dir
 
+      @sent_file_versions = Hash.new(0)
       @root_path = Pathname.new(File.expand_path(project_dir))
       @logger = logger
 
@@ -46,7 +50,7 @@ module Juggler::Plugins
         @initialized_mutex.lock
         launch(parent_thread, cmd, host, port)
       end
-      Thread.stop
+      Thread.stop # Call this to ensure we switch to the other thread and give the LSP a chance to startup before we continue
     end
 
     def wait_until_initialized
@@ -150,8 +154,35 @@ module Juggler::Plugins
       receive_msg
     end
 
+    def buffer_left_hook(absolute_path)
+      send_changes_if_needed(absolute_path)
+    end
+
+    def send_changes_if_needed(path)
+      absolute_path = File.expand_path(path)
+      if Juggler::Completer.instance.file_contents.file_modified?(absolute_path, @sent_file_versions[absolute_path])
+        did_change(absolute_path)
+      end
+    end
+
+    def did_change(absolute_path)
+      current_contents = Juggler.file_contents(absolute_path)
+      msg = {
+        textDocument: {
+          uri: "file://#{absolute_path}",
+          version: (@version_id += 1),
+        },
+        contentChanges: [{text: current_contents[:contents].join("\n")}],
+      }
+      send_msg('textDocument/didChange', msg)
+      @sent_file_versions[absolute_path] = current_contents[:version]
+      receive_msg
+    end
+
     # `line` and `col` should be zero-based
     def definition(path, line, col)
+      send_changes_if_needed(path)
+
       absolute_path = File.expand_path(path)
       msg = {
         textDocument: {
@@ -167,11 +198,16 @@ module Juggler::Plugins
     end
 
     def show_references(path, line, col, _term)
+      send_changes_if_needed(path)
+
       # [{"uri"=>"file:///home/tim/dev/vimconfig/bundle/juggler/autoload/test.rb", "range"=>{"start"=>{"line"=>16, "character"=>11}, "end"=>{"line"=>16, "character"=>26}}}, ...]
       result = find_references(path, line, col)
       result.map do |entry|
-        path = Pathname.new(entry['uri'][7..-1]).relative_path_from(Dir.getwd)
-        {file: path.to_s, line: entry['range']['start']['line'] + 1}
+        full_path = entry['uri'][7..-1]
+        path = Pathname.new(full_path).relative_path_from(Dir.getwd)
+        line_num = entry['range']['start']['line'] + 1 # for display we use a 1 based line
+        line_display = Juggler.file_contents(full_path)[:contents][line_num - 1]
+        {file: path.to_s, line: line_num, tag_line: line_display}
       end
     end
 
@@ -188,10 +224,10 @@ module Juggler::Plugins
 
     def send_msg(method, params)
       wait_until_initialized
-      msg = {jsonrpc: '2.0', id: (@msg_id += 1), method: method, params: params}.to_json
-      wrapped = "Content-Length: #{msg.size}\r\n\r\n#{msg}"
-      @logger.debug { "Sending message:\n#{wrapped}" }
-      @send_socket.write(wrapped)
+      wrapped = ->(s, size) { "Content-Length: #{size}\r\n\r\n#{s}" }
+      msg = JSON.pretty_generate({jsonrpc: '2.0', id: (@msg_id += 1), method: method, params: params})
+      @logger.debug { "Sending message:\n#{wrapped.call(Juggler::Utils::Colorize.yellow(msg), msg.size)}" }
+      @send_socket.write(wrapped.call(msg, msg.size))
     end
 
     def receive_msg
@@ -208,8 +244,8 @@ module Juggler::Plugins
       raise 'No "Content-Length" header received' if content_length.nil?
 
       json = @receive_socket.read(content_length)
-      @logger.debug { "Received message:\n#{headers}#{json}" }
       msg = JSON.parse(json)
+      @logger.debug { "Received message:\n#{headers}#{Juggler::Utils::Colorize.yellow(JSON.pretty_generate(msg))}" }
       msg['result']
     end
   end

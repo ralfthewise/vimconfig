@@ -18,7 +18,10 @@ module Juggler
   class Completer
     include Singleton
 
+    attr_accessor :file_contents
+
     def initialize
+      @file_contents = FileContents.new
       @log_level = ENV['JUGGLER_LOG_LEVEL'] || VIM::evaluate('g:juggler_logLevel')
       #TODO: load these on each completion
       @use_omni = VIM::evaluate('g:juggler_useOmniCompleter') == 1
@@ -64,27 +67,18 @@ module Juggler
       Juggler.with_status('Searching...') do
         srchstr = VIM::evaluate('srchstr').to_s
         next if srchstr == ''
-        grep_cmd = 'ag --nogroup --nocolor --vimgrep --hidden'
-        strip_tabs_cmd = "sed 's/\\t/  /g'" #sometimes cexpr and cgetexpr have issues with tabs
-        if srchstr.start_with?('/')
-          srchstr = srchstr[1..-1] #strip off beginning '/'
-          grep_cmd += ' --case-sensitive'
-        else
-          srchstr = srchstr[1..-1] if srchstr.start_with?('\/') #strip off beginning '\'
-          grep_cmd += ' --smart-case --literal'
-        end
-        grep_cmd = "#{find_files_cmd} -exec #{grep_cmd} -- #{Shellwords.escape(srchstr)} {} +"
 
-        start = Time.now
-        result = `#{grep_cmd} | #{strip_tabs_cmd}`
-        result = result.gsub("\r\n", "\n").gsub("\r", "\n")
-        result = Juggler.clean_utf8(result).split("\n")
+        Juggler.logger.debug { "Starting search for pattern: #{srchstr}\n" }
+
+        result = []
+        plugins.each do |p|
+          plugin_results = p.grep(srchstr)
+          result += plugin_results.to_a
+        end
         Juggler.logger.debug do
-          "Searching for the pattern: #{srchstr}\n" +
-          "  Using grep command: #{grep_cmd}\n" +
-          "  Text search took #{Time.now - start} seconds\n" +
+          "Completed search for pattern: #{srchstr}\n" +
           "  Num results: #{result.length}\n" +
-          "  Result:\n#{result.join("\n")}"
+          "  Final results:\n#{result.join("\n")}"
         end
         result = result.map {|entry| "\"#{Juggler.escape_vim_doublequote_string(entry.strip[0..191])}\""}.join(',')
         # TODO: consider this instead?
@@ -113,7 +107,8 @@ module Juggler
           result += plugin_results.to_a
         end
         result.map! do |entry|
-          qfix_entry = "#{entry[:file]}:#{entry[:line]}: <#{entry[:kind]}> #{entry[:tag_line]}"
+          kind = entry[:kind].to_s.strip.empty? ? '' : "<#{entry[:kind].to_s.strip}> "
+          qfix_entry = "#{entry[:file]}:#{entry[:line]}: #{kind}#{entry[:tag_line]}"
           "\"#{Juggler.escape_vim_doublequote_string(qfix_entry.strip[0..191])}\""
         end
         VIM::command("cgetexpr [#{result.join(',')}]")
@@ -254,17 +249,37 @@ module Juggler
     def file_saved_hook
       absolute_path = eval_current_path
       Juggler.logger.info { "File saved: #{absolute_path}" }
+
+      @file_contents.file_saved(absolute_path)
+    end
+
+    def buffer_changed_hook
+      absolute_path = eval_current_path
+      return unless File.file?(absolute_path)
+
+      @file_contents.file_modified(absolute_path)
+      Juggler.logger.info { "Buffer changed: #{absolute_path}" }
+      plugins.each {|p| p.buffer_changed_hook(absolute_path)}
+    end
+
+    def buffer_left_hook
+      absolute_path = eval_current_path
+      return unless File.file?(absolute_path)
+
+      Juggler.logger.info { "Buffer left: #{absolute_path}" }
+      plugins.each {|p| p.buffer_left_hook(absolute_path)}
     end
 
     protected
 
     # Gets the plugins for the current filetype
     def plugins
-      Juggler.logger.debug { "Config: #{@language_plugins_config}" }
       plugins_for_filetype(VIM::evaluate('&filetype'))
     end
 
     def plugins_for_filetype(filetype)
+      Juggler.logger.debug { "Language plugins config: #{@language_plugins_config}" } if @plugins.nil?
+
       @plugins ||= {}
       return @plugins[filetype] if @plugins.key?(filetype)
 
@@ -291,13 +306,13 @@ module Juggler
         end
       end
 
-      Juggler.logger.debug { "Plugins for '#{filetype}': #{@plugins[filetype]}" }
       @plugins[filetype]
     end
 
     def default_plugin_options
       @default_plugin_options ||= {
         project_dir: determine_project_dir,
+        current_file: File.absolute_path(VIM::evaluate('bufname("%")')),
         logger: Juggler.logger,
       }
     end
@@ -322,28 +337,10 @@ module Juggler
       cwd = VIM::evaluate('getcwd()')
       buf = File.absolute_path(VIM::evaluate('bufname("%")'))
       buf_wd = File.expand_path('..', buf)
-      result = walk_tree_looking_for_project(cwd)
-      result = walk_tree_looking_for_project(buf_wd) if result.nil?
+      result = Juggler.walk_tree_looking_for_files(cwd)
+      result = Juggler.walk_tree_looking_for_files(buf_wd) if result.nil?
       Dir.chdir(cwd)
       return result
-    end
-
-    def walk_tree_looking_for_project(cwd)
-      #walk up the tree until we find a VCS entry
-      while valid_project_dir?(cwd)
-        Dir.chdir(cwd)
-        if Dir.glob(['.git']).length > 0
-          return cwd
-        end
-        cwd = File.expand_path('..')
-      end
-      return nil
-    end
-
-    def valid_project_dir?(d)
-      return false if d == Dir.home
-      return false if d == '/'
-      return true
     end
 
     def find_files_cmd(for_path: nil, absolute_path: false, for_cscope: false)

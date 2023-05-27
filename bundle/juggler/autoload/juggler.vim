@@ -329,6 +329,9 @@ function! s:SetupAutoCommands()
   augroup Juggler
     autocmd BufReadPost * ruby Juggler::Completer.instance.file_opened_hook
     autocmd BufWritePost * ruby Juggler::Completer.instance.file_saved_hook
+    autocmd TextChanged * ruby Juggler::Completer.instance.buffer_changed_hook
+    autocmd TextChangedI * ruby Juggler::Completer.instance.buffer_changed_hook
+    autocmd BufLeave * ruby Juggler::Completer.instance.buffer_left_hook
   augroup END
 endfunction
 
