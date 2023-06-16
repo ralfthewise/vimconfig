@@ -10,7 +10,7 @@ module Juggler::Plugins
       @cscope_service.query(term, Juggler::CscopeQuery::Symbol)
     end
 
-    def generate_completions(base, cursor_info)
+    def generate_completions(_absolute_path, base, cursor_info)
       return if base.nil? || base.empty?
 
       #BUG this regex below doesn't grab the right tag from the cscope results

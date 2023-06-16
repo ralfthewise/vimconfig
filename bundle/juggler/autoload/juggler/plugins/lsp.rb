@@ -51,7 +51,7 @@ module Juggler::Plugins
         @initialized_mutex.lock
         launch(parent_thread, cmd, host, port)
       end
-      Thread.stop # Call this to ensure we switch to the other thread and give the LSP a chance to startup before we continue
+      Thread.stop # Call this to ensure we switch to the other thread and give the language server a chance to startup before we continue
     end
 
     def wait_until_initialized
@@ -188,13 +188,8 @@ module Juggler::Plugins
 
       absolute_path = File.expand_path(path)
       msg = {
-        textDocument: {
-          uri: "file://#{absolute_path}",
-        },
-        position: {
-          line: line,
-          character: col,
-        },
+        textDocument: { uri: "file://#{absolute_path}" },
+        position: { line: line, character: col },
       }
       send_msg('textDocument/definition', msg)
       receive_msg
@@ -223,6 +218,18 @@ module Juggler::Plugins
       }
       send_msg('textDocument/references', msg)
       receive_msg
+    end
+
+    def generate_completions(absolute_path, base, cursor_info)
+      send_changes_if_needed(absolute_path)
+
+      msg = {
+        textDocument: { uri: "file://#{absolute_path}" },
+        position: { line: cursor_info['linenum'] - 1, character: cursor_info['cursorindex'] - 1 },
+      }
+      send_msg('textDocument/completion', msg)
+      receive_msg
+      super
     end
 
     def send_msg(method, params)

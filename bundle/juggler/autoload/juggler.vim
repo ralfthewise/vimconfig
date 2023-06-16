@@ -60,7 +60,7 @@ function juggler#Enable()
   endif
 
   "set these initially so we can always count on them being set
-  let s:cursorinfo = {'linenum': -1, 'cursorindex': -1}
+  " let s:cursorinfo = {'linenum': -1, 'cursorindex': -1}
   let s:usercompleted = 0
 
   call s:SetupCommands()
@@ -136,6 +136,7 @@ function! juggler#Complete(findstart, base)
     return s:cursorinfo.matchstart
   else
     let s:cursorinfo.base = a:base
+    " return {'words': [], 'refresh': 'always'}
     return s:GetJugglerCompletions()
   endif
 endfunction
@@ -146,7 +147,7 @@ function juggler#UpdatePopup()
   else
     if &modifiable && &buftype == ''
       let newcursofinfo = s:GetCursorInfo()
-      if newcursofinfo.match && (newcursofinfo.linenum != s:cursorinfo.linenum || newcursofinfo.cursorindex != s:cursorinfo.cursorindex)
+      if newcursofinfo.match && (!exists('s:cursorinfo') || newcursofinfo.linenum != s:cursorinfo.linenum || newcursofinfo.cursorindex != s:cursorinfo.cursorindex)
         let s:cursorinfo = newcursofinfo
         call feedkeys("\<C-x>\<C-u>\<C-R>=juggler#AfterPopup()\<CR>", 'n')
       endif

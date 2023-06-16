@@ -184,7 +184,7 @@ module Juggler
         plugins.each do |plugin|
           start = Time.now
           count = 0
-          plugin.generate_completions(token, cursor_info) do |entry|
+          plugin.generate_completions(eval_current_path, token, cursor_info) do |entry|
             if entry.tag != token #don't bother including exact matches
               entry_file = entry.file.to_s
               file_existence[entry_file] = File.exists?(entry_file) if file_existence[entry_file].nil?

@@ -11,7 +11,7 @@ module Juggler::Plugins
       @cached_entries = []
     end
 
-    def generate_completions(token, cursor_info)
+    def generate_completions(_absolute_path, token, cursor_info)
       #first let's determine if we should use the cache
       use_cache_for_this_completion = false
       if @use_omni_trigger_cache

@@ -2,7 +2,7 @@ require_relative '../completion_entry'
 
 module Juggler::Plugins
   class OmniCompleter < Base
-    def generate_completions(base, cursor_info)
+    def generate_completions(_absolute_path, base, cursor_info)
       omni_results = VIM::evaluate('s:CallOmniFunc()')
       if omni_results.is_a?(Array)
         omni_results.each do |omni_result|

@@ -31,7 +31,7 @@ module Juggler::Plugins
     def buffer_left_hook(absolute_path); end
     def show_references(path, line, col, term); end
     def grep(srchstr); end
-    def generate_completions(base, cursor_info); end
+    def generate_completions(absolute_path, base, cursor_info); end
 
     def for_display
       "#{Juggler::Utils::Colorize.bold(self.class)}: #{@options}"

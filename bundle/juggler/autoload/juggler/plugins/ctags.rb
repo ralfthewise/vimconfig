@@ -6,7 +6,13 @@ module Juggler::Plugins
     #
     #  [{'cmd': '/^  appendValAtPath = (dataModel, modelPath, modelVal, archetypeProperties) ->$/', 'static': 0, 'name': 'appendValAtPath', 'line': '6', 'language': 'coffee', 'kind': 'function', 'filename': './app/components/radar-forms/services/form-data-translator.coffee'}]
 
-    def generate_completions(base, cursor_info)
+    def initialize(project_dir:, **opts)
+      super
+
+      init_indexes(project_dir)
+    end
+
+    def generate_completions(_absolute_path, base, cursor_info)
       return if base.nil? || base.empty?
 
       ctag_output = VIM::evaluate("s:GetTags('\\c#{Juggler.escape_vim_singlequote_string(generate_ctag_pattern(base))}')")
@@ -22,6 +28,16 @@ module Juggler::Plugins
     protected
     def generate_ctag_pattern(base)
       return base.scan(/./).join('.*')
+    end
+
+    def init_indexes(project_dir)
+      return if project_dir.nil?
+
+      digest = Digest::SHA1.hexdigest(project_dir)
+      indexes_path = File.join(Dir.home, '.vim_indexes', digest)
+      FileUtils.mkdir_p(indexes_path)
+      VIM::command("let s:indexespath = '#{Juggler.escape_vim_singlequote_string(indexes_path)}'")
+      VIM::command("execute 'set tags=#{Juggler.escape_vim_singlequote_string(indexes_path)}/tags'")
     end
   end
 end
