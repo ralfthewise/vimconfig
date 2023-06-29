@@ -169,6 +169,13 @@ module Juggler
       # @lsp_completer = Plugins::Lsp.new(root_path: '.', cmd: "bash -l -c #{Shellwords.escape('bundle exec solargraph socket')}", host: '127.0.0.1', logger: Juggler.logger) if @use_lsp
     end
 
+    def prepare_for_completions
+      absolute_path = eval_current_path
+      cursor_info = VIM::evaluate('s:cursorinfo')
+      Juggler.logger.info { "prepare_for_completions: #{absolute_path}\n#{cursor_info}\n#{Juggler.file_contents(absolute_path)}" }
+      @file_contents.cache_contents(absolute_path)
+    end
+
     def generate_completions
       begin
         completion_start = Time.now
@@ -340,7 +347,7 @@ module Juggler
       buf_wd = File.expand_path('..', buf)
       result = Juggler.walk_tree_looking_for_files(cwd)
       result = Juggler.walk_tree_looking_for_files(buf_wd) if result.nil?
-      return result
+      return result || File.expand_path(cwd)
     end
 
     def find_files_cmd(for_path: nil, absolute_path: false, for_cscope: false)

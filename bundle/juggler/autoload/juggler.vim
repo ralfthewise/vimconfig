@@ -110,8 +110,10 @@ function! juggler#Complete(findstart, base)
   endif
 
   if a:findstart
+    ruby Juggler::Completer.instance.prepare_for_completions
+
     if !s:cursorinfo.match
-      return 0
+      return -1 "indicates the completion should start at the cursor column
     endif
 
     "make sure omnifunc gets called if there is one
@@ -138,6 +140,7 @@ function! juggler#Complete(findstart, base)
     let s:cursorinfo.base = a:base
     " return {'words': [], 'refresh': 'always'}
     return s:GetJugglerCompletions()
+    " return v:none
   endif
 endfunction
 
@@ -150,6 +153,8 @@ function juggler#UpdatePopup()
       if newcursofinfo.match && (!exists('s:cursorinfo') || newcursofinfo.linenum != s:cursorinfo.linenum || newcursofinfo.cursorindex != s:cursorinfo.cursorindex)
         let s:cursorinfo = newcursofinfo
         call feedkeys("\<C-x>\<C-u>\<C-R>=juggler#AfterPopup()\<CR>", 'n')
+      else
+        let s:cursorinfo = newcursofinfo
       endif
     endif
   endif
@@ -192,15 +197,26 @@ function! s:ShowReferences(defterm)
   let &errorformat = save_errorformat
 endfunction
 
+"Returns the following:
+"  {
+"    'match': <int>, " 0 or 1 - 1 indicates the text before the cursor matched one of the regexes thus triggering a completion
+"    'type': <string>, " 'none', 'token', or 'omnitrigger' - which regex was matched
+"    'linenum': <int>, " line of the cursor, first line is 1
+"    'cursorindex': <int>, " column of the cursor, first column is 0
+"    'token': <string>, " the text that matched the regex
+"    'matchstart': <int>, " column where the regex started matching
+"    'trigger': <string> " any additional match in the regex for an 'omnitrigger' match
+"  }
 function! s:GetCursorInfo()
   let line = getline('.')
-  if len(line) == 0
-    return {'match': 0}
-  endif
-
-  let posinfo = getpos('.')
+  " let posinfo = getpos('.')
+  let posinfo = getcursorcharpos()
   let cursorindex = posinfo[2] - 1
-  let cursorchar = line[cursorindex]
+  let result = {'match': 0, 'type': 'none', 'linenum': posinfo[1], 'cursorindex': cursorindex, 'token': '', 'matchstart': 0, 'trigger': ''}
+  if len(line) == 0
+    return result
+  endif
+  " let cursorchar = line[cursorindex]
 
   let prefix = strpart(line, 0, cursorindex)
   "check for trigger token completion
@@ -216,7 +232,7 @@ function! s:GetCursorInfo()
     endif
   endif
 
-  return {'match': 0}
+  return result
 endfunction
 
 function! s:CallOmniFunc()

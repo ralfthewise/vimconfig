@@ -6,12 +6,16 @@ module Juggler
 
       # Keeps track of a version number for each file that increments each time the file is changed
       @file_versions = Hash.new(0)
+
+      # Will temporarily cache the contents of files
+      @cached_contents = Hash.new
     end
 
     # Called to indicate that a file has been modified in vim but not yet saved to disk
     def file_modified(absolute_path)
       @modified_files.add(absolute_path)
       @file_versions[absolute_path] += 1
+      @cached_contents.delete(absolute_path) if @cached_contents.include?(absolute_path)
     end
 
     # Called to check if a file has been modified in vim but not yet saved to disk
@@ -26,8 +30,16 @@ module Juggler
       @modified_files.delete(absolute_path)
     end
 
+    def cache_contents(absolute_path)
+      @cached_contents[absolute_path] = {version: @file_versions[absolute_path], contents: contents_of(absolute_path)[:contents]}
+    end
+
     # Returns the contents of the passed in `absolute_path` as an array of lines
     def contents_of(absolute_path)
+      if @cached_contents.include?(absolute_path) && @cached_contents[absolute_path][:version] == @file_versions[absolute_path]
+        return @cached_contents[absolute_path]
+      end
+
       # TODO: maybe introduce some caching here so if called multiple times we only do this once
       if @modified_files.include?(absolute_path)
         Juggler.logger.info("Getting buffer for #{absolute_path}")

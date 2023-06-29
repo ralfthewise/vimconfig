@@ -21,11 +21,15 @@ module Juggler::Plugins
           dynamicRegistration: false,
           linkSupport: false,
         },
+        completion: {
+          dynamicRegistration: true,
+        },
         references: {
           dynamicRegistration: false,
         },
       }
     }.freeze
+    # MSG_INITIALIZE = JSON.parse('{"processId":27197,"clientInfo":{"name":"Visual Studio Code","version":"1.79.2"},"locale":"en-us","rootPath":"/home/tim/dev/lsp-test","rootUri":"file:///home/tim/dev/lsp-test","capabilities":{"workspace":{"applyEdit":true,"workspaceEdit":{"documentChanges":true,"resourceOperations":["create","rename","delete"],"failureHandling":"textOnlyTransactional","normalizesLineEndings":true,"changeAnnotationSupport":{"groupsOnLabel":true}},"didChangeConfiguration":{"dynamicRegistration":true},"didChangeWatchedFiles":{"dynamicRegistration":true},"symbol":{"dynamicRegistration":true,"symbolKind":{"valueSet":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]},"tagSupport":{"valueSet":[1]}},"codeLens":{"refreshSupport":true},"executeCommand":{"dynamicRegistration":true},"configuration":true,"workspaceFolders":true,"semanticTokens":{"refreshSupport":true},"fileOperations":{"dynamicRegistration":true,"didCreate":true,"didRename":true,"didDelete":true,"willCreate":true,"willRename":true,"willDelete":true}},"textDocument":{"publishDiagnostics":{"relatedInformation":true,"versionSupport":false,"tagSupport":{"valueSet":[1,2]},"codeDescriptionSupport":true,"dataSupport":true},"synchronization":{"dynamicRegistration":true,"willSave":true,"willSaveWaitUntil":true,"didSave":true},"completion":{"dynamicRegistration":true,"contextSupport":true,"completionItem":{"snippetSupport":true,"commitCharactersSupport":true,"documentationFormat":["markdown","plaintext"],"deprecatedSupport":true,"preselectSupport":true,"tagSupport":{"valueSet":[1]},"insertReplaceSupport":true,"resolveSupport":{"properties":["documentation","detail","additionalTextEdits"]},"insertTextModeSupport":{"valueSet":[1,2]}},"completionItemKind":{"valueSet":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]}},"hover":{"dynamicRegistration":true,"contentFormat":["markdown","plaintext"]},"signatureHelp":{"dynamicRegistration":true,"signatureInformation":{"documentationFormat":["markdown","plaintext"],"parameterInformation":{"labelOffsetSupport":true},"activeParameterSupport":true},"contextSupport":true},"definition":{"dynamicRegistration":true,"linkSupport":true},"references":{"dynamicRegistration":true},"documentHighlight":{"dynamicRegistration":true},"documentSymbol":{"dynamicRegistration":true,"symbolKind":{"valueSet":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]},"hierarchicalDocumentSymbolSupport":true,"tagSupport":{"valueSet":[1]},"labelSupport":true},"codeAction":{"dynamicRegistration":true,"isPreferredSupport":true,"disabledSupport":true,"dataSupport":true,"resolveSupport":{"properties":["edit"]},"codeActionLiteralSupport":{"codeActionKind":{"valueSet":["","quickfix","refactor","refactor.extract","refactor.inline","refactor.rewrite","source","source.organizeImports"]}},"honorsChangeAnnotations":false},"codeLens":{"dynamicRegistration":true},"formatting":{"dynamicRegistration":true},"rangeFormatting":{"dynamicRegistration":true},"onTypeFormatting":{"dynamicRegistration":true},"rename":{"dynamicRegistration":true,"prepareSupport":true,"prepareSupportDefaultBehavior":1,"honorsChangeAnnotations":true},"documentLink":{"dynamicRegistration":true,"tooltipSupport":true},"typeDefinition":{"dynamicRegistration":true,"linkSupport":true},"implementation":{"dynamicRegistration":true,"linkSupport":true},"colorProvider":{"dynamicRegistration":true},"foldingRange":{"dynamicRegistration":true,"rangeLimit":5000,"lineFoldingOnly":true},"declaration":{"dynamicRegistration":true,"linkSupport":true},"selectionRange":{"dynamicRegistration":true},"callHierarchy":{"dynamicRegistration":true},"semanticTokens":{"dynamicRegistration":true,"tokenTypes":["namespace","type","class","enum","interface","struct","typeParameter","parameter","variable","property","enumMember","event","function","method","macro","keyword","modifier","comment","string","number","regexp","operator"],"tokenModifiers":["declaration","definition","readonly","static","deprecated","abstract","async","modification","documentation","defaultLibrary"],"formats":["relative"],"requests":{"range":true,"full":{"delta":true}},"multilineTokenSupport":false,"overlappingTokenSupport":false},"linkedEditingRange":{"dynamicRegistration":true}},"window":{"showMessage":{"messageActionItem":{"additionalPropertiesSupport":true}},"showDocument":{"support":true},"workDoneProgress":true},"general":{"regularExpressions":{"engine":"ECMAScript","version":"ES2020"},"markdown":{"parser":"marked","version":"1.1.0"}}},"initializationOptions":{"enablePages":true,"viewsPath":"/home/tim/.vscode/extensions/castwide.solargraph-0.24.0/views","transport":"external","externalServer":{"host":"localhost","port":7658},"commandPath":"solargraph","useBundler":false,"bundlerPath":"bundle","checkGemVersion":true,"completion":true,"hover":true,"diagnostics":false,"autoformat":false,"formatting":false,"symbols":true,"definitions":true,"rename":true,"references":true,"folding":true,"logLevel":"warn"},"trace":"off","workspaceFolders":[{"uri":"file:///home/tim/dev/lsp-test","name":"lsp-test"}]}')
 
     def initialize(project_dir:, current_file:, cmd: nil, host: nil, port: 7658, **opts)
       super
@@ -112,6 +116,7 @@ module Juggler::Plugins
       send_msg('initialize', msg)
       receive_msg
       send_msg('initialized', {})
+      receive_msg
       receive_msg
       logger.info { 'LSP connection initialized' }
       @initialized_mutex.unlock
@@ -220,16 +225,28 @@ module Juggler::Plugins
       receive_msg
     end
 
+    # {"jsonrpc":"2.0","id":6,"method":"textDocument/completion","params":{"textDocument":{"uri":"file:///home/tim/dev/lsp-test/test.rb"},"position":{"line":1,"character":2},"context":{"triggerKind":1}}}
     def generate_completions(absolute_path, base, cursor_info)
       send_changes_if_needed(absolute_path)
 
       msg = {
         textDocument: { uri: "file://#{absolute_path}" },
-        position: { line: cursor_info['linenum'] - 1, character: cursor_info['cursorindex'] - 1 },
+        position: { line: cursor_info['linenum'] - 1, character: cursor_info['cursorindex'] },
+        context: { triggerKind: 1 },
       }
       send_msg('textDocument/completion', msg)
-      receive_msg
-      super
+      receive_msg['items'].each_with_index do |item, index|
+        signature = item.dig('data', 'path')
+        file = item.dig('data', 'location', 'filename')
+        kind = case item['kind']
+               when 2 then 'method'
+               when 6 then 'variable'
+               end
+        entry = Juggler::CompletionEntry.new(source: :lsp, tag: item['label'], index: index, file: file, kind: kind, signature: signature, info: signature)
+        line = item.dig('data', 'location', 'range', 'start', 'line')
+        entry.line = line + 1 unless line.nil?
+        yield(entry)
+      end
     end
 
     def send_msg(method, params)
