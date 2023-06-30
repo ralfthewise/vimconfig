@@ -114,10 +114,9 @@ module Juggler::Plugins
         processId: nil,
       }
       send_msg('initialize', msg)
-      receive_msg
+      receive_msgs
       send_msg('initialized', {})
-      receive_msg
-      receive_msg
+      receive_msgs
       logger.info { 'LSP connection initialized' }
       @initialized_mutex.unlock
     end
@@ -132,7 +131,7 @@ module Juggler::Plugins
 
     def close
       send_msg('shutdown', nil)
-      receive_msg
+      receive_msgs
       send_msg('exit', nil)
 
       # @stdin.close
@@ -159,7 +158,7 @@ module Juggler::Plugins
         },
       }
       send_msg('textDocument/didOpen', msg)
-      receive_msg
+      receive_msgs
     end
 
     def buffer_left_hook(absolute_path)
@@ -184,7 +183,7 @@ module Juggler::Plugins
       }
       send_msg('textDocument/didChange', msg)
       @sent_file_versions[absolute_path] = current_contents[:version]
-      receive_msg
+      receive_msgs
     end
 
     # `line` and `col` should be zero-based
@@ -197,7 +196,7 @@ module Juggler::Plugins
         position: { line: line, character: col },
       }
       send_msg('textDocument/definition', msg)
-      receive_msg
+      receive_msgs
     end
 
     def show_references(path, line, col, _term)
@@ -222,7 +221,7 @@ module Juggler::Plugins
         position: { line: line, character: col },
       }
       send_msg('textDocument/references', msg)
-      receive_msg
+      receive_msgs
     end
 
     # {"jsonrpc":"2.0","id":6,"method":"textDocument/completion","params":{"textDocument":{"uri":"file:///home/tim/dev/lsp-test/test.rb"},"position":{"line":1,"character":2},"context":{"triggerKind":1}}}
@@ -235,7 +234,7 @@ module Juggler::Plugins
         context: { triggerKind: 1 },
       }
       send_msg('textDocument/completion', msg)
-      receive_msg['items'].each_with_index do |item, index|
+      receive_msgs.last['items'].each_with_index do |item, index|
         signature = item.dig('data', 'path')
         file = item.dig('data', 'location', 'filename')
         kind = case item['kind']
@@ -257,10 +256,40 @@ module Juggler::Plugins
       @send_socket.write(wrapped.call(msg, msg.size))
     end
 
-    def receive_msg
+    def receive_msgs
+      IO::select([@receive_socket])
+      data = ''
+      begin
+        loop do
+          data += @receive_socket.read_nonblock(65536)
+        end
+      rescue IO::WaitReadable
+        logger.debug { "Received raw data:\n#{data}" }
+      end
+
+      msgs = []
+      max_id_received = 0
+      msg_io = StringIO.new(data)
+      while (msg = receive_msg(msg_io))
+        msgs << msg['result']
+        max_id_received = msg['id'] if msg['id'] > max_id_received
+      end
+
+      if msgs.empty?
+        logger.warn { 'No messages received, trying again' }
+        return receive_msgs
+      end
+
+      # Make sure we've received all messages up to and including the last `id` we sent
+      msgs += receive_msgs if max_id_received < @msg_id
+
+      msgs
+    end
+
+    def receive_msg(io)
       headers = ''
       content_length = nil
-      while (line = @receive_socket.gets)
+      while (line = io.gets)
         headers += line
         if line.downcase.include?('content-length:')
           content_length = /\d+/.match(line)[0].to_i
@@ -268,12 +297,13 @@ module Juggler::Plugins
 
         break if line == "\r\n"
       end
-      raise 'No "Content-Length" header received' if content_length.nil?
+      # raise 'No "Content-Length" header received' if content_length.nil?
+      return nil if content_length.nil?
 
-      json = @receive_socket.read(content_length)
+      json = io.read(content_length)
       msg = JSON.parse(json)
-      logger.debug { "Received message:\n#{headers}#{Juggler::Utils::Colorize.yellow(JSON.pretty_generate(msg))}" }
-      msg['result']
+      logger.debug { "Received message:\n#{headers}#{Juggler::Utils::Colorize.green(JSON.pretty_generate(msg))}" }
+      msg
     end
   end
 end
