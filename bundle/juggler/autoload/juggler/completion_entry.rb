@@ -7,7 +7,7 @@ module Juggler
 
     attr_accessor :source, :tag, :index, :pri, :kind, :file, :info, :signature, :line, :excmd, :score_data
 
-    def initialize(source:, tag:, line: nil, index: nil, pri: nil, kind: nil, file: nil, signature: nil, info: nil)
+    def initialize(source:, tag: nil, line: nil, index: nil, pri: nil, kind: nil, file: nil, signature: nil, info: nil)
       self.source = source
       self.tag = tag
       self.line = line

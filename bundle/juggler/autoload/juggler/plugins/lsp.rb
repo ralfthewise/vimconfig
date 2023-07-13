@@ -22,7 +22,7 @@ module Juggler::Plugins
           linkSupport: false,
         },
         completion: {
-          dynamicRegistration: true,
+          dynamicRegistration: false,
         },
         references: {
           dynamicRegistration: false,
@@ -153,12 +153,16 @@ module Juggler::Plugins
         textDocument: {
           uri: "file://#{absolute_path}",
           languageId: 'ruby',
-          version: (@version_id += 1),
+          version: msg_version,
           text: File.read(absolute_path),
         },
       }
       send_msg('textDocument/didOpen', msg)
       receive_msgs
+      # send_msg('textDocument/foldingRange', { textDocument: { uri: "file://#{absolute_path}" } })
+      # receive_msgs
+      # send_msg('textDocument/documentSymbol', { textDocument: { uri: "file://#{absolute_path}" } })
+      # receive_msgs
     end
 
     def buffer_left_hook(absolute_path)
@@ -177,7 +181,7 @@ module Juggler::Plugins
       msg = {
         textDocument: {
           uri: "file://#{absolute_path}",
-          version: (@version_id += 1),
+          version: msg_version,
         },
         contentChanges: [{text: current_contents[:contents].join("\n")}],
       }
@@ -227,11 +231,13 @@ module Juggler::Plugins
     # {"jsonrpc":"2.0","id":6,"method":"textDocument/completion","params":{"textDocument":{"uri":"file:///home/tim/dev/lsp-test/test.rb"},"position":{"line":1,"character":2},"context":{"triggerKind":1}}}
     def generate_completions(absolute_path, base, cursor_info)
       send_changes_if_needed(absolute_path)
+      solargraph_patch(absolute_path, cursor_info)
 
       msg = {
         textDocument: { uri: "file://#{absolute_path}" },
         position: { line: cursor_info['linenum'] - 1, character: cursor_info['cursorindex'] },
-        context: { triggerKind: 1 },
+        # context: { triggerKind: 1 },
+        context: { triggerKind: 2, triggerCharacter: '.' },
       }
       send_msg('textDocument/completion', msg)
       receive_msgs.last['items'].each_with_index do |item, index|
@@ -246,6 +252,38 @@ module Juggler::Plugins
         entry.line = line + 1 unless line.nil?
         yield(entry)
       end
+    end
+
+    protected
+
+    # solargraph has a bug where sometimes it doesn't return completions
+    # properly. The simplest example would be a file with the contents:
+    #   "t = Time.new\nt.\n"
+    # and trigger a completion with the cursor after the last '.'. Triggering a
+    # `contentChanges` message with a range param that replaces the character
+    # before the cursor with the same character fixes the issue.
+    def solargraph_patch(absolute_path, cursor_info)
+      # First get the character right before the cursor
+      current_contents = Juggler.file_contents(absolute_path)
+      char = current_contents[:contents][cursor_info['linenum'] - 1][cursor_info['cursorindex'] - 1]
+
+      msg = {
+        textDocument: {
+          uri: "file://#{absolute_path}",
+          version: msg_version,
+        },
+        contentChanges: [{
+          range: {start: {line: cursor_info['linenum'] - 1, character: cursor_info['cursorindex'] - 1}, end: {line: cursor_info['linenum'] - 1, character: cursor_info['cursorindex']}},
+          rangeLength: 1,
+          text: char,
+        }],
+      }
+      send_msg('textDocument/didChange', msg)
+      receive_msgs
+    end
+
+    def msg_version
+      @version_id += 1
     end
 
     def send_msg(method, params)

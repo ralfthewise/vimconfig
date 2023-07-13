@@ -107,6 +107,7 @@ autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>:ccl<CR>
 set wildmenu "vim command completion
 set wildmode=longest:full,full "vim command completion
 set nostartofline "don't position cursor at start of line when switching buffers (as well as other situations)
+" setg formatprg=fmt\ --width=120 "wish this worked but it doesn't handle comments properly
 
 "load internal matchit plugin/macro
 runtime macros/matchit.vim
@@ -217,6 +218,7 @@ endif
 "jump to definition of method under cursor
 "g<C-]> is part of the tags feature of vim - equivalent of :tjump <symbol
 "under cursor> - means jump to definition or popup menu if more than 1 def
+"see :help g_CTRL-]
 "nnoremap <C-b> g<C-]>
 "nmap <C-b> :cstag <C-R>=expand("<cword>")<CR><CR>
 
@@ -231,7 +233,7 @@ let g:juggler_useKeywordCompleter = 0
 let g:juggler_additionalPathExcludes = ['*/test-ui/reports/*', '*/coverage/*']
 let g:juggler_language_plugins = {
       \ '*': ['example', 'ctags', 'cscope', 'keywords', 'grep_ag'],
-      \ 'ruby': [{'lsp': {'cmd': 'bundle exec solargraph stdio'}}, '*']
+      \ 'ruby': [{'lsp': {'cmd': 'solargraph stdio'}}, '*']
       \ }
 " let g:juggler_language_plugins = {
 "       \ '*': ['ctags', 'cscope', 'keywords'],

@@ -179,6 +179,8 @@ function! s:Search(defsrch)
 endfunction
 
 function! s:GoToDefinition(defterm)
+  " TODO: replace this with a user defined `tagfunc`
+  " see :help tag-function
   let resolvedterm = (a:defterm == '' ? expand('<cword>') : a:defterm)
   exe 'cstag ' . resolvedterm
 endfunction
