@@ -12,6 +12,14 @@ endif
 let s:plugin_path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 
 function juggler#Enable()
+  " Ctrl-Y is how you typically accept an option from the popup menu. The
+  " problem is that accepting an option will usually cause additional text to
+  " be inserted, which in turn will trigger a `TextChangedI` and
+  " `CursorMovedI` event, which will in turn cause us to re-display the popup
+  " menu. So here we instead call the `UserCompleted` method, which sets a
+  " flag indicating that the popup menu is closing, and then on the next
+  " `TextChangedI`/`CursorMovedI` event we DON'T re-open the
+  " popup menu. See https://stackoverflow.com/questions/73895546/vim-mapping-c-y-to-its-original-insert-meaning-when-using-youcompleteme
   imap <silent> <expr> <C-y> (pumvisible() ? <SID>UserCompleted("\<C-y>") : "\<C-y>")
 
   set lazyredraw "eliminate flickering
@@ -221,13 +229,16 @@ function! s:GetCursorInfo()
   " let cursorchar = line[cursorindex]
 
   let prefix = strpart(line, 0, cursorindex)
-  "check for trigger token completion
+  "check if the text before the cursor matches the token regex and is at least
+  "the minimum length
   let matches = matchlist(prefix, g:juggler_triggerTokenRegex)
   if len(matches) > 1 && len(matches[1]) >= g:juggler_minTokenLength
     return {'match': 1, 'type': 'token', 'linenum': posinfo[1], 'cursorindex': cursorindex, 'token': matches[1], 'matchstart': cursorindex - len(matches[1])}
   endif
-  "check for trigger omni completion
-  if g:juggler_useOmniTrigger && &omnifunc != ""
+  "some plugins (eg LSP or OmniCompleter) may be smart enough about the
+  "language to offer completions when for example a `.` is pressed. We check
+  "for that regex here.
+  if g:juggler_useOmniTrigger
     let matches = matchlist(prefix, g:juggler_triggerOmniRegex)
     if len(matches) > 2
       return {'match': 1, 'type': 'omnitrigger', 'linenum': posinfo[1], 'cursorindex': cursorindex, 'token': matches[2], 'matchstart': cursorindex - len(matches[2]), 'trigger': matches[1]}

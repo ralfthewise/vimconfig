@@ -19,7 +19,7 @@ Plug 'scrooloose/nerdtree'
 "Plug 'scrooloose/syntastic'
 Plug 'dense-analysis/ale'
 Plug 'majutsushi/tagbar'
-Plug 'vim-scripts/taglist.vim'
+" Plug 'vim-scripts/taglist.vim' " No longer used, replaced with Tagbar
 Plug 'MattesGroeger/vim-bookmarks'
 Plug 'thisivan/vim-bufexplorer'
 Plug 'tpope/vim-fugitive'
@@ -228,7 +228,7 @@ let g:juggler_logLevel = 'debug'
 let g:juggler_useTagsCompleter = 0
 let g:juggler_useCscopeCompleter = 1
 let g:juggler_useOmniCompleter = 0
-let g:juggler_useOmniTrigger = 0
+let g:juggler_useOmniTrigger = 1
 let g:juggler_useKeywordCompleter = 0
 let g:juggler_additionalPathExcludes = ['*/test-ui/reports/*', '*/coverage/*']
 let g:juggler_language_plugins = {
@@ -285,6 +285,8 @@ let g:ctrlpmatcher_debug = 0
 nnoremap <silent> <C-t> :CtrlPTag<CR>
 "nnoremap <silent> <Nul> :CtrlP<CR>
 set timeout timeoutlen=1000 ttimeoutlen=100
+" I think this is supposed to map <Ctrl>-F4 to open Tagbar but doesn't seem to
+" work
 "set <F13>=[1;5S
 set <F13>=O1;5S
 nmap <F13> :TagbarToggle<CR>
@@ -370,6 +372,8 @@ let g:tagbar_type_go = {
 let g:bookmark_save_per_working_dir = 1
 let g:bookmark_auto_save = 1
 let g:bookmark_auto_close = 1
+let g:bookmark_location_list = 1
+let g:bookmark_disable_ctrlp = 1
 
 "markdown
 autocmd BufNewFile,BufReadPost *.md set filetype=markdown

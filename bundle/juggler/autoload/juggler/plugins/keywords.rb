@@ -7,7 +7,7 @@ module Juggler::Plugins
     # 17:   31 type PublicIncident struct {
     @@keyword_regexp = /^\s*(\d+):\s+(\d+)\s+(.+)$/
 
-    def initialize(project_dir:, current_file:, cmd: nil, host: nil, port: 7658, **opts)
+    def initialize(project_dir:, **opts)
       super
       @project_dir = File.absolute_path(project_dir)
     end
