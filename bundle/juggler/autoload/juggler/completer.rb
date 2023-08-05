@@ -19,11 +19,12 @@ module Juggler
     include Singleton
 
     attr_accessor :file_contents
+    attr_reader :indexes_path
 
     def initialize
       @file_contents = FileContents.new
       @log_level = ENV['JUGGLER_LOG_LEVEL'] || VIM::evaluate('g:juggler_logLevel')
-      #TODO: load these on each completion
+      # TODO: load these on each completion
       @use_omni = VIM::evaluate('g:juggler_useOmniCompleter') == 1
       @use_omni_trigger = VIM::evaluate('g:juggler_useOmniTrigger') == 1
       @use_omni_trigger_cache = VIM::evaluate('g:juggler_useOmniTriggerCache') == 1
@@ -40,23 +41,19 @@ module Juggler
     end
 
     def init_indexes
-      if ((@use_tags && @manage_tags) || (@use_cscope && @manage_cscope))
-        project_dir = determine_project_dir
-        if project_dir.nil?
-          @use_tags = @manage_tags = @use_cscope = @manage_cscope = false
-          return
-        end
+      return unless (@use_tags && @manage_tags) || (@use_cscope && @manage_cscope)
 
-        digest = Digest::SHA1.hexdigest(project_dir)
-        @indexes_path = File.join(Dir.home, '.vim_indexes', digest)
-        FileUtils.mkdir_p(@indexes_path)
-        VIM::command("let s:indexespath = '#{Juggler.escape_vim_singlequote_string(@indexes_path)}'")
-        @cscope_service = CscopeService.new(File.join(@indexes_path, 'cscope.out')) if (@use_cscope && @manage_cscope)
+      project_dir = determine_project_dir
+      if project_dir.nil?
+        @use_tags = @manage_tags = @use_cscope = @manage_cscope = false
+        return
       end
-    end
 
-    def indexes_path
-      @indexes_path
+      digest = Digest::SHA1.hexdigest(project_dir)
+      @indexes_path = File.join(Dir.home, '.vim_indexes', digest)
+      FileUtils.mkdir_p(@indexes_path)
+      VIM::command("let s:indexespath = '#{Juggler.escape_vim_singlequote_string(@indexes_path)}'")
+      @cscope_service = CscopeService.new(File.join(@indexes_path, 'cscope.out')) if @use_cscope && @manage_cscope
     end
 
     def replace_ctrlp_user_command
@@ -68,7 +65,7 @@ module Juggler
         srchstr = VIM::evaluate('srchstr').to_s
         next if srchstr == ''
 
-        Juggler.logger.debug { "Starting search for pattern: #{srchstr}\n" }
+        Juggler.logger.debug {"Starting search for pattern: #{srchstr}\n"}
 
         result = []
         plugins.each do |p|
@@ -77,16 +74,16 @@ module Juggler
         end
         Juggler.logger.debug do
           "Completed search for pattern: #{srchstr}\n" +
-          "  Num results: #{result.length}\n" +
-          "  Final results:\n#{result.join("\n")}"
+            "  Num results: #{result.length}\n" +
+            "  Final results:\n#{result.join("\n")}"
         end
         result = result.map {|entry| "\"#{Juggler.escape_vim_doublequote_string(entry.strip[0..191])}\""}.join(',')
         # TODO: consider this instead?
         #   call setqflist([{'filename':'foo','lnum':23,'col':4,'text':'some helpful text'},{'filename':'blah/blab.txt','lnum':23,'col':43,'text':'other text'}], 'r')
         VIM::command("cgetexpr [#{result}]")
 
-        #VIM::command("cgetexpr split(\"#{Juggler.escape_vim_doublequote_string(result)}\", \"\\n\")")
-        #VIM::command("cgetexpr system('#{Juggler.escape_vim_singlequote_string(grep_cmd)} \\| #{Juggler.escape_vim_singlequote_string(strip_tabs_cmd)}')")
+        # VIM::command("cgetexpr split(\"#{Juggler.escape_vim_doublequote_string(result)}\", \"\\n\")")
+        # VIM::command("cgetexpr system('#{Juggler.escape_vim_singlequote_string(grep_cmd)} \\| #{Juggler.escape_vim_singlequote_string(strip_tabs_cmd)}')")
 
         VIM::command('copen')
         Juggler.refresh
@@ -98,12 +95,12 @@ module Juggler
         term = VIM::evaluate('resolvedterm').to_s
         next if term == ''
 
-        Juggler.logger.debug { "Searching for references of: #{term}" }
+        Juggler.logger.debug {"Searching for references of: #{term}"}
         result = []
         _bufnum, lnum, col, _off = VIM::evaluate('getpos(".")')
         plugins.each do |p|
           plugin_results = p.show_references(eval_current_path, lnum - 1, col - 1, term)
-          Juggler.logger.debug { "Plugin results (#{p.class.to_s}): #{plugin_results}" }
+          Juggler.logger.debug {"Plugin results (#{p.class}): #{plugin_results}"}
           result += plugin_results.to_a
         end
         result.map! do |entry|
@@ -117,47 +114,48 @@ module Juggler
     end
 
     def update_indexes(only_current_file: 0)
-      if ((@use_tags && @manage_tags) || (@use_cscope && @manage_cscope))
-        only_current_file = 0 if !File.exists?(File.join(@indexes_path, 'tags.files')) || !File.exists?(File.join(@indexes_path, 'cscope.files'))
-        cd_cmd = "cd #{Shellwords.escape(@indexes_path)}"
-        ctags_cmd = "echo #{Shellwords.escape($curbuf.name)} | ctags --append --fields=afmikKlnsStz --sort=foldcase -L - -f tags > /dev/null 2>&1"
-        cscope_cmd = "cscope -q -b -U > /dev/null 2>&1"
-        if only_current_file == 0
-          ctags_cmd = "#{find_files_cmd(absolute_path: true)} -exec grep -Il . {} + > tags.files && ctags --fields=afmikKlnsStz --sort=foldcase -L tags.files -f tags > /dev/null 2>&1"
-          cscope_cmd = "#{find_files_cmd(absolute_path: true, for_cscope: true)} -exec grep -Il . {} + > cscope.files && cscope -q -b -U > /dev/null 2>&1"
-        end
+      return unless (@use_tags && @manage_tags) || (@use_cscope && @manage_cscope)
 
-        #tags
-        if (@use_tags && @manage_tags)
-          remove_tags_for_file($curbuf.name) if only_current_file == 1
-          cmd = "#{cd_cmd} && #{ctags_cmd}"
-          Juggler.logger.debug { "Updating tags with the following command: #{cmd}" }
-          Juggler.refresh
-          start = Time.now
-          if system(cmd)
-            Juggler.logger.info { "Updating tags took #{Time.now - start} seconds" }
-            Juggler.refresh
-          else
-            Juggler.logger.error { "Error updating tags with the following command: #{cmd}" }
-          end
-        end
-
-        #cscope
-        if (@use_cscope && @manage_cscope)
-          FileUtils.rm(Dir.glob(File.join(@indexes_path, 'cscope.*'))) if only_current_file == 0
-          cmd = "#{cd_cmd} && #{cscope_cmd}"
-          Juggler.logger.debug { "Updating cscope with the following command: #{cmd}" }
-          Juggler.refresh
-          start = Time.now
-          if system(cmd)
-            Juggler.logger.info { "Updating cscope took #{Time.now - start} seconds" }
-            Juggler.refresh
-          else
-            Juggler.logger.error { "Error updating cscope with the following command: #{cmd}" }
-          end
-        end
-        Juggler.refresh
+      only_current_file = 0 if !File.exist?(File.join(@indexes_path, 'tags.files')) || !File.exist?(File.join(@indexes_path, 'cscope.files'))
+      cd_cmd = "cd #{Shellwords.escape(@indexes_path)}"
+      ctags_cmd = "echo #{Shellwords.escape($curbuf.name)} | ctags --append --fields=afmikKlnsStz --sort=foldcase -L - -f tags > /dev/null 2>&1"
+      cscope_cmd = 'cscope -q -b -U > /dev/null 2>&1'
+      if only_current_file == 0
+        ctags_cmd = "#{find_files_cmd(absolute_path: true)} -exec grep -Il . {} + > tags.files && ctags --fields=afmikKlnsStz --sort=foldcase -L tags.files -f tags > /dev/null 2>&1"
+        cscope_cmd = "#{find_files_cmd(absolute_path: true,
+                                       for_cscope: true)} -exec grep -Il . {} + > cscope.files && cscope -q -b -U > /dev/null 2>&1"
       end
+
+      # tags
+      if @use_tags && @manage_tags
+        remove_tags_for_file($curbuf.name) if only_current_file == 1
+        cmd = "#{cd_cmd} && #{ctags_cmd}"
+        Juggler.logger.debug {"Updating tags with the following command: #{cmd}"}
+        Juggler.refresh
+        start = Time.now
+        if system(cmd)
+          Juggler.logger.info {"Updating tags took #{Time.now - start} seconds"}
+          Juggler.refresh
+        else
+          Juggler.logger.error {"Error updating tags with the following command: #{cmd}"}
+        end
+      end
+
+      # cscope
+      if @use_cscope && @manage_cscope
+        FileUtils.rm(Dir.glob(File.join(@indexes_path, 'cscope.*'))) if only_current_file == 0
+        cmd = "#{cd_cmd} && #{cscope_cmd}"
+        Juggler.logger.debug {"Updating cscope with the following command: #{cmd}"}
+        Juggler.refresh
+        start = Time.now
+        if system(cmd)
+          Juggler.logger.info {"Updating cscope took #{Time.now - start} seconds"}
+          Juggler.refresh
+        else
+          Juggler.logger.error {"Error updating cscope with the following command: #{cmd}"}
+        end
+      end
+      Juggler.refresh
     end
 
     def init_completers
@@ -172,73 +170,71 @@ module Juggler
     def prepare_for_completions
       absolute_path = eval_current_path
       cursor_info = VIM::evaluate('s:cursorinfo')
-      Juggler.logger.info { "prepare_for_completions: #{absolute_path}\n#{cursor_info}\n#{Juggler.file_contents(absolute_path)}" }
+      Juggler.logger.info {"prepare_for_completions: #{absolute_path}\n#{cursor_info}\n#{Juggler.file_contents(absolute_path)}"}
       @file_contents.cache_contents(absolute_path)
     end
 
     def generate_completions
-      begin
-        completion_start = Time.now
-        cursor_info = VIM::evaluate('s:cursorinfo')
-        token = cursor_info['token']
-        Juggler.logger.info { "Generating completions for: #{token} (#{cursor_info})" }
+      completion_start = Time.now
+      cursor_info = VIM::evaluate('s:cursorinfo')
+      token = cursor_info['token']
+      Juggler.logger.info {"Generating completions for: #{token} (#{cursor_info})"}
 
-        scorer = EntryScorer.new(token, $curbuf.name, VIM::Buffer.current.line_number)
-        entries = CompletionEntries.new
-        completers = get_completers(cursor_info)
-        file_existence = {'' => true}
+      scorer = EntryScorer.new(token, $curbuf.name, VIM::Buffer.current.line_number)
+      entries = CompletionEntries.new
+      # completers = get_completers(cursor_info)
+      file_existence = {'' => true}
 
-        plugins.each do |plugin|
-          start = Time.now
-          count = 0
-          plugin.generate_completions(eval_current_path, token, cursor_info) do |entry|
-            if entry.tag != token #don't bother including exact matches
-              entry_file = entry.file.to_s
-              file_existence[entry_file] = File.exists?(entry_file) if file_existence[entry_file].nil?
-              if file_existence[entry_file]
-                entry.score_data = scorer.score(entry)
-                entries.add(entry)
-                count += 1
-              else
-                Juggler.logger.debug { "Skipping file because it doesn't exist: #{entry_file}" }
-              end
+      plugins.each do |plugin|
+        start = Time.now
+        count = 0
+        plugin.generate_completions(eval_current_path, token, cursor_info) do |entry|
+          if entry.tag != token # don't bother including exact matches
+            entry_file = entry.file.to_s
+            file_existence[entry_file] = File.exist?(entry_file) if file_existence[entry_file].nil?
+            if file_existence[entry_file]
+              entry.score_data = scorer.score(entry)
+              entries.add(entry)
+              count += 1
+            else
+              Juggler.logger.debug {"Skipping file because it doesn't exist: #{entry_file}"}
             end
           end
-          Juggler.logger.info { "#{plugin.class.to_s} completions took #{Time.now - start} seconds and found #{count} entries" }
         end
-
-        # completers.each do |completion_type, completer|
-        #   start = Time.now
-        #   count = 0
-        #   completer.generate_completions(token, cursor_info) do |entry|
-        #     if entry.tag != token #don't bother including exact matches
-        #       entry_file = entry.file.to_s
-        #       file_existence[entry_file] = File.exists?(entry_file) if file_existence[entry_file].nil?
-        #       if file_existence[entry_file]
-        #         entry.score_data = scorer.score(entry)
-        #         entries.add(entry)
-        #         count += 1
-        #       else
-        #         Juggler.logger.debug { "Skipping file because it doesn't exist: #{entry_file}" }
-        #       end
-        #     end
-        #   end
-        #   Juggler.logger.info { "#{completion_type} completions took #{Time.now - start} seconds and found #{count} entries" }
-        # end
-
-        Juggler.logger.info { "#{entries.count} total entries found" }
-        entries.process do |vim_arr|
-          VIM::command("call extend(s:juggler_completions, #{vim_arr})")
-        end
-        Juggler.logger.info { "Total time was #{Time.now - completion_start}" }
-      rescue Exception => e
-        Juggler.logger.error { "Exception while generating completions: #{e}\n#{e.backtrace.join("\n")}" }
+        Juggler.logger.info {"#{plugin.class} completions took #{Time.now - start} seconds and found #{count} entries"}
       end
+
+      # completers.each do |completion_type, completer|
+      #   start = Time.now
+      #   count = 0
+      #   completer.generate_completions(token, cursor_info) do |entry|
+      #     if entry.tag != token #don't bother including exact matches
+      #       entry_file = entry.file.to_s
+      #       file_existence[entry_file] = File.exists?(entry_file) if file_existence[entry_file].nil?
+      #       if file_existence[entry_file]
+      #         entry.score_data = scorer.score(entry)
+      #         entries.add(entry)
+      #         count += 1
+      #       else
+      #         Juggler.logger.debug { "Skipping file because it doesn't exist: #{entry_file}" }
+      #       end
+      #     end
+      #   end
+      #   Juggler.logger.info { "#{completion_type} completions took #{Time.now - start} seconds and found #{count} entries" }
+      # end
+
+      Juggler.logger.info {"#{entries.count} total entries found"}
+      entries.process do |vim_arr|
+        VIM::command("call extend(s:juggler_completions, #{vim_arr})")
+      end
+      Juggler.logger.info {"Total time was #{Time.now - completion_start}"}
+    rescue Exception => e
+      Juggler.logger.error {"Exception while generating completions: #{e}\n#{e.backtrace.join("\n")}"}
     end
 
     def sum_block
       block = VIM::evaluate('s:juggler_sum_block').to_s
-      #Juggler.logger.info { "Sum block on:\n#{block}" }
+      # Juggler.logger.info { "Sum block on:\n#{block}" }
       items = block.split(/\s/).reject {|e| e.to_s.empty?}.map do |e|
         !!(e =~ /\A[-+]?\d+\z/) ? e.to_i : e.to_f
       end
@@ -249,13 +245,13 @@ module Juggler
       absolute_path = eval_current_path
       return unless File.file?(absolute_path)
 
-      Juggler.logger.info { "File loaded: #{absolute_path}" }
+      Juggler.logger.info {"File loaded: #{absolute_path}"}
       plugins.each {|p| p.file_opened(absolute_path)}
     end
 
     def file_saved_hook
       absolute_path = eval_current_path
-      Juggler.logger.info { "File saved: #{absolute_path}" }
+      Juggler.logger.info {"File saved: #{absolute_path}"}
 
       @file_contents.file_saved(absolute_path)
     end
@@ -265,7 +261,7 @@ module Juggler
       return unless File.file?(absolute_path)
 
       @file_contents.file_modified(absolute_path)
-      Juggler.logger.info { "Buffer changed: #{absolute_path}" }
+      Juggler.logger.info {"Buffer changed: #{absolute_path}"}
       plugins.each {|p| p.buffer_changed_hook(absolute_path)}
     end
 
@@ -273,7 +269,7 @@ module Juggler
       absolute_path = eval_current_path
       return unless File.file?(absolute_path)
 
-      Juggler.logger.info { "Buffer left: #{absolute_path}" }
+      Juggler.logger.info {"Buffer left: #{absolute_path}"}
       plugins.each {|p| p.buffer_left_hook(absolute_path)}
     end
 
@@ -285,7 +281,7 @@ module Juggler
     end
 
     def plugins_for_filetype(filetype)
-      Juggler.logger.debug { "Language plugins config: #{@language_plugins_config}" } if @plugins.nil?
+      Juggler.logger.debug {"Language plugins config: #{@language_plugins_config}"} if @plugins.nil?
 
       @plugins ||= {}
       return @plugins[filetype] if @plugins.key?(filetype)
@@ -313,7 +309,7 @@ module Juggler
         end
       end
 
-      Juggler.logger.debug { "Plugins for filetype `#{filetype}`:\n  #{@plugins[filetype].map(&:for_display).join("\n  ")}" }
+      Juggler.logger.debug {"Plugins for filetype `#{filetype}`:\n  #{@plugins[filetype].map(&:for_display).join("\n  ")}"}
       @plugins[filetype]
     end
 
@@ -353,23 +349,23 @@ module Juggler
     def find_files_cmd(for_path: nil, absolute_path: false, for_cscope: false)
       path_spec = for_path
       if path_spec.nil?
-        #path_spec = absolute_path ? Shellwords.escape(VIM::evaluate('getcwd()')) : '*'
+        # path_spec = absolute_path ? Shellwords.escape(VIM::evaluate('getcwd()')) : '*'
         path_spec = absolute_path ? Shellwords.escape(VIM::evaluate('getcwd()')) : '.'
       end
       path_excludes = VIM::evaluate('g:juggler_pathExcludes')
 
       if for_cscope
-        #cscope can't handle paths that include a space
-        #if they ever fix it to handle spaces in filenames, you might have to pipe it to some sed magic like so:
-        #  | sed 's/^\\(.*[ \\t].*\\)$/\"\\1\"/'"
-        return "find #{path_spec} -type f -not -path " + (path_excludes + ['* *']).map {|e| Shellwords.escape(e)}.join(' -not -path ')
+        # cscope can't handle paths that include a space
+        # if they ever fix it to handle spaces in filenames, you might have to pipe it to some sed magic like so:
+        #   | sed 's/^\\(.*[ \\t].*\\)$/\"\\1\"/'"
+        "find #{path_spec} -type f -not -path " + (path_excludes + ['* *']).map {|e| Shellwords.escape(e)}.join(' -not -path ')
       else
-        return "find #{path_spec} -type f -not -path " + path_excludes.map {|e| Shellwords.escape(e)}.join(' -not -path ')
+        "find #{path_spec} -type f -not -path " + path_excludes.map {|e| Shellwords.escape(e)}.join(' -not -path ')
       end
     end
 
     def remove_tags_for_file(file)
-      Juggler.logger.debug { "Removing tags for file: #{file}" }
+      Juggler.logger.debug {"Removing tags for file: #{file}"}
       tag_file = File.join(@indexes_path, 'tags')
       tmp_file = File.join(@indexes_path, 'tags.tmp')
       File.open(tmp_file, 'w') do |f|

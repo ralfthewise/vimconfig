@@ -13,19 +13,21 @@ module Juggler
   end
 
   def self.escape_vim_singlequote_string(str)
-    #replace:
-    # \0 with (nothing/empty string)
-    # ' with ''
+    # replace:
+    #   \0 with (nothing/empty string)
+    #   ' with ''
     return str.to_s.gsub(/[\0']/, {"\0" => '', "'" => "''"})
   end
 
   def self.escape_vim_doublequote_string(str)
-    #replace:
-    # \ with \\
-    # " with \"
-    # | with \|
+    # Replace:
+    #   \ with \\
+    #   " with \"
+    #   | with \|
     str = str.to_s.gsub(/[\\"|]/, {'\\' => '\\\\', '"' => '\\"', '|' => '\\|'})
-    #replace all newline character sequences with \n - NOTE we are replacing it with the string "\\n", NOT the newline character
+
+    # Replace all newline character sequences with \n - NOTE we are replacing
+    # it with the string "\\n", NOT the newline character
     return str.gsub("\r\n", '\\n').gsub(/[\r\n]/, '\\n')
   end
 
@@ -34,12 +36,17 @@ module Juggler
   end
 
   def self.generate_scan_base_pattern(base)
-    return base.scan(/./).join('\w*') + '\w*' if base.length <= 2
-    return '\w*' + base.scan(/./).join('\w*') + '\w*'
+    # If the text before the cursor (`base`) is <= 2 in length generate a
+    # pattern that must start with the first letter of `base`
+    return "#{base.scan(/./).join('\w*')}\\w*" if base.length <= 2
+
+    # Otherwise, the pattern can include other word characters (`\w`) in front
+    # of `base`
+    return "\\w*#{base.scan(/./).join('\w*')}\\w*"
   end
 
   def self.logger
-    @@logger ||= create_logger
+    @logger ||= create_logger
   end
 
   def self.refresh
@@ -61,32 +68,31 @@ module Juggler
         else
           (ENV['JUGGLER_LOG_FILE'] ? Logger.new(ENV['JUGGLER_LOG_FILE']) : Logger.new('/tmp/juggler.log'))
         end
-    l.formatter = proc { |severity, datetime, progname, msg|
-      "JUGGLER #{datetime.strftime('%T.%L')} ##{Thread.current.object_id} #{severity} - #{msg.to_s}\n"
+    l.formatter = proc {|severity, datetime, _progname, msg|
+      "JUGGLER #{datetime.strftime('%T.%L')} ##{Thread.current.object_id} #{severity} - #{msg}\n"
     }
-    case (ENV['JUGGLER_LOG_LEVEL'] || VIM::evaluate('g:juggler_logLevel'))
-    when 'warn' then l.level = Logger::WARN
-    when 'info' then l.level = Logger::INFO
-    when 'debug' then l.level = Logger::DEBUG
-    else l.level = Logger::ERROR
-    end
+    l.level = case (ENV['JUGGLER_LOG_LEVEL'] || VIM::evaluate('g:juggler_logLevel'))
+              when 'warn' then Logger::WARN
+              when 'info' then Logger::INFO
+              when 'debug' then Logger::DEBUG
+              else Logger::ERROR
+              end
     return l
   end
 
   def self.walk_tree_looking_for_files(cwd, glob: ['.git'])
-    #walk up the tree until we find files that match the passed in `glob`
+    # Walk up the tree until we find files that match the passed in `glob`
     while valid_project_dir?(cwd)
-      if Dir.glob(glob, base: cwd).length > 0
-        return cwd
-      end
+      return cwd if !Dir.glob(glob, base: cwd).empty?
+
       cwd = File.expand_path('..', cwd)
     end
     return nil
   end
 
-  def self.valid_project_dir?(d)
-    return false if d == Dir.home
-    return false if d == '/'
+  def self.valid_project_dir?(dir)
+    return false if dir == Dir.home || dir == '/'
+
     return true
   end
 end

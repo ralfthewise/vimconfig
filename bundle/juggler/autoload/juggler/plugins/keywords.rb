@@ -40,7 +40,7 @@ module Juggler::Plugins
           end
         else
           file = File.absolute_path(line)
-          should_include_file = @project_dir.start_with?(file)
+          should_include_file = file.start_with?(@project_dir)
         end
       end
     end
