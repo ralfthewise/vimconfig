@@ -13,7 +13,7 @@ module Juggler::Plugins
     end
 
     def generate_completions(_absolute_path, base, cursor_info)
-      return if base.nil? || base.empty?
+      return if base.nil? || base.empty? || cursor_info['token'].length < 2
 
       ctag_output = VIM::evaluate("s:GetTags('\\c#{Juggler.escape_vim_singlequote_string(generate_ctag_pattern(base))}')")
       ctag_output.each_with_index do |ctag_entry, index|

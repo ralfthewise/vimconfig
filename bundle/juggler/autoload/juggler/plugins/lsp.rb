@@ -233,12 +233,19 @@ module Juggler::Plugins
       send_changes_if_needed(absolute_path)
       solargraph_patch(absolute_path, cursor_info)
 
-      msg = {
-        textDocument: { uri: "file://#{absolute_path}" },
-        position: { line: cursor_info['linenum'] - 1, character: cursor_info['cursorindex'] },
-        # context: { triggerKind: 1 },
-        context: { triggerKind: 2, triggerCharacter: '.' },
-      }
+      msg = if cursor_info['type'] == 'omnitrigger'
+              {
+                textDocument: { uri: "file://#{absolute_path}" },
+                position: { line: cursor_info['linenum'] - 1, character: cursor_info['cursorindex'] },
+                context: { triggerKind: 2, triggerCharacter: cursor_info['trigger'][-1] },
+              }
+            else
+              {
+                textDocument: { uri: "file://#{absolute_path}" },
+                position: { line: cursor_info['linenum'] - 1, character: cursor_info['cursorindex'] },
+                context: { triggerKind: 1 },
+              }
+            end
       send_msg('textDocument/completion', msg)
       receive_msgs.last['items'].each_with_index do |item, index|
         signature = item.dig('data', 'path')

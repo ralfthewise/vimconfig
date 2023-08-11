@@ -11,7 +11,7 @@ module Juggler::Plugins
     end
 
     def generate_completions(_absolute_path, base, cursor_info)
-      return if base.nil? || base.empty?
+      return if base.nil? || base.empty? || cursor_info['token'].length < 2
 
       #BUG this regex below doesn't grab the right tag from the cscope results
       base_regex = Regexp.new(Juggler.generate_scan_base_pattern(base), Regexp::IGNORECASE)

@@ -41,7 +41,7 @@ call s:defineOption('g:juggler_fixupPopupMenu', 1)
 
 "Will trigger completion if the text before the cursor matches the regex
 "below and the matched text is >= the min token length.
-call s:defineOption('g:juggler_triggerTokenRegex', '\(\w*\)$')
+call s:defineOption('g:juggler_triggerTokenRegex', '\(\w\+\)$')
 call s:defineOption('g:juggler_minTokenLength', 2)
 
 "Use omni completion when doing token completion

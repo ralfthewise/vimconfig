@@ -27,8 +27,9 @@ module Juggler::Plugins
       logger.debug {"Keywords search output: #{keyword_output}"}
       keyword_output.split("\n").each do |line|
         if (match = self.class.keyword_regexp.match(line))
-          # Doing `exe 'ilist! <some pattern>'` from within a ruby file in vim
-          # sometimes returns results from random ruby files (such as
+          # Doing `VIM::command("exe 'ilist! <some pattern>'")` from within a
+          # plugin's ruby file in vim sometimes returns results from random
+          # ruby library files (such as
           # /usr/local/rbenv/versions/3.0.2/lib/ruby/3.0.0/x86_64-linux/socket.so)
           # so we limit the results to files that are somewhere within the
           # project_dir
@@ -36,8 +37,8 @@ module Juggler::Plugins
 
           index = match[1].to_i
           line_num = match[2].to_i
-          match[3].scan(base_regex) do |tag|
-            entry = Juggler::CompletionEntry.new(source: :keyword, index: index, file: file, line: line_num, tag: tag)
+          match[3].scan(base_regex) do |m|
+            entry = Juggler::CompletionEntry.new(source: :keyword, index: index, file: file, line: line_num, tag: m.last)
             yield(entry)
           end
         else
@@ -49,13 +50,24 @@ module Juggler::Plugins
 
     protected
 
+    # This regexp is passed to vim's `ilist!`
     def generate_keyword_search_pattern(base)
       # '\c' makes it case insensitive
-      return "/\\c#{base.scan(/./).join('\w*')}"
+
+      # This pattern requires the keyword start with the first letter in `base`
+      return "/\\c\\(^\\|\\W\\)#{base.scan(/./).join('\w*')}"
+
+      # This pattern allows there to be preceeding letters in front of the first letter of `base`
+      # return "/\\c#{base.scan(/./).join('\w*')}"
     end
 
+    # This regexp is used to parse/tokenize each line of the output from `ilist!`
     def generate_keyword_match_pattern(base)
-      return "\\w*#{base.scan(/./).join('\w*')}\\w*"
+      # Again, must start with the first letter of `base`
+      return "(^|\\W+)(#{base.scan(/./).join('\w*')}\\w*)"
+
+      # Allows preceeding letters in front of the first letter of `base`
+      # return "(\\w*#{base.scan(/./).join('\w*')}\\w*)"
     end
   end
 end

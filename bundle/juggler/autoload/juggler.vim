@@ -232,7 +232,7 @@ function! s:GetCursorInfo()
   "check if the text before the cursor matches the token regex and is at least
   "the minimum length
   let matches = matchlist(prefix, g:juggler_triggerTokenRegex)
-  if len(matches) > 1 && len(matches[1]) >= g:juggler_minTokenLength
+  if len(matches) > 1 " && len(matches[1]) >= g:juggler_minTokenLength
     return {'match': 1, 'type': 'token', 'linenum': posinfo[1], 'cursorindex': cursorindex, 'token': matches[1], 'matchstart': cursorindex - len(matches[1])}
   endif
   "some plugins (eg LSP or OmniCompleter) may be smart enough about the
