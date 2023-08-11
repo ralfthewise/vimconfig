@@ -50,7 +50,7 @@ call s:defineOption('g:juggler_useOmniCompleter', 0)
 "or '::')
 call s:defineOption('g:juggler_useOmniTrigger', 1)
 "Regex that will trigger just language aware (LSP and OmniCompleter) completions
-call s:defineOption('g:juggler_triggerOmniRegex', '\(\%(->\|\.\|::\|<\)\)\(\w*\)$')
+call s:defineOption('g:juggler_triggerOmniRegex', '\(\%(->\|\.\|::\|<\)\)$')
 "If doing omni trigger completion, should we cache the results and use them
 "for successive token completions
 call s:defineOption('g:juggler_useOmniTriggerCache', 1)
