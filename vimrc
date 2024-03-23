@@ -226,7 +226,9 @@ endif
 let g:juggler_enableAtStartup = 1
 let g:juggler_logLevel = 'debug'
 let g:juggler_useTagsCompleter = 0
+let g:juggler_manageTags = 0
 let g:juggler_useCscopeCompleter = 1
+let g:juggler_manageCscope = 0
 let g:juggler_useOmniCompleter = 0
 let g:juggler_useOmniTrigger = 1
 let g:juggler_useKeywordCompleter = 0

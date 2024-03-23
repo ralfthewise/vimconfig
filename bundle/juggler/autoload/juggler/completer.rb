@@ -41,8 +41,6 @@ module Juggler
     end
 
     def init_indexes
-      return unless (@use_tags && @manage_tags) || (@use_cscope && @manage_cscope)
-
       project_dir = determine_project_dir
       if project_dir.nil?
         @use_tags = @manage_tags = @use_cscope = @manage_cscope = false
@@ -51,9 +49,10 @@ module Juggler
 
       digest = Digest::SHA1.hexdigest(project_dir)
       @indexes_path = File.join(Dir.home, '.vim_indexes', digest)
+      return unless (@use_tags && @manage_tags) || (@use_cscope && @manage_cscope)
+
       FileUtils.mkdir_p(@indexes_path)
       VIM::command("let s:indexespath = '#{Juggler.escape_vim_singlequote_string(@indexes_path)}'")
-      @cscope_service = CscopeService.new(File.join(@indexes_path, 'cscope.out')) if @use_cscope && @manage_cscope
     end
 
     def replace_ctrlp_user_command
@@ -87,6 +86,36 @@ module Juggler
 
         VIM::command('copen')
         Juggler.refresh
+      end
+    end
+
+    # TODO: combine code to get term/lnum/col with show_references below
+    def go_to_definition
+      Juggler.with_status('Finding definition...') do
+        term = VIM::evaluate('resolvedterm').to_s
+        next if term == ''
+
+        Juggler.logger.debug {"Searching for definition of: #{term}"}
+        result = []
+        _bufnum, lnum, col, _off = VIM::evaluate('getpos(".")')
+        plugins.each do |p|
+          plugin_results = p.go_to_definition(eval_current_path, lnum - 1, col - 1, term)
+          Juggler.logger.debug {"Plugin results (#{p.class}): #{plugin_results}"}
+          result += plugin_results.to_a
+        end
+        result.map! do |entry|
+          {filename: entry[:file], lnum: entry[:line], col: entry[:col], vcol: 1, text: entry[:desc].strip[0..164]}
+        end
+        Juggler.logger.debug {"Will set quickfix to: #{result.to_json}"}
+        VIM::evaluate("setqflist(json_decode(\"#{Juggler.escape_vim_doublequote_string(result.to_json)}\"), 'r')")
+        # VIM::command("cgetexpr [#{result.join(',')}]")
+        if result.size > 1
+          VIM::command('copen')
+        elsif result.size == 1
+          VIM::command('cc!')
+        else
+          Juggler.notify("Definition of '#{term}' not found!")
+        end
       end
     end
 
@@ -354,6 +383,7 @@ module Juggler
       end
       path_excludes = VIM::evaluate('g:juggler_pathExcludes')
 
+      # Consider using `git ls-files --cached --others --exclude-standard` instead?
       if for_cscope
         # cscope can't handle paths that include a space
         # if they ever fix it to handle spaces in filenames, you might have to pipe it to some sed magic like so:

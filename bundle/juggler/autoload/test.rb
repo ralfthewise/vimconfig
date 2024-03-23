@@ -6,7 +6,7 @@ c.open_file('juggler/completer.rb')
 # puts c.receive_msg
 
 puts "\n\nDefinition"
-result = c.definition('juggler/completer.rb', 79, 57)
+result = c.go_to_definition('juggler/completer.rb', 79, 57, nil)
 puts result.to_json
 
 

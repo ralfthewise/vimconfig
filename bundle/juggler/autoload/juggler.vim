@@ -187,10 +187,16 @@ function! s:Search(defsrch)
 endfunction
 
 function! s:GoToDefinition(defterm)
-  " TODO: replace this with a user defined `tagfunc`
-  " see :help tag-function
+  " " TODO: maybe replace this with a user defined `tagfunc`?
+  " " see :help tag-function
+  " let resolvedterm = (a:defterm == '' ? expand('<cword>') : a:defterm)
+  " exe 'cstag ' . resolvedterm
+
   let resolvedterm = (a:defterm == '' ? expand('<cword>') : a:defterm)
-  exe 'cstag ' . resolvedterm
+  let save_errorformat = &errorformat
+  set errorformat=%f:%l:%m
+  ruby Juggler::Completer.instance.go_to_definition()
+  let &errorformat = save_errorformat
 endfunction
 
 function! s:ShowReferences(defterm)
@@ -349,10 +355,10 @@ function! s:SetupCommands()
 endfunction
 
 function! s:SetupMaps()
-  nmap <F1> :JugglerHelp<CR>
-  nmap <F3> :JugglerSearch<CR>
-  nmap <C-B> :JugglerJumpDef<CR>
-  nmap <F7> :JugglerShowRefs<CR>
+  nmap <silent> <F1> :JugglerHelp<CR>
+  nmap <silent> <F3> :JugglerSearch<CR>
+  nmap <silent> <C-B> :JugglerJumpDef<CR>
+  nmap <silent> <F7> :JugglerShowRefs<CR>
 endfunction
 
 function! s:SetupAutoCommands()

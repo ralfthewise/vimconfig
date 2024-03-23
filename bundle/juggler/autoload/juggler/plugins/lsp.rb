@@ -5,6 +5,7 @@ require 'uri'
 require 'open3'
 require 'shellwords'
 require 'pathname'
+require 'stringio'
 require_relative '../completion_entry'
 require_relative 'base'
 
@@ -190,8 +191,13 @@ module Juggler::Plugins
       receive_msgs
     end
 
+    # Should return an array of objects with the following properties:
+    #   file: path to file (relative to project root)
+    #   line: line in the file (starting from 1, not 0)
+    #   col: column of the line (starting from 1, not 0)
+    #   desc: description to display
     # `line` and `col` should be zero-based
-    def definition(path, line, col)
+    def go_to_definition(path, line, col, _term)
       send_changes_if_needed(path)
 
       absolute_path = File.expand_path(path)
@@ -200,7 +206,17 @@ module Juggler::Plugins
         position: { line: line, character: col },
       }
       send_msg('textDocument/definition', msg)
-      receive_msgs
+      result = receive_msgs
+      result.last.map do |entry|
+        logger.debug("Entry: #{entry}")
+        uri = URI.parse(entry['uri'])
+        full_path = URI.decode_www_form_component(uri.path)
+        path = Pathname.new(full_path).relative_path_from(Dir.getwd)
+        line_num = entry['range']['start']['line'] + 1 # for display we use a 1 based line
+        col = entry['range']['start']['character']
+        line_display = Juggler.file_contents(full_path)[:contents][line_num - 1]
+        {file: path.to_s, line: line_num, col: col, desc: line_display}
+      end
     end
 
     def show_references(path, line, col, _term)

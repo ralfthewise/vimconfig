@@ -10,8 +10,14 @@ module Juggler::Plugins
       logger.info { "file_opened: #{absolute_path}" }
     end
 
+    def go_to_definition(path, line, col, term)
+      logger.info { "go_to_definition:\n  path: #{path}\n  line: #{line}\n  col: #{col}\n  term: #{term}" }
+      []
+    end
+
     def show_references(path, line, col, term)
       logger.info { "show_references:\n  path: #{path}\n  line: #{line}\n  col: #{col}\n  term: #{term}" }
+      []
     end
 
     def grep(srchstr)

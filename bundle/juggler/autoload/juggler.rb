@@ -5,9 +5,14 @@ require 'zeitwerk'
 
 loader = Zeitwerk::Loader.new
 loader.push_dir(__dir__)
+loader.enable_reloading if ENV['DEBUG'] == 'true'
 loader.setup
 
 module Juggler
+  def self.notify(msg)
+    VIM::command("echom '#{Juggler.escape_vim_singlequote_string(msg)}'")
+  end
+
   def self.clean_utf8(str)
     return str.encode('UTF-8', 'UTF-8', invalid: :replace)
   end
@@ -51,6 +56,10 @@ module Juggler
 
   def self.refresh
     VIM::command('redraw!|redrawstatus')
+  end
+
+  def self.set_status(line)
+    VIM::command("set statusline=#{line.to_s.gsub(' ', '\\ ')} | redrawstatus")
   end
 
   def self.with_status(line)
