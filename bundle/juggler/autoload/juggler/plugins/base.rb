@@ -40,6 +40,7 @@ module Juggler::Plugins
     def show_references(path, line, col, term); end
     def grep(srchstr); end
     def generate_completions(absolute_path, base, cursor_info); end
+    def update_indexes(only_current_file: false); end
 
     def for_display
       "#{Juggler::Utils::Colorize.bold(self.class)}: #{@options}"

@@ -37,6 +37,10 @@ module Juggler::Plugins
       logger.info { "generate_completions:\n  absolute_path: #{absolute_path}\n  base: #{base}\n  cursor_info: #{cursor_info}" }
     end
 
+    def update_indexes(only_current_file: false)
+      logger.info { "update_indexes:\n  only_current_file: #{only_current_file}" }
+    end
+
     # Hooks
     def buffer_changed_hook(absolute_path)
       # logger.info { "buffer_changed_hook: #{absolute_path}\n#{Juggler.file_contents(absolute_path)}" }

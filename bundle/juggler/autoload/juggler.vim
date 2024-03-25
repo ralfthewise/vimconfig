@@ -34,6 +34,7 @@ function juggler#Enable()
   nnoremap <silent> R R<C-r>=juggler#UpdatePopup()<CR>
   inoremap <silent> <expr> <C-h> <SID>OnBackspace("\<C-h>")
   inoremap <silent> <expr> <BS> <SID>OnBackspace("\<BS>")
+  nnoremap <silent> <F12> :call <SID>UpdateIndexes(0, v:false)<CR>
 
   "initialize our completer singleton
   let s:indexespath = '' "will get updated by Juggler::Completer
@@ -41,15 +42,14 @@ function juggler#Enable()
 
   let s:indexesused = (s:indexespath != '')
   if s:indexesused
-    "nmap <silent> <F12> :call <SID>UpdateIndexes(0, 0)<CR>
     augroup Juggler
-      autocmd BufWritePost * call s:UpdateIndexes(0, 1)
+      autocmd BufWritePost * call s:UpdateIndexes(0, false)
     augroup END
 
     if g:juggler_useTagsCompleter && g:juggler_manageTags
       execute 'set tags=' . s:indexespath . '/tags'
       if !filereadable(s:indexespath . '/tags')
-        call s:UpdateIndexes(1, 0)
+        call s:UpdateIndexes(1, false)
       endif
     endif
 
@@ -58,7 +58,7 @@ function juggler#Enable()
       if filereadable(s:indexespath . '/cscope.out')
         execute 'silent! cscope add ' . s:indexespath . '/cscope.out'
       else
-        call s:UpdateIndexes(1, 0)
+        call s:UpdateIndexes(1, false)
       endif
     endif
   endif
@@ -85,7 +85,7 @@ endfunction
 function! s:UpdateIndexes(quiet, onlyCurrentFile)
   let s:oldstatusline = &statusline
   if !a:onlyCurrentFile | set statusline=Updating\ indexes... | endif
-  let rubyExec = 'ruby Juggler::Completer.instance.update_indexes(only_current_file: ' . a:onlyCurrentFile . ')'
+  let rubyExec = 'ruby Juggler::Completer.instance.update_indexes(only_current_file: ' . json_encode(a:onlyCurrentFile) . ')'
   if a:quiet
     execute 'silent! ' . rubyExec
   else
@@ -347,7 +347,7 @@ function! s:SetupCommands()
   command! -nargs=? JugglerSearch call s:Search('<args>')
   command! -nargs=? JugglerJumpDef call s:GoToDefinition('<args>')
   command! -nargs=? JugglerShowRefs call s:ShowReferences('<args>')
-  command! -n=0 JugglerUpdateIndexes call s:UpdateIndexes(0, 0)
+  command! -n=0 JugglerUpdateIndexes call s:UpdateIndexes(0, v:false)
   command! -range -n=0 JugglerSumBlock call s:SumBlock()
   if g:juggler_setupMaps
     call s:SetupMaps()

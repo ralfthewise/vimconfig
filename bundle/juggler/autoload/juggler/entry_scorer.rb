@@ -23,7 +23,7 @@ module Juggler
         invalid_omni: -1000000
       }
       @entry_source_weights = {
-        lsp: 6, #language server protocol is the best when it works
+        lsp: 20, #language server protocol is the best when it works
         keyword: 1, #keywords is slightly better than ctags/cscope since it operates on the (potentially not yet saved) buffer
         omni: 2, #omni can't include file/line info, so this helps balance that lack
         omnitrigger: 2,

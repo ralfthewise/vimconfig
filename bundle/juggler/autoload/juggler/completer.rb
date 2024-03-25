@@ -142,7 +142,13 @@ module Juggler
       end
     end
 
-    def update_indexes(only_current_file: 0)
+    def update_indexes(only_current_file: false)
+      Juggler.logger.info {'Updating indexes'}
+      plugins.each do |p|
+        p.update_indexes(only_current_file: only_current_file)
+      end
+      return
+
       return unless (@use_tags && @manage_tags) || (@use_cscope && @manage_cscope)
 
       only_current_file = 0 if !File.exist?(File.join(@indexes_path, 'tags.files')) || !File.exist?(File.join(@indexes_path, 'cscope.files'))
@@ -383,7 +389,7 @@ module Juggler
       end
       path_excludes = VIM::evaluate('g:juggler_pathExcludes')
 
-      # Consider using `git ls-files --cached --others --exclude-standard` instead?
+      # Consider using `git ls-files -z --cached --others --exclude-standard | xargs --null grep -Il .` instead?
       if for_cscope
         # cscope can't handle paths that include a space
         # if they ever fix it to handle spaces in filenames, you might have to pipe it to some sed magic like so:
