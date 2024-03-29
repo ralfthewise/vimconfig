@@ -235,7 +235,7 @@ let g:juggler_useKeywordCompleter = 0
 let g:juggler_replaceCtrlpCommand = 0
 let g:juggler_additionalPathExcludes = ['*/test-ui/reports/*', '*/coverage/*']
 let g:juggler_language_plugins = {
-      \ '*': ['example', 'ctags', 'cscope', 'keywords', 'grep_ag'],
+      \ '*': ['example', 'ctags', 'cscope', 'keywords', 'grep_ripgrep'],
       \ 'ruby': [{'lsp': {'cmd': 'solargraph stdio'}}, '*']
       \ }
 " let g:juggler_language_plugins = {

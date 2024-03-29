@@ -5,11 +5,12 @@ module Juggler::Plugins
     #example result from taglist():
     #
     #  [{'cmd': '/^  appendValAtPath = (dataModel, modelPath, modelVal, archetypeProperties) ->$/', 'static': 0, 'name': 'appendValAtPath', 'line': '6', 'language': 'coffee', 'kind': 'function', 'filename': './app/components/radar-forms/services/form-data-translator.coffee'}]
+    @cmd_regexp = /^\/\^(.+)\$\/$/
+    class << self; attr_reader :cmd_regexp; end
 
     def initialize(project_dir:, **opts)
       super
-
-      init_indexes(project_dir)
+      @indexes_path = Juggler::Completer.instance.indexes_path
     end
 
     def generate_completions(_absolute_path, base, cursor_info)
@@ -25,19 +26,47 @@ module Juggler::Plugins
       end
     end
 
-    protected
-    def generate_ctag_pattern(base)
-      return base.scan(/./).join('.*')
+    # Should return an array of Juggler::LocationEntrys
+    def go_to_definition(_path, _line, _col, term)
+      ctag_output = VIM::evaluate("s:GetTags('#{Juggler.escape_vim_singlequote_string(term)}')")
+      ctag_output.map do |ctag_entry|
+        desc = ctag_entry['name']
+        if (match = self.class.cmd_regexp.match(ctag_entry['cmd']))
+          desc = match[1].strip
+        end
+        Juggler::LocationEntry.new(file: ctag_entry['filename'], line: ctag_entry['line'], column: 1, description: desc)
+      end
     end
 
-    def init_indexes(project_dir)
-      return if project_dir.nil?
+    def update_indexes(only_current_file: false)
+      dest_file = File.join(@indexes_path, 'tags.files')
+      escaped_indexes_path = Shellwords.escape(@indexes_path)
+      escaped_dest_file = Shellwords.escape(dest_file)
 
-      digest = Digest::SHA1.hexdigest(project_dir)
-      indexes_path = File.join(Dir.home, '.vim_indexes', digest)
-      FileUtils.mkdir_p(indexes_path)
-      VIM::command("let s:indexespath = '#{Juggler.escape_vim_singlequote_string(indexes_path)}'")
-      VIM::command("execute 'set tags=#{Juggler.escape_vim_singlequote_string(indexes_path)}/tags'")
+      only_current_file = false if !File.exist?(dest_file)
+      FileUtils.rm(Dir.glob(File.join(@indexes_path, 'tags*'))) if !only_current_file
+
+      cmd = if only_current_file
+              absolute_path = File.expand_path($curbuf.name)
+              "cd #{escaped_indexes_path} && echo #{Shellwords.escape(absolute_path)} | ctags --append --fields=afmikKlnsStz --sort=foldcase -L - -f tags > /dev/null 2>&1"
+            else
+              dest_file_cmd = "git ls-files -z --cached --others --exclude-standard | xargs --null grep -Il --null . | xargs --null readlink -e > #{escaped_dest_file}"
+              "#{dest_file_cmd} && cd #{escaped_indexes_path} && ctags --fields=afmikKlnsStz --sort=foldcase -L tags.files -f tags > /dev/null 2>&1"
+            end
+
+      Juggler.logger.debug {"Updating ctags with the following command: #{cmd}"}
+      start = Time.now
+      if system(cmd)
+        Juggler.logger.info {"Updating ctags took #{Time.now - start} seconds"}
+      else
+        Juggler.logger.error {"Error updating ctags with the following command: #{cmd}"}
+      end
+    end
+
+    protected
+
+    def generate_ctag_pattern(base)
+      return base.scan(/./).join('.*')
     end
   end
 end

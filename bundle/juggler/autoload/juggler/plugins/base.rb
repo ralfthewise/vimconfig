@@ -30,11 +30,7 @@ module Juggler::Plugins
     def buffer_changed_hook(absolute_path); end
     def buffer_left_hook(absolute_path); end
 
-    # Should return an array of objects with the following properties:
-    #   file: path to file (relative to project root)
-    #   line: line in the file (starting from 1, not 0)
-    #   col: column of the line (starting from 1, not 0)
-    #   desc: description to display
+    # Should return an array of Juggler::LocationEntrys
     def go_to_definition(path, line, col, term); end
 
     def show_references(path, line, col, term); end

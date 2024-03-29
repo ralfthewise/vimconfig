@@ -49,10 +49,11 @@ module Juggler
 
       digest = Digest::SHA1.hexdigest(project_dir)
       @indexes_path = File.join(Dir.home, '.vim_indexes', digest)
-      return unless (@use_tags && @manage_tags) || (@use_cscope && @manage_cscope)
+      # return unless (@use_tags && @manage_tags) || (@use_cscope && @manage_cscope)
 
       FileUtils.mkdir_p(@indexes_path)
       VIM::command("let s:indexespath = '#{Juggler.escape_vim_singlequote_string(@indexes_path)}'")
+      VIM::command("execute 'set tags=#{Juggler.escape_vim_singlequote_string(@indexes_path)}/tags'")
     end
 
     def replace_ctrlp_user_command
@@ -96,20 +97,20 @@ module Juggler
         next if term == ''
 
         Juggler.logger.debug {"Searching for definition of: #{term}"}
-        result = []
+        result = Juggler::LocationEntryCollector.new
         _bufnum, lnum, col, _off = VIM::evaluate('getpos(".")')
         plugins.each do |p|
           plugin_results = p.go_to_definition(eval_current_path, lnum - 1, col - 1, term)
           Juggler.logger.debug {"Plugin results (#{p.class}): #{plugin_results}"}
-          result += plugin_results.to_a
+          result.add(plugin_results)
         end
-        result.map! do |entry|
-          {filename: entry[:file], lnum: entry[:line], col: entry[:col], vcol: 1, text: entry[:desc].strip[0..164]}
+        vim_result = result.sort!.map do |entry|
+          {filename: entry.file, lnum: entry.line, col: entry.column, vcol: 1, text: entry.description.strip[0..164]}
         end
-        Juggler.logger.debug {"Will set quickfix to: #{result.to_json}"}
-        VIM::evaluate("setqflist(json_decode(\"#{Juggler.escape_vim_doublequote_string(result.to_json)}\"), 'r')")
+        Juggler.logger.debug {"Will set quickfix to: #{vim_result.to_json}"}
+        VIM::evaluate("setqflist(json_decode(\"#{Juggler.escape_vim_doublequote_string(vim_result.to_json)}\"), 'r')")
         # VIM::command("cgetexpr [#{result.join(',')}]")
-        if result.size > 1
+        if vim_result.size > 1
           VIM::command('copen')
         elsif result.size == 1
           VIM::command('cc!')
@@ -293,7 +294,8 @@ module Juggler
 
     def buffer_changed_hook
       absolute_path = eval_current_path
-      return unless File.file?(absolute_path)
+      # return unless File.file?(absolute_path)
+      return if absolute_path.empty?
 
       @file_contents.file_modified(absolute_path)
       Juggler.logger.info {"Buffer changed: #{absolute_path}"}

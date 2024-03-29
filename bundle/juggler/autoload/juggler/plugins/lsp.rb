@@ -170,6 +170,10 @@ module Juggler::Plugins
       send_changes_if_needed(absolute_path)
     end
 
+    def buffer_changed_hook(absolute_path)
+      send_changes_if_needed(absolute_path)
+    end
+
     def send_changes_if_needed(path)
       absolute_path = File.expand_path(path)
       return unless Juggler::Completer.instance.file_contents.file_modified?(absolute_path, @sent_file_versions[absolute_path])
@@ -191,12 +195,7 @@ module Juggler::Plugins
       receive_msgs
     end
 
-    # Should return an array of objects with the following properties:
-    #   file: path to file (relative to project root)
-    #   line: line in the file (starting from 1, not 0)
-    #   col: column of the line (starting from 1, not 0)
-    #   desc: description to display
-    # `line` and `col` should be zero-based
+    # Should return an array of Juggler::LocationEntrys
     def go_to_definition(path, line, col, _term)
       send_changes_if_needed(path)
 
@@ -215,7 +214,7 @@ module Juggler::Plugins
         line_num = entry['range']['start']['line'] + 1 # for display we use a 1 based line
         col = entry['range']['start']['character']
         line_display = Juggler.file_contents(full_path)[:contents][line_num - 1]
-        {file: path.to_s, line: line_num, col: col, desc: line_display}
+        Juggler::LocationEntry.new(file: path.to_s, line: line_num, column: col, description: line_display)
       end
     end
 
@@ -224,8 +223,9 @@ module Juggler::Plugins
 
       # [{"uri"=>"file:///home/tim/dev/vimconfig/bundle/juggler/autoload/test.rb", "range"=>{"start"=>{"line"=>16, "character"=>11}, "end"=>{"line"=>16, "character"=>26}}}, ...]
       result = find_references(path, line, col)
-      result.map do |entry|
-        full_path = entry['uri'][7..-1]
+      result.last.map do |entry|
+        uri = URI.parse(entry['uri'])
+        full_path = URI.decode_www_form_component(uri.path)
         path = Pathname.new(full_path).relative_path_from(Dir.getwd)
         line_num = entry['range']['start']['line'] + 1 # for display we use a 1 based line
         line_display = Juggler.file_contents(full_path)[:contents][line_num - 1]

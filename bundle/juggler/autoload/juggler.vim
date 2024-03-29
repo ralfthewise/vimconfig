@@ -43,13 +43,13 @@ function juggler#Enable()
   let s:indexesused = (s:indexespath != '')
   if s:indexesused
     augroup Juggler
-      autocmd BufWritePost * call s:UpdateIndexes(0, false)
+      autocmd BufWritePost * call s:UpdateIndexes(0, v:false)
     augroup END
 
     if g:juggler_useTagsCompleter && g:juggler_manageTags
       execute 'set tags=' . s:indexespath . '/tags'
       if !filereadable(s:indexespath . '/tags')
-        call s:UpdateIndexes(1, false)
+        call s:UpdateIndexes(1, v:false)
       endif
     endif
 
@@ -58,7 +58,7 @@ function juggler#Enable()
       if filereadable(s:indexespath . '/cscope.out')
         execute 'silent! cscope add ' . s:indexespath . '/cscope.out'
       else
-        call s:UpdateIndexes(1, false)
+        call s:UpdateIndexes(1, v:false)
       endif
     endif
   endif
