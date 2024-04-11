@@ -34,7 +34,7 @@ module Juggler::Plugins
         if (match = self.class.cmd_regexp.match(ctag_entry['cmd']))
           desc = match[1].strip
         end
-        Juggler::LocationEntry.new(file: ctag_entry['filename'], line: ctag_entry['line'], column: 1, description: desc)
+        Juggler::LocationEntry.new(source: :ctags, file: ctag_entry['filename'], line: ctag_entry['line'], column: 1, description: desc)
       end
     end
 

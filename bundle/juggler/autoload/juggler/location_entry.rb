@@ -1,13 +1,15 @@
 module Juggler
   class LocationEntry
     # Simple class to represent a location within a file
+    attr_accessor :source # Source (plugin the created this entry) of this LocationEntry - can be an array if multiple plugins create identical LocationEntrys
     attr_accessor :file # Path to file
     attr_accessor :line # Line in the file (starting from 1, not 0)
     attr_accessor :column # Column of the line (starting from 1, not 0)
     attr_accessor :description # Description of the location
     attr_accessor :additional_info # Can store arbitrary additional info of any type
 
-    def initialize(file:, line:, column:, description:, additional_info: nil)
+    def initialize(source:, file:, line:, column:, description:, additional_info: nil)
+      self.source = [source]
       self.file = File.expand_path(file)
       self.line = line
       self.column = column
@@ -23,6 +25,8 @@ module Juggler
       if other_entry.description.size > description.size
         self.description = other_entry.description
       end
+
+      self.source += other_entry.source
     end
 
     def key
@@ -30,7 +34,7 @@ module Juggler
     end
 
     def to_s
-      {file: file, line: line, column: column, description: description, additional_info: additional_info}.to_s
+      {source: source, file: file, line: line, column: column, description: description, additional_info: additional_info}.to_s
     end
   end
 end

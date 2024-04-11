@@ -112,7 +112,7 @@ module Juggler
         # VIM::command("cgetexpr [#{result.join(',')}]")
         if vim_result.size > 1
           VIM::command('copen')
-        elsif result.size == 1
+        elsif vim_result.size == 1
           VIM::command('cc!')
         else
           Juggler.notify("Definition of '#{term}' not found!")
@@ -126,21 +126,38 @@ module Juggler
         next if term == ''
 
         Juggler.logger.debug {"Searching for references of: #{term}"}
-        result = []
+        result = Juggler::LocationEntryCollector.new
         _bufnum, lnum, col, _off = VIM::evaluate('getpos(".")')
         plugins.each do |p|
           plugin_results = p.show_references(eval_current_path, lnum - 1, col - 1, term)
           Juggler.logger.debug {"Plugin results (#{p.class}): #{plugin_results}"}
-          result += plugin_results.to_a
+          result.add(plugin_results)
         end
-        result.map! do |entry|
-          kind = entry[:kind].to_s.strip.empty? ? '' : "<#{entry[:kind].to_s.strip}> "
-          qfix_entry = "#{entry[:file]}:#{entry[:line]}: #{kind}#{entry[:tag_line]}"
-          "\"#{Juggler.escape_vim_doublequote_string(qfix_entry.strip[0..191])}\""
+        vim_result = result.sort!.map do |entry|
+          {filename: entry.file, lnum: entry.line, col: entry.column, vcol: 1, text: entry.description.strip[0..164]}
         end
-        VIM::command("cgetexpr [#{result.join(',')}]")
-        VIM::command('copen')
+        Juggler.logger.debug {"Will set quickfix to: #{vim_result.to_json}"}
+        VIM::evaluate("setqflist(json_decode(\"#{Juggler.escape_vim_doublequote_string(vim_result.to_json)}\"), 'r')")
+        # VIM::command("cgetexpr [#{result.join(',')}]")
+        if vim_result.size >= 1
+          VIM::command('copen')
+        else
+          Juggler.notify("References of '#{term}' not found!")
+        end
       end
+    end
+
+    def self.vim_args(*args)
+      args.map {|a| VIM::evaluate(a)}
+    end
+
+    def ctrlp_match_function
+      items, str, limit, mmode, ispath, crfile, regex = self.class.vim_args('a:items', 'a:str', 'a:limit', 'a:mmode', 'a:ispath', 'a:crfile', 'a:regex')
+      Juggler.logger.debug {"ctrlp_match_function called:\n  str: #{str}\n  limit: #{limit}\n  mmode: #{mmode}\n  ispath: #{ispath}\n  crfile: #{crfile}\n  regex: #{regex}\n  items: #{items}"}
+      if ispath
+      else
+      end
+      return items
     end
 
     def update_indexes(only_current_file: false)

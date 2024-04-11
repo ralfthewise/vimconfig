@@ -214,7 +214,7 @@ module Juggler::Plugins
         line_num = entry['range']['start']['line'] + 1 # for display we use a 1 based line
         col = entry['range']['start']['character']
         line_display = Juggler.file_contents(full_path)[:contents][line_num - 1]
-        Juggler::LocationEntry.new(file: path.to_s, line: line_num, column: col, description: line_display)
+        Juggler::LocationEntry.new(source: :lsp, file: path.to_s, line: line_num, column: col, description: line_display)
       end
     end
 
@@ -228,8 +228,9 @@ module Juggler::Plugins
         full_path = URI.decode_www_form_component(uri.path)
         path = Pathname.new(full_path).relative_path_from(Dir.getwd)
         line_num = entry['range']['start']['line'] + 1 # for display we use a 1 based line
+        col = entry['range']['start']['character']
         line_display = Juggler.file_contents(full_path)[:contents][line_num - 1]
-        {file: path.to_s, line: line_num, tag_line: line_display}
+        Juggler::LocationEntry.new(source: :lsp, file: path.to_s, line: line_num, column: col, description: line_display)
       end
     end
 

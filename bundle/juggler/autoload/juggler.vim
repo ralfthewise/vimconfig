@@ -176,6 +176,10 @@ function juggler#AfterPopup()
   return '' "have to return empty string otherwise '0' will get inserted
 endfunction
 
+function juggler#CtrlPMatchFunction(items, str, limit, mmode, ispath, crfile, regex)
+  return rubyeval('Juggler::Completer.instance.ctrlp_match_function()')
+endfunction
+
 function! s:Search(defsrch)
   let resolvedsrch = (a:defsrch == '' ? expand('<cword>') : a:defsrch)
   let srchstr = input('Text to search for (start text with "/" to search for a regex): ', resolvedsrch)

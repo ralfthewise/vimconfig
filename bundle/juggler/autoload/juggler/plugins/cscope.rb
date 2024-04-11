@@ -8,7 +8,10 @@ module Juggler::Plugins
     end
 
     def show_references(_path, _line, _col, term)
-      @cscope_service.query(term, Juggler::CscopeQuery::Symbol)
+      @cscope_service.query(term, Juggler::CscopeQuery::Symbol).map do |cscope_entry|
+        col = cscope_entry[:tag_line].index(Regexp.new(term, Regexp::IGNORECASE)).to_i + 1 # This isn't quite right because cscope strips off leading spaces
+        Juggler::LocationEntry.new(source: :cscope, file: cscope_entry[:file], line: cscope_entry[:line], column: col, description: cscope_entry[:tag_line].strip)
+      end
     end
 
     def generate_completions(_absolute_path, base, cursor_info)
@@ -29,7 +32,7 @@ module Juggler::Plugins
     def go_to_definition(_path, _line, _col, term)
       @cscope_service.query(term, Juggler::CscopeQuery::Symbol).map do |cscope_entry|
         col = cscope_entry[:tag_line].index(Regexp.new(term, Regexp::IGNORECASE)).to_i + 1 # This isn't quite right because cscope strips off leading spaces
-        Juggler::LocationEntry.new(file: cscope_entry[:file], line: cscope_entry[:line], column: col, description: cscope_entry[:tag_line].strip)
+        Juggler::LocationEntry.new(source: :cscope, file: cscope_entry[:file], line: cscope_entry[:line], column: col, description: cscope_entry[:tag_line].strip)
       end
     end
 
