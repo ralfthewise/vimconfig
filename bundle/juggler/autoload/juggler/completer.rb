@@ -90,6 +90,34 @@ module Juggler
       end
     end
 
+    def find_files(search_text)
+      Juggler.with_status("Searching for: #{search_text}") do
+        Juggler.logger.debug {"Starting file search for pattern: #{search_text}"}
+        return ['a', 'b', 'c']
+
+        result = []
+        plugins.each do |p|
+          plugin_results = p.grep(srchstr)
+          result += plugin_results.to_a
+        end
+        Juggler.logger.debug do
+          "Completed search for pattern: #{srchstr}\n" +
+            "  Num results: #{result.length}\n" +
+            "  Final results:\n#{result.join("\n")}"
+        end
+        result = result.map {|entry| "\"#{Juggler.escape_vim_doublequote_string(entry.strip[0..191])}\""}.join(',')
+        # TODO: consider this instead?
+        #   call setqflist([{'filename':'foo','lnum':23,'col':4,'text':'some helpful text'},{'filename':'blah/blab.txt','lnum':23,'col':43,'text':'other text'}], 'r')
+        VIM::command("cgetexpr [#{result}]")
+
+        # VIM::command("cgetexpr split(\"#{Juggler.escape_vim_doublequote_string(result)}\", \"\\n\")")
+        # VIM::command("cgetexpr system('#{Juggler.escape_vim_singlequote_string(grep_cmd)} \\| #{Juggler.escape_vim_singlequote_string(strip_tabs_cmd)}')")
+
+        VIM::command('copen')
+        Juggler.refresh
+      end
+    end
+
     # TODO: combine code to get term/lnum/col with show_references below
     def go_to_definition
       Juggler.with_status('Finding definition...') do
@@ -153,11 +181,19 @@ module Juggler
 
     def ctrlp_match_function
       items, str, limit, mmode, ispath, crfile, regex = self.class.vim_args('a:items', 'a:str', 'a:limit', 'a:mmode', 'a:ispath', 'a:crfile', 'a:regex')
-      Juggler.logger.debug {"ctrlp_match_function called:\n  str: #{str}\n  limit: #{limit}\n  mmode: #{mmode}\n  ispath: #{ispath}\n  crfile: #{crfile}\n  regex: #{regex}\n  items: #{items}"}
-      if ispath
-      else
+      Juggler.logger.debug {"ctrlp_match_function called:\n  str: #{str}\n  limit: #{limit}\n  mmode: #{mmode}\n  ispath: #{ispath} (#{ispath.class})\n  crfile: #{crfile}\n  regex: #{regex}\n  items: #{items}"}
+      return items if str.size == 0
+
+      search_regex = Regexp.new('\w*' + str.scan(/./).join('\w*') + '\w*', Regexp::IGNORECASE)
+      return items.select do |item|
+        token = (mmode == 'first-non-tab' ? item.split("\t").first : item)
+        Juggler.logger.debug {"Examining: #{token}"}
+        if ispath == 1
+          search_regex.match?(token)
+        else
+          search_regex.match?(token)
+        end
       end
-      return items
     end
 
     def update_indexes(only_current_file: false)

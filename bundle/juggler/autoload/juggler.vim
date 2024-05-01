@@ -180,6 +180,74 @@ function juggler#CtrlPMatchFunction(items, str, limit, mmode, ispath, crfile, re
   return rubyeval('Juggler::Completer.instance.ctrlp_match_function()')
 endfunction
 
+function! s:OpenWindow()
+  let s:prompt_text = 'Search: '
+  let s:save_laststatus = &laststatus
+  set laststatus=0
+  botright 12new
+  " setlocal nomodifiable
+  setlocal nobuflisted
+  setlocal bufhidden=wipe
+  setlocal noswapfile
+  setlocal buftype=nofile
+  setlocal noshowmode
+  setlocal cursorline
+  setlocal nocursorcolumn
+  setlocal cursorline
+  setlocal foldcolumn=0
+  setlocal fillchars=eob:\ ,fold:\  " Remove end-of-buffer `~` char for empty lines at bottom of window
+  silent! file Search results
+  let s:output_buffer = bufnr('')
+  let s:output_winid = bufwinid(s:output_buffer)
+  " Could also try calling `input()` with some sort of custom completion...
+  botright 1new
+  setlocal nobuflisted
+  setlocal bufhidden=wipe
+  setlocal noswapfile
+  setlocal buftype=prompt
+  setlocal noshowmode
+  setlocal foldcolumn=0
+  let s:prompt_buffer = bufnr('')
+  autocmd InsertLeave <buffer> call s:CloseWindow()
+  autocmd TextChangedI <buffer> call s:PromptChanged()
+  inoremap <buffer> <expr> <Up> <SID>PromptMove(0)
+  inoremap <buffer> <expr> <C-k> <SID>PromptMove(0)
+  inoremap <buffer> <expr> <Down> <SID>PromptMove(1)
+  inoremap <buffer> <expr> <C-j> <SID>PromptMove(1)
+  call prompt_setprompt(s:prompt_buffer, s:prompt_text)
+  call prompt_setcallback(s:prompt_buffer, function('s:PromptSelected'))
+  startinsert
+endfunction
+
+function! s:PromptChanged()
+  let search_text = getbufline(s:prompt_buffer, 1)[0][len(s:prompt_text):-1]
+  " echom 'Prompt changed: ' . search_text
+  let result = rubyeval('Juggler::Completer.instance.find_files(' . json_encode(search_text) . ')')
+  call setbufline(s:output_buffer, 1, result)
+  call deletebufline(s:output_buffer, len(result) + 1, '$') " Clear remaining lines
+  let s:highlighted_line = 1
+  call win_execute(s:output_winid, ['call setpos(".", [0, ' . s:highlighted_line . ', 1, 0])', 'redraw'])
+endfunction
+
+function! s:PromptMove(direction)
+  if a:direction == 1
+    let s:highlighted_line = s:highlighted_line + 1
+  else
+    let s:highlighted_line = s:highlighted_line - 1
+  endif
+  call win_execute(s:output_winid, ['call setpos(".", [0, ' . s:highlighted_line . ', 1, 0])', 'redraw'])
+  return '' " Have to return an empty string to make sure no additional text is added in insert mode
+endfunction
+
+function! s:PromptSelected(text)
+  call s:CloseWindow()
+endfunction
+
+function! s:CloseWindow()
+  execute 'silent! bwipeout! ' . s:prompt_buffer  . ' ' . s:output_buffer
+  let &laststatus = s:save_laststatus
+endfunction
+
 function! s:Search(defsrch)
   let resolvedsrch = (a:defsrch == '' ? expand('<cword>') : a:defsrch)
   let srchstr = input('Text to search for (start text with "/" to search for a regex): ', resolvedsrch)
@@ -348,6 +416,7 @@ endfunction
 
 function! s:SetupCommands()
   command! -n=0 JugglerHelp :help JugglerCommands
+  command! -n=0 JugglerFindFiles call s:OpenWindow()
   command! -nargs=? JugglerSearch call s:Search('<args>')
   command! -nargs=? JugglerJumpDef call s:GoToDefinition('<args>')
   command! -nargs=? JugglerShowRefs call s:ShowReferences('<args>')
@@ -360,6 +429,7 @@ endfunction
 
 function! s:SetupMaps()
   nmap <silent> <F1> :JugglerHelp<CR>
+  nmap <silent> <C-p> :JugglerFindFiles<CR>
   nmap <silent> <F3> :JugglerSearch<CR>
   nmap <silent> <C-B> :JugglerJumpDef<CR>
   nmap <silent> <F7> :JugglerShowRefs<CR>
