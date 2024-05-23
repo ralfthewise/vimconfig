@@ -8,6 +8,8 @@ loader.push_dir(__dir__)
 loader.enable_reloading if ENV['DEBUG'] == 'true'
 loader.setup
 
+require_relative 'vim_overlay'
+
 module Juggler
   def self.notify(msg)
     VIM::command("echom '#{Juggler.escape_vim_singlequote_string(msg)}'")

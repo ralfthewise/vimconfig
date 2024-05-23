@@ -51,7 +51,7 @@ module Juggler::Plugins
       #   | sed 's/^\\(.*[ \\t].*\\)$/\"\\1\"/'"
       # the `xargs --null grep -Il --null .` below makes sure we don't include binary files
       # the `xargs --null readlink -e` below makes sure we get the absolute path of each file
-      dest_file_cmd = "git ls-files -z --cached --others --exclude-standard | xargs --null grep -Il --null . | xargs --null readlink -e | grep -v ' ' > #{escaped_dest_file}"
+      dest_file_cmd = "git ls-files -z --cached --others --exclude-standard | xargs --null grep -Il --null . 2> /dev/null | xargs --null readlink -e | grep -v ' ' > #{escaped_dest_file}"
       cmd = "cd #{escaped_indexes_path} && cscope -q -b -U > /dev/null 2>&1"
       cmd = "#{dest_file_cmd} && #{cmd}" if !only_current_file
 

@@ -18,5 +18,28 @@ module Juggler::Plugins
       result = result.gsub("\r\n", "\n").gsub("\r", "\n")
       Juggler.clean_utf8(result).split("\n")
     end
+
+    def find_files(srchstr)
+      return [] if srchstr.nil? || srchstr.empty?
+
+      # search_regex = Regexp.new('\w*' + str.scan(/./).join('\w*') + '\w*', Regexp::IGNORECASE)
+      search_regex = srchstr.scan(/./).join('.*')
+      grep_cmd = "rg --files | rg --ignore-case -- #{Shellwords.escape(search_regex)}"
+      logger.debug { "Searching for files with command: #{grep_cmd}" }
+      `#{grep_cmd}`.split("\n").map(&:strip)
+
+
+      # Can do the below to get indexes of matches
+      # re = /^\/\^(.+)\$\/$/
+      # m = re.match('/^  foo()$/')
+      # m.begin(1)
+      # m.end(1)
+
+      # Things to consider for weights
+      #   * letters next to each other
+      #   * letters immediately after a break (ie _, /, -, ., etc)
+      #   * file basename match
+      #   * capital letter after lowercase letter
+    end
   end
 end

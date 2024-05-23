@@ -1,5 +1,5 @@
 module Juggler
-  class LocationEntryCollector
+  class LocationEntryCollection
     # Collects, de-duplicates, and sorts LocationEntrys
 
     def initialize

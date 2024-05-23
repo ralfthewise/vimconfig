@@ -181,7 +181,6 @@ function juggler#CtrlPMatchFunction(items, str, limit, mmode, ispath, crfile, re
 endfunction
 
 function! s:OpenWindow()
-  let s:prompt_text = 'Search: '
   let s:save_laststatus = &laststatus
   set laststatus=0
   botright 12new
@@ -199,7 +198,9 @@ function! s:OpenWindow()
   silent! file Search results
   let s:output_buffer = bufnr('')
   let s:output_winid = bufwinid(s:output_buffer)
-  " Could also try calling `input()` with some sort of custom completion...
+
+  " Instead of creating a 'prompt' buffer, we could also try calling `input()` with some sort of custom completion...
+  let s:prompt_text = 'Search: '
   botright 1new
   setlocal nobuflisted
   setlocal bufhidden=wipe
@@ -208,39 +209,30 @@ function! s:OpenWindow()
   setlocal noshowmode
   setlocal foldcolumn=0
   let s:prompt_buffer = bufnr('')
+
   autocmd InsertLeave <buffer> call s:CloseWindow()
   autocmd TextChangedI <buffer> call s:PromptChanged()
   inoremap <buffer> <expr> <Up> <SID>PromptMove(0)
   inoremap <buffer> <expr> <C-k> <SID>PromptMove(0)
   inoremap <buffer> <expr> <Down> <SID>PromptMove(1)
   inoremap <buffer> <expr> <C-j> <SID>PromptMove(1)
-  call prompt_setprompt(s:prompt_buffer, s:prompt_text)
   call prompt_setcallback(s:prompt_buffer, function('s:PromptSelected'))
   startinsert
+  execute 'ruby Juggler::Completer.instance.search_started(' . s:output_winid . ', ' . s:output_buffer . ', ' . s:prompt_buffer . ')'
 endfunction
 
 function! s:PromptChanged()
-  let search_text = getbufline(s:prompt_buffer, 1)[0][len(s:prompt_text):-1]
-  " echom 'Prompt changed: ' . search_text
-  let result = rubyeval('Juggler::Completer.instance.find_files(' . json_encode(search_text) . ')')
-  call setbufline(s:output_buffer, 1, result)
-  call deletebufline(s:output_buffer, len(result) + 1, '$') " Clear remaining lines
-  let s:highlighted_line = 1
-  call win_execute(s:output_winid, ['call setpos(".", [0, ' . s:highlighted_line . ', 1, 0])', 'redraw'])
+  ruby Juggler::Completer.instance.search_updated
 endfunction
 
 function! s:PromptMove(direction)
-  if a:direction == 1
-    let s:highlighted_line = s:highlighted_line + 1
-  else
-    let s:highlighted_line = s:highlighted_line - 1
-  endif
-  call win_execute(s:output_winid, ['call setpos(".", [0, ' . s:highlighted_line . ', 1, 0])', 'redraw'])
+  execute 'ruby Juggler::Completer.instance.search_results_selection_moved(' . a:direction . ')'
   return '' " Have to return an empty string to make sure no additional text is added in insert mode
 endfunction
 
 function! s:PromptSelected(text)
   call s:CloseWindow()
+  ruby Juggler::Completer.instance.navigate_to_search_results_selection
 endfunction
 
 function! s:CloseWindow()

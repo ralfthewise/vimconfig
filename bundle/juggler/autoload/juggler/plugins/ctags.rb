@@ -34,7 +34,7 @@ module Juggler::Plugins
         if (match = self.class.cmd_regexp.match(ctag_entry['cmd']))
           desc = match[1].strip
         end
-        Juggler::LocationEntry.new(source: :ctags, file: ctag_entry['filename'], line: ctag_entry['line'], column: 1, description: desc)
+        Juggler::LocationEntry.new(source: :ctags, file: ctag_entry['filename'], line: ctag_entry['line'], description: desc)
       end
     end
 
@@ -50,7 +50,10 @@ module Juggler::Plugins
               absolute_path = File.expand_path($curbuf.name)
               "cd #{escaped_indexes_path} && echo #{Shellwords.escape(absolute_path)} | ctags --append --fields=afmikKlnsStz --sort=foldcase -L - -f tags > /dev/null 2>&1"
             else
-              dest_file_cmd = "git ls-files -z --cached --others --exclude-standard | xargs --null grep -Il --null . | xargs --null readlink -e > #{escaped_dest_file}"
+              # If you `rm` a file but don't `git rm` it, then the `git
+              # ls-files ...` command below will still print that file, which
+              # is why we have to `2> /dev/null` the `xargs ...` command
+              dest_file_cmd = "git ls-files -z --cached --others --exclude-standard | xargs --null grep -Il --null . 2> /dev/null | xargs --null readlink -e > #{escaped_dest_file}"
               "#{dest_file_cmd} && cd #{escaped_indexes_path} && ctags --fields=afmikKlnsStz --sort=foldcase -L tags.files -f tags > /dev/null 2>&1"
             end
 

@@ -35,6 +35,7 @@ module Juggler::Plugins
 
     def show_references(path, line, col, term); end
     def grep(srchstr); end
+    def find_files(srchstr); end
     def generate_completions(absolute_path, base, cursor_info); end
     def update_indexes(only_current_file: false); end
 

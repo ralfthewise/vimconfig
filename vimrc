@@ -283,10 +283,10 @@ let g:ctrlp_map = '<C-@>'
 let g:ctrlp_extensions = ['tag']
 " let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|app\/components\/|Godeps\/|log\/)'
 " let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|Godeps\/|coverage\/|log\/)'
-" let g:ctrlp_user_command = 'cd %s && git ls-files -z --cached --others --exclude-standard | xargs --null grep -Il . | tee /tmp/ctrlp.files'
+" let g:ctrlp_user_command = 'cd %s && git ls-files -z --cached --others --exclude-standard | xargs --null grep -Il . 2> /dev/null'
 let g:ctrlp_user_command = {
   \ 'types': {
-    \ 1: ['.git', 'cd %s && git ls-files -z --cached --others --exclude-standard | xargs --null grep -Il .'],
+    \ 1: ['.git', 'cd %s && git ls-files -z --cached --others --exclude-standard | xargs --null grep -Il . 2> /dev/null'],
     \ 2: ['.hg', 'hg --cwd %s status -numac -I . $(hg root)']
   \ },
   \ 'fallback': 'find %s -type f -print0 | xargs --null grep -Il .'

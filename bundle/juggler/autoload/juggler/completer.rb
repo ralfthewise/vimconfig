@@ -90,21 +90,57 @@ module Juggler
       end
     end
 
+    def search_started(results_win_id, results_buf_id, prompt_buf_id)
+      @results_win_id = results_win_id
+      @results_buf_id = results_buf_id
+      @prompt_buf_id = prompt_buf_id
+      @prompt_text = 'Search: '
+      VIM::command("call prompt_setprompt(#{prompt_buf_id}, #{VIM::arg(@prompt_text)})")
+    end
+
+    def search_updated
+      # let search_text = getbufline(s:prompt_buffer, 1)[0][len(s:prompt_text):-1]
+      search_text = VIM::evaluate("getbufline(#{@prompt_buf_id}, 1)")[0][@prompt_text.size..-1]
+      Juggler.logger.debug {"Search text: #{search_text}"}
+      @search_results = find_files(search_text)
+      VIM::command("call setbufline(#{@results_buf_id}, 1, #{VIM::arg(@search_results)})")
+      VIM::command("call deletebufline(#{@results_buf_id}, #{@search_results.size + 1}, '$')")
+      @selected_search_results_line = 1
+      update_search_results_selection
+    end
+
+    def search_results_selection_moved(direction)
+      @selected_search_results_line += (direction ? 1 : -1)
+      @selected_search_results_line = 1 if @selected_search_results_line < 1
+      @selected_search_results_line = @search_results.size if @selected_search_results_line > @search_results.size
+      update_search_results_selection
+    end
+
+    def navigate_to_search_results_selection
+      file = @search_results[@selected_search_results_line - 1]
+      VIM::command("edit #{VIM.escape_doublequote_string(file)}")
+    end
+
+    def update_search_results_selection
+      VIM::command("call win_execute(#{@results_win_id}, ['call setpos(\".\", [0, #{@selected_search_results_line}, 1, 0])', 'redraw'])")
+    end
+
     def find_files(search_text)
       Juggler.with_status("Searching for: #{search_text}") do
         Juggler.logger.debug {"Starting file search for pattern: #{search_text}"}
-        return ['a', 'b', 'c']
 
         result = []
         plugins.each do |p|
-          plugin_results = p.grep(srchstr)
+          plugin_results = p.find_files(search_text)
           result += plugin_results.to_a
         end
         Juggler.logger.debug do
-          "Completed search for pattern: #{srchstr}\n" +
+          "Completed file search for pattern: #{search_text}\n" +
             "  Num results: #{result.length}\n" +
             "  Final results:\n#{result.join("\n")}"
         end
+        return result
+
         result = result.map {|entry| "\"#{Juggler.escape_vim_doublequote_string(entry.strip[0..191])}\""}.join(',')
         # TODO: consider this instead?
         #   call setqflist([{'filename':'foo','lnum':23,'col':4,'text':'some helpful text'},{'filename':'blah/blab.txt','lnum':23,'col':43,'text':'other text'}], 'r')
@@ -125,18 +161,16 @@ module Juggler
         next if term == ''
 
         Juggler.logger.debug {"Searching for definition of: #{term}"}
-        result = Juggler::LocationEntryCollector.new
+        result = Juggler::LocationEntryCollection.new
         _bufnum, lnum, col, _off = VIM::evaluate('getpos(".")')
         plugins.each do |p|
           plugin_results = p.go_to_definition(eval_current_path, lnum - 1, col - 1, term)
           Juggler.logger.debug {"Plugin results (#{p.class}): #{plugin_results}"}
           result.add(plugin_results)
         end
-        vim_result = result.sort!.map do |entry|
-          {filename: entry.file, lnum: entry.line, col: entry.column, vcol: 1, text: entry.description.strip[0..164]}
-        end
-        Juggler.logger.debug {"Will set quickfix to: #{vim_result.to_json}"}
-        VIM::evaluate("setqflist(json_decode(\"#{Juggler.escape_vim_doublequote_string(vim_result.to_json)}\"), 'r')")
+        vim_result = result.sort!.map(&:to_vim_quickfix)
+        Juggler.logger.debug {"Will set quickfix to: #{vim_result}"}
+        VIM::evaluate("setqflist(#{VIM::arg(vim_result)}, 'r')")
         # VIM::command("cgetexpr [#{result.join(',')}]")
         if vim_result.size > 1
           VIM::command('copen')
@@ -154,18 +188,16 @@ module Juggler
         next if term == ''
 
         Juggler.logger.debug {"Searching for references of: #{term}"}
-        result = Juggler::LocationEntryCollector.new
+        result = Juggler::LocationEntryCollection.new
         _bufnum, lnum, col, _off = VIM::evaluate('getpos(".")')
         plugins.each do |p|
           plugin_results = p.show_references(eval_current_path, lnum - 1, col - 1, term)
           Juggler.logger.debug {"Plugin results (#{p.class}): #{plugin_results}"}
           result.add(plugin_results)
         end
-        vim_result = result.sort!.map do |entry|
-          {filename: entry.file, lnum: entry.line, col: entry.column, vcol: 1, text: entry.description.strip[0..164]}
-        end
-        Juggler.logger.debug {"Will set quickfix to: #{vim_result.to_json}"}
-        VIM::evaluate("setqflist(json_decode(\"#{Juggler.escape_vim_doublequote_string(vim_result.to_json)}\"), 'r')")
+        vim_result = result.sort!.map(&:to_vim_quickfix)
+        Juggler.logger.debug {"Will set quickfix to: #{vim_result}"}
+        VIM::evaluate("setqflist(#{VIM::arg(vim_result)}, 'r')")
         # VIM::command("cgetexpr [#{result.join(',')}]")
         if vim_result.size >= 1
           VIM::command('copen')
