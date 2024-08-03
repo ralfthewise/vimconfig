@@ -27,8 +27,8 @@ module Juggler::Plugins
     end
 
     # Should return an array of Juggler::LocationEntrys
-    def go_to_definition(_path, _line, _col, term)
-      ctag_output = VIM::evaluate("s:GetTags('#{Juggler.escape_vim_singlequote_string(term)}')")
+    def go_to_definition(_cursor_info, term)
+      ctag_output = VIM::evaluate("s:GetTags('^#{Juggler.escape_vim_singlequote_string(term)}$')")
       ctag_output.map do |ctag_entry|
         desc = ctag_entry['name']
         if (match = self.class.cmd_regexp.match(ctag_entry['cmd']))
@@ -36,6 +36,22 @@ module Juggler::Plugins
         end
         Juggler::LocationEntry.new(source: :ctags, file: ctag_entry['filename'], line: ctag_entry['line'], description: desc)
       end
+    end
+
+    def find_tags(cursor_info, srchstr)
+      result = Juggler::LocationEntryCollection.new(cursor_info, srchstr)
+      return result if srchstr.nil? || srchstr.empty?
+
+      # ctag_output = VIM::evaluate("s:GetTags('^#{Juggler.escape_vim_singlequote_string(srchstr)}$')")
+      ctag_output = VIM::evaluate("s:GetTags('\\c#{Juggler.escape_vim_singlequote_string(generate_ctag_pattern(srchstr))}')")
+      ctag_output.each do |ctag_entry|
+        desc = ctag_entry['name']
+        # if (match = self.class.cmd_regexp.match(ctag_entry['cmd']))
+        #   desc = match[1].strip
+        # end
+        result << Juggler::LocationEntry.new(source: :ctags, file: ctag_entry['filename'], line: ctag_entry['line'], description: desc)
+      end
+      result
     end
 
     def update_indexes(only_current_file: false)

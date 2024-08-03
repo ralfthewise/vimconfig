@@ -61,15 +61,15 @@ module Juggler
   end
 
   def self.set_status(line)
-    VIM::command("set statusline=#{line.to_s.gsub(' ', '\\ ')} | redrawstatus")
+    VIM::log_cmd("set statusline=#{line.to_s.gsub(' ', '\\ ')} | redrawstatus")
   end
 
   def self.with_status(line)
-    VIM::command("let s:oldstatusline = &statusline | set statusline=#{line.to_s.gsub(' ', '\\ ')} | redrawstatus")
+    VIM::log_cmd("let s:oldstatusline = &statusline | set statusline=#{line.to_s.gsub(' ', '\\ ')} | redrawstatus")
     begin
       yield
     ensure
-      VIM::command('let &statusline = s:oldstatusline | redrawstatus')
+      VIM::log_cmd('let &statusline = s:oldstatusline | redrawstatus')
     end
   end
 

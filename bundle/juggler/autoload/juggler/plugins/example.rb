@@ -10,19 +10,29 @@ module Juggler::Plugins
       logger.info { "file_opened: #{absolute_path}" }
     end
 
-    def go_to_definition(path, line, col, term)
-      logger.info { "go_to_definition:\n  path: #{path}\n  line: #{line}\n  col: #{col}\n  term: #{term}" }
+    def go_to_definition(cursor_info, term)
+      logger.info { "go_to_definition:\n  cursor_info: #{cursor_info}\n  term: #{term}" }
       []
     end
 
-    def show_references(path, line, col, term)
-      logger.info { "show_references:\n  path: #{path}\n  line: #{line}\n  col: #{col}\n  term: #{term}" }
+    def show_references(cursor_info, term)
+      logger.info { "show_references:\n  cursor_info: #{cursor_info}\n  term: #{term}" }
       []
     end
 
     def grep(srchstr)
       logger.info { "grep: #{srchstr}" }
       []
+    end
+
+    def find_files(cursor_info, srchstr)
+      logger.info { "find_files:\n  cursor_info: #{cursor_info}\n  srchstr: #{srchstr}" }
+      nil
+    end
+
+    def find_tags(cursor_info, srchstr)
+      logger.info { "find_tags:\n  cursor_info: #{cursor_info}\n  srchstr: #{srchstr}" }
+      nil
     end
 
     # Params if the word leading up to the cursor is `col`

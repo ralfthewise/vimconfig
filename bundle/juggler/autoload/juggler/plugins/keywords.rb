@@ -24,7 +24,7 @@ module Juggler::Plugins
       logger.debug {"Performing keywords search for: #{pattern}"}
       logger.debug {"Current dir is: #{Dir.getwd}"}
       keyword_output = VIM::evaluate("s:GetKeywords('#{pattern}')")
-      logger.debug {"Keywords search output: #{keyword_output}"}
+      logger.debug {"Keywords search output: #{keyword_output.force_encoding('BINARY').encode('UTF-8', undef: :replace, replace: '')}"}
       keyword_output.split("\n").each do |line|
         if (match = self.class.keyword_regexp.match(line))
           # Doing `VIM::command("exe 'ilist! <some pattern>'")` from within a

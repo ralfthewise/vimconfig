@@ -1,7 +1,7 @@
 module Juggler
   class LocationEntry
     # Simple class to represent a location within a file
-    attr_accessor :file # Path to file
+    attr_accessor :file # Absolute path to file
     attr_accessor :line # Line in the file (starting from 1, not 0)
     attr_accessor :column # Column of the line (starting from 1, not 0)
     attr_accessor :description # Description of the location
@@ -36,12 +36,14 @@ module Juggler
       {filename: file, lnum: line, col: (column.nil? ? 1 : column), vcol: 1, text: description.strip[0..164]}
     end
 
-    def to_s
-      {source: source, file: file, line: line, column: column, description: description}.compact.to_s
+    def pretty_log(indent = 0)
+      to_h.map do |k, v|
+        "#{' ' * indent}#{k}: #{v}"
+      end.join("\n")
     end
 
-    def inspect
-      "<LocationEntry #{self}>"
+    def to_h
+      {Source: source, File: file, Line: line, Column: column, Description: description}.compact
     end
   end
 end

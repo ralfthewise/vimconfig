@@ -180,9 +180,13 @@ function juggler#CtrlPMatchFunction(items, str, limit, mmode, ispath, crfile, re
   return rubyeval('Juggler::Completer.instance.ctrlp_match_function()')
 endfunction
 
-function! s:OpenWindow()
+function! s:OpenWindow(search_type)
   let s:save_laststatus = &laststatus
   set laststatus=0
+  let cursor_info = getcursorcharpos()
+  let current_file = expand('%:p')
+
+  " Create our output window
   botright 12new
   " setlocal nomodifiable
   setlocal nobuflisted
@@ -199,8 +203,8 @@ function! s:OpenWindow()
   let s:output_buffer = bufnr('')
   let s:output_winid = bufwinid(s:output_buffer)
 
+  " Create our input/prompt window
   " Instead of creating a 'prompt' buffer, we could also try calling `input()` with some sort of custom completion...
-  let s:prompt_text = 'Search: '
   botright 1new
   setlocal nobuflisted
   setlocal bufhidden=wipe
@@ -212,13 +216,15 @@ function! s:OpenWindow()
 
   autocmd InsertLeave <buffer> call s:CloseWindow()
   autocmd TextChangedI <buffer> call s:PromptChanged()
-  inoremap <buffer> <expr> <Up> <SID>PromptMove(0)
-  inoremap <buffer> <expr> <C-k> <SID>PromptMove(0)
+  inoremap <buffer> <expr> <Up> <SID>PromptMove(-1)
+  inoremap <buffer> <expr> <C-k> <SID>PromptMove(-1)
+  inoremap <buffer> <expr> <C-p> <SID>PromptMove(-1)
   inoremap <buffer> <expr> <Down> <SID>PromptMove(1)
   inoremap <buffer> <expr> <C-j> <SID>PromptMove(1)
+  inoremap <buffer> <expr> <C-n> <SID>PromptMove(1)
   call prompt_setcallback(s:prompt_buffer, function('s:PromptSelected'))
   startinsert
-  execute 'ruby Juggler::Completer.instance.search_started(' . s:output_winid . ', ' . s:output_buffer . ', ' . s:prompt_buffer . ')'
+  execute "ruby Juggler::Completer.instance.search_started('" . a:search_type . "', {file: '" . substitute(current_file, "'", "\\\\'", 'g') . "', line: " . cursor_info[1] . ', column: ' . cursor_info[2] . '}, ' . s:output_winid . ', ' . s:output_buffer . ', ' . s:prompt_buffer . ')'
 endfunction
 
 function! s:PromptChanged()
@@ -408,7 +414,8 @@ endfunction
 
 function! s:SetupCommands()
   command! -n=0 JugglerHelp :help JugglerCommands
-  command! -n=0 JugglerFindFiles call s:OpenWindow()
+  command! -n=0 JugglerFindFiles call s:OpenWindow('files')
+  command! -n=0 JugglerFindTags call s:OpenWindow('tags')
   command! -nargs=? JugglerSearch call s:Search('<args>')
   command! -nargs=? JugglerJumpDef call s:GoToDefinition('<args>')
   command! -nargs=? JugglerShowRefs call s:ShowReferences('<args>')
@@ -422,6 +429,7 @@ endfunction
 function! s:SetupMaps()
   nmap <silent> <F1> :JugglerHelp<CR>
   nmap <silent> <C-p> :JugglerFindFiles<CR>
+  nmap <silent> <C-t> :JugglerFindTags<CR>
   nmap <silent> <F3> :JugglerSearch<CR>
   nmap <silent> <C-B> :JugglerJumpDef<CR>
   nmap <silent> <F7> :JugglerShowRefs<CR>

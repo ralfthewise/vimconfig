@@ -14,7 +14,7 @@ module VIM
 
   def self.cursor_info
     _bufnum, line, column = VIM::evaluate('getcursorcharpos()')
-    Juggler::LocationEntry.new(file: current_absolute_path, line: line, column: column)
+    Juggler::CursorInfo.new(file: current_absolute_path, line: line, column: column)
   end
 
   def self.current_absolute_path
@@ -43,5 +43,11 @@ module VIM
     #   \0 with (nothing/empty string)
     #   ' with ''
     return str.to_s.gsub(/[\0']/, {"\0" => '', "'" => "''"})
+  end
+
+  # Same as `VIM::command`, but first logs what will be executed
+  def self.log_cmd(cmd)
+    Juggler.logger.debug {"VIM::command - #{cmd}"}
+    VIM::command(cmd)
   end
 end

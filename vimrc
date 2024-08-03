@@ -277,25 +277,25 @@ let g:expand_region_text_objects_ruby = {
 "let g:CommandTMatchWindowAtTop = 1
 
 "ctrlp
-let g:ctrlp_working_path_mode = '0'
-let g:ctrlp_map = '<C-@>'
-" let g:ctrlp_cmd = 'CtrlPMixed' "careful here, when searching MRU it is across all sessions/historical MRUs
-let g:ctrlp_extensions = ['tag']
-" let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|app\/components\/|Godeps\/|log\/)'
-" let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|Godeps\/|coverage\/|log\/)'
-" let g:ctrlp_user_command = 'cd %s && git ls-files -z --cached --others --exclude-standard | xargs --null grep -Il . 2> /dev/null'
-let g:ctrlp_user_command = {
-  \ 'types': {
-    \ 1: ['.git', 'cd %s && git ls-files -z --cached --others --exclude-standard | xargs --null grep -Il . 2> /dev/null'],
-    \ 2: ['.hg', 'hg --cwd %s status -numac -I . $(hg root)']
-  \ },
-  \ 'fallback': 'find %s -type f -print0 | xargs --null grep -Il .'
-\ }
-let g:ctrlp_show_hidden = 1
-"let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
-let g:ctrlpmatcher_debug = 0
-nnoremap <silent> <C-t> :CtrlPTag<CR>
-"nnoremap <silent> <Nul> :CtrlP<CR>
+" let g:ctrlp_working_path_mode = '0'
+" let g:ctrlp_map = '<C-@>'
+" " let g:ctrlp_cmd = 'CtrlPMixed' "careful here, when searching MRU it is across all sessions/historical MRUs
+" let g:ctrlp_extensions = ['tag']
+" " let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|app\/components\/|Godeps\/|log\/)'
+" " let g:ctrlp_custom_ignore = '\v(\.git|\.hg|\.svn|tmp\/|vendor\/bundle|bower_components\/|node_modules\/|Godeps\/|coverage\/|log\/)'
+" " let g:ctrlp_user_command = 'cd %s && git ls-files -z --cached --others --exclude-standard | xargs --null grep -Il . 2> /dev/null'
+" let g:ctrlp_user_command = {
+"   \ 'types': {
+"     \ 1: ['.git', 'cd %s && git ls-files -z --cached --others --exclude-standard | xargs --null grep -Il . 2> /dev/null'],
+"     \ 2: ['.hg', 'hg --cwd %s status -numac -I . $(hg root)']
+"   \ },
+"   \ 'fallback': 'find %s -type f -print0 | xargs --null grep -Il .'
+" \ }
+" let g:ctrlp_show_hidden = 1
+" "let g:ctrlp_match_func = {'match':'ctrlpmatcher#MatchIt'}
+" let g:ctrlpmatcher_debug = 0
+" nnoremap <silent> <C-t> :CtrlPTag<CR>
+" "nnoremap <silent> <Nul> :CtrlP<CR>
 set timeout timeoutlen=1000 ttimeoutlen=100
 " I think this is supposed to map <Ctrl>-F4 to open Tagbar but doesn't seem to
 " work

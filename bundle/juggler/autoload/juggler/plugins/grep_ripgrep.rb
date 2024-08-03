@@ -19,15 +19,19 @@ module Juggler::Plugins
       Juggler.clean_utf8(result).split("\n")
     end
 
-    def find_files(srchstr)
-      return [] if srchstr.nil? || srchstr.empty?
+    def find_files(cursor_info, srchstr)
+      result = Juggler::LocationEntryCollection.new(cursor_info, srchstr)
+      return result if srchstr.nil? || srchstr.empty?
 
       # search_regex = Regexp.new('\w*' + str.scan(/./).join('\w*') + '\w*', Regexp::IGNORECASE)
       search_regex = srchstr.scan(/./).join('.*')
       grep_cmd = "rg --files | rg --ignore-case -- #{Shellwords.escape(search_regex)}"
       logger.debug { "Searching for files with command: #{grep_cmd}" }
-      `#{grep_cmd}`.split("\n").map(&:strip)
+      `#{grep_cmd}`.split("\n").each do |file|
+        result << Juggler::LocationEntry.new(source: :ripgrep, file: file.strip, description: file.strip)
+      end
 
+      result
 
       # Can do the below to get indexes of matches
       # re = /^\/\^(.+)\$\/$/

@@ -31,11 +31,15 @@ module Juggler::Plugins
     def buffer_left_hook(absolute_path); end
 
     # Should return an array of Juggler::LocationEntrys
-    def go_to_definition(path, line, col, term); end
+    def go_to_definition(cursor_info, term); end
+    def show_references(cursor_info, term); end
 
-    def show_references(path, line, col, term); end
     def grep(srchstr); end
-    def find_files(srchstr); end
+
+    # Should return a Juggler::LocationEntryCollection
+    def find_files(cursor_info, srchstr); end
+    def find_tags(cursor_info, srchstr); end
+
     def generate_completions(absolute_path, base, cursor_info); end
     def update_indexes(only_current_file: false); end
 

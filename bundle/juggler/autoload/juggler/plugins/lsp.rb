@@ -196,13 +196,13 @@ module Juggler::Plugins
     end
 
     # Should return an array of Juggler::LocationEntrys
-    def go_to_definition(path, line, col, _term)
-      send_changes_if_needed(path)
+    # TODO: this doesn't seem to find subclass overrides, can we use something else?
+    def go_to_definition(cursor_info, _term)
+      send_changes_if_needed(cursor_info.file)
 
-      absolute_path = File.expand_path(path)
       msg = {
-        textDocument: { uri: "file://#{absolute_path}" },
-        position: { line: line, character: col },
+        textDocument: { uri: "file://#{cursor_info.file}" },
+        position: { line: cursor_info.line - 1, character: cursor_info.column - 1 },
       }
       send_msg('textDocument/definition', msg)
       result = receive_msgs
@@ -212,34 +212,33 @@ module Juggler::Plugins
         full_path = URI.decode_www_form_component(uri.path)
         path = Pathname.new(full_path).relative_path_from(Dir.getwd)
         line_num = entry['range']['start']['line'] + 1 # for display we use a 1 based line
-        col = entry['range']['start']['character']
+        col = entry['range']['start']['character'] + 1
         line_display = Juggler.file_contents(full_path)[:contents][line_num - 1]
         Juggler::LocationEntry.new(source: :lsp, file: path.to_s, line: line_num, column: col, description: line_display)
       end
     end
 
-    def show_references(path, line, col, _term)
-      send_changes_if_needed(path)
+    def show_references(cursor_info, _term)
+      send_changes_if_needed(cursor_info.file)
 
       # [{"uri"=>"file:///home/tim/dev/vimconfig/bundle/juggler/autoload/test.rb", "range"=>{"start"=>{"line"=>16, "character"=>11}, "end"=>{"line"=>16, "character"=>26}}}, ...]
-      result = find_references(path, line, col)
+      result = find_references(cursor_info)
       result.last.map do |entry|
         uri = URI.parse(entry['uri'])
         full_path = URI.decode_www_form_component(uri.path)
         path = Pathname.new(full_path).relative_path_from(Dir.getwd)
         line_num = entry['range']['start']['line'] + 1 # for display we use a 1 based line
-        col = entry['range']['start']['character']
+        col = entry['range']['start']['character'] + 1
         line_display = Juggler.file_contents(full_path)[:contents][line_num - 1]
         Juggler::LocationEntry.new(source: :lsp, file: path.to_s, line: line_num, column: col, description: line_display)
       end
     end
 
-    def find_references(path, line, col)
-      absolute_path = File.expand_path(path)
+    def find_references(cursor_info)
       msg = {
         context: { includeDeclaration: true },
-        textDocument: { uri: "file://#{absolute_path}" },
-        position: { line: line, character: col },
+        textDocument: { uri: "file://#{cursor_info.file}" },
+        position: { line: cursor_info.line - 1, character: cursor_info.column - 1 },
       }
       send_msg('textDocument/references', msg)
       receive_msgs
