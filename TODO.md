@@ -1,6 +1,5 @@
 # TODO
 
-* ctrl-p for tags
 * sort results of go_to_definition and show_references
 * better "important character" sorting
 * ignore matches on the same line
