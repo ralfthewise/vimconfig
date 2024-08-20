@@ -121,6 +121,14 @@ endfunction
 command TrimWhitespace call TrimWhitespace()
 nnoremap <leader>tw :call TrimWhitespace()<CR>
 
+" Clean up airline a bit
+" let g:airline_section_z = '├: %l/%L ┴: %c'
+" let g:airline_section_z = '㏑: %l/%L ㏇: %c'
+let g:airline_section_z = 'L: %l/%L C: %c'
+let g:airline#extensions#whitespace#enabled = 0
+let g:airline#extensions#wordcount#enabled = 0
+" let g:airline_extensions = ['fugitiveline', 'hunks'] " Check :AirlineExtensions to see what's enabled
+
 au BufNewFile,BufRead *.js.erb set filetype=javascript
 au BufNewFile,BufRead *.coffee.erb set filetype=coffee
 " let g:ale_linters = {'ruby': ['rubocop', 'solargraph'], 'javascript': ['eslint']}
