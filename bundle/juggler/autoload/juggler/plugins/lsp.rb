@@ -333,7 +333,7 @@ module Juggler::Plugins
       msg_io = StringIO.new(data)
       while (msg = receive_msg(msg_io))
         msgs << msg['result']
-        max_id_received = msg['id'] if msg['id'] > max_id_received
+        max_id_received = msg['id'] if msg['id'] && msg['id'] > max_id_received
       end
 
       if msgs.empty?
