@@ -1,5 +1,13 @@
 require 'rubygems'
 ENV['BUNDLE_GEMFILE'] = File.join(File.dirname(__FILE__), 'Gemfile') # location of `Gemfile`
+
+# If the locked bundler version doesn't match what's installed, Bundler tries to
+# re-exec ruby to switch versions. That re-exec uses $0, which vim hardcodes to
+# "vim-ruby" (not a real file), so it always fails inside vim. Pin to whatever
+# bundler is already active to skip that switch entirely, on any machine.
+require 'bundler'
+ENV['BUNDLER_VERSION'] ||= Bundler::VERSION
+
 require 'bundler/setup'
 require 'zeitwerk'
 
