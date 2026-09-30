@@ -3,8 +3,8 @@
 DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "${DIR}"
 
-echo "  mkdir -p ~/.vim ~/.vimbackup ~/.vimswp ~/.vimundo"
-mkdir -p ~/.vim  ~/.vimbackup ~/.vimswp ~/.vimundo
+echo "  mkdir -p ~/.vim ~/.vim/autoload ~/.vimbackup ~/.vimswp ~/.vimundo"
+mkdir -p ~/.vim ~/.vim/autoload ~/.vimbackup ~/.vimswp ~/.vimundo
 
 if [ ! -f ~/.vim/autoload/plug.vim ]; then
   curl -sfLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
